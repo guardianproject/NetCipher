@@ -3,6 +3,10 @@ OnionKit
 
 Android Library Project for Multi-Layer Network Connections (Better TLS/SSL and Tor)
 
+The ONION refers to not only Onion Routing used by Tor, but also the concept of multiple layers of security this library provides.
+
+You can use this library without using Tor, but obviously we think using strong TLS/SSL connections over Tor is just about the best thing in the world.
+
 # StrongTrustManager
 
 We have implemented a TrustManager for SSL Certificate verification that we believe is better than the default one provided by Android. For app developers, it provides for a consistent implementation of TLS/SSL verification and trust across various versions and devices.
