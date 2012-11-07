@@ -5,7 +5,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
     
-   <EditText android:text="https://"  android:id="@+id/txtUrl" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+   <EditText android:text="https://check.torproject.org"  android:id="@+id/txtUrl" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
     
 <TableLayout android:id="@+id/TableLayout01" android:stretchColumns="*" android:layout_height="fill_parent" android:layout_width="wrap_content">
 
@@ -25,10 +25,10 @@
 </TableRow>
 <TableRow android:id="@+id/TableRow01" android:layout_width="fill_parent" android:layout_height="30px">
 
-	   
-	   	<Button android:text="Socket Test" android:id="@+id/btnWizard1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-	   <Button android:text="HTTP Test" android:id="@+id/btnWizard2" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-	   		   <Button android:text="HTTP/S Test" android:id="@+id/btnWizard3" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+	   	<Button android:text="Socks Socket Test" android:id="@+id/btnWizard1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	   
+	   <Button android:text="HTTP Proxy Test" android:id="@+id/btnWizard2" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+	   <Button android:text="SOCKS Proxy Test" android:id="@+id/btnWizard3" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
 	   	
 	   
 </TableRow>			

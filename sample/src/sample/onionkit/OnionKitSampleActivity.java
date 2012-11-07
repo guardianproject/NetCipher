@@ -67,7 +67,7 @@ public class OnionKitSampleActivity extends Activity {
 						try {
 							url = new URL(txtUrl.getText().toString());
 
-							openSocksSocket(url.getHost(),url.getPort());
+							openSocksSocket(url.getHost(),80);
 						} catch (MalformedURLException e) {
 							Log.e(TAG,"bad url",e);
         					txtView.setText("bad urL: " + e.getLocalizedMessage());
@@ -86,19 +86,29 @@ public class OnionKitSampleActivity extends Activity {
         btn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 			 
-				String url = txtUrl.getText().toString();
+				Runnable runnable = new Runnable ()
+				{
+					
+					public void run ()
+					{
+						String url = txtUrl.getText().toString();
+						
+						try
+						{
+							String resp = checkHTTP(url, Proxy.Type.HTTP, "localhost", 8118);
+							txtView.setText("connection response: " + resp);
+						}
+						catch (Exception e)
+						{
+							Log.e(TAG,"error connecting to: " + url,e);
+							txtView.setText(e.getLocalizedMessage());
+						}
+					}
+				};
 				
-				try
-				{
-					String resp = checkHTTP(url, Proxy.Type.HTTP, "localhost", 8118);
-					txtView.setText("connection response: " + resp);
-				}
-				catch (Exception e)
-				{
-					Log.e(TAG,"error connecting to: " + url,e);
-					txtView.setText(e.getLocalizedMessage());
-				}
 
+				Handler handle = new Handler();
+				handle.post(runnable);
 			}
         });
         
@@ -108,24 +118,29 @@ public class OnionKitSampleActivity extends Activity {
         btn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 			 
-				//use the direct SOCKS5 proxy built into Tor itself (more secure)
-				
-				//SOCKS with HTTP/S not quite working yet (DNS leaks)
-				//checkHTTP("https://check.torproject.org:443/", Proxy.Type.SOCKS, "localhost", 9050);
-				
-				/// so use HTTP proxy for now, it will work just fine!
-				String url = txtUrl.getText().toString();
-				
-				try
+				Runnable runnable = new Runnable ()
 				{
-					String resp = checkHTTP(url, Proxy.Type.SOCKS, "localhost", 9050);
-					txtView.setText("connection response: " + resp);
-				}
-				catch (Exception e)
-				{
-					Log.e(TAG,"error connecting to: " + url,e);
-					txtView.setText(e.getLocalizedMessage());
-				}
+					
+					public void run ()
+					{
+						String url = txtUrl.getText().toString();
+						
+						try
+						{
+							String resp = checkHTTP(url, Proxy.Type.SOCKS, "localhost", 9050);
+							txtView.setText("connection response: " + resp);
+						}
+						catch (Exception e)
+						{
+							Log.e(TAG,"error connecting to: " + url,e);
+							txtView.setText(e.getLocalizedMessage());
+						}
+					}
+				};
+				
+
+				Handler handle = new Handler();
+				handle.post(runnable);
 			}
         });
         
@@ -184,7 +199,7 @@ public class OnionKitSampleActivity extends Activity {
     	}
     	catch (Exception e)
     	{
-    		txtView.append(e.getMessage());
+    		txtView.append("error opening socket: " + e.toString());
     		
     		Log.e(TAG, "Unable to connect to torproject",e);
     	}
