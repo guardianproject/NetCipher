@@ -119,10 +119,12 @@ public class StrongSSLSocketFactory extends org.apache.http.conn.ssl.SSLSocketFa
         {
         	InetSocketAddress proxyAddr = (InetSocketAddress)mProxy.address();
         	SocksSocketFactory ssf = SocksSocketFactory.getSocketFactory(proxyAddr.getHostName(),proxyAddr.getPort() );     	
-        	sockProxy = ssf.createSocket(null, null, -1, params);
+        	sockProxy = ssf.createSocket();
+        	sockProxy.connect(new InetSocketAddress(host, port));
         }
         
-        SSLSocket sslsock = (SSLSocket)createSocket(sockProxy, host, port, true);
+        boolean autoClose = false;
+        SSLSocket sslsock = (SSLSocket)createSocket(sockProxy, host, port, autoClose);
         
         if ((localAddress != null) || (localPort > 0)) {
 
@@ -135,7 +137,7 @@ public class StrongSSLSocketFactory extends org.apache.http.conn.ssl.SSLSocketFa
             sslsock.bind(isa);
         }
         
-
+/*
         InetSocketAddress inetSocket;
 		InetAddress inetHost = mNameResolver.resolve(host);
 		
@@ -143,10 +145,10 @@ public class StrongSSLSocketFactory extends org.apache.http.conn.ssl.SSLSocketFa
 			inetSocket = new InetSocketAddress(inetHost, port); 
 		} else {
 			inetSocket = new InetSocketAddress(host, port);            
-		}
+		}*/
     
-        sslsock.connect(inetSocket, connTimeout);
-    	sslsock.setSoTimeout(soTimeout);
+    //    sslsock.connect(inetSocket, connTimeout);
+    //	sslsock.setSoTimeout(soTimeout);
         
         try {
         	

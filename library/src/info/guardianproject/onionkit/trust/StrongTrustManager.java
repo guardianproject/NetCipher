@@ -78,7 +78,7 @@ class StrongTrustManager implements X509TrustManager {
     private final static Pattern cnPattern = Pattern.compile("(?i)(cn=)([^,]*)");
 
     private final static String TRUSTSTORE_TYPE = "BKS";
-    private final static String TRUSTSTORE_PASSWORD = "changeme";
+    private final static String TRUSTSTORE_PASSWORD = "changeit";
     
     private int DEFAULT_NOTIFY_ID = 10;
 
