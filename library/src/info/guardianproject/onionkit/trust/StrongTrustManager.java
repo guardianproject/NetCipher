@@ -124,12 +124,12 @@ class StrongTrustManager implements X509TrustManager {
         mTrustStore = KeyStore.getInstance(TRUSTSTORE_TYPE);
         //load our bundled cacerts from raw assets
         in = context.getResources().openRawResource(R.raw.cacerts);
-        mTrustStore.load(in, TRUSTSTORE_TYPE.toCharArray());
+        mTrustStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
         
         mPinnedStore = KeyStore.getInstance(TRUSTSTORE_TYPE);
         //load our bundled cacerts from raw assets
         in = context.getResources().openRawResource(R.raw.pinnedcacerts);
-        mPinnedStore.load(in, TRUSTSTORE_TYPE.toCharArray());
+        mPinnedStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
        
     }
 
