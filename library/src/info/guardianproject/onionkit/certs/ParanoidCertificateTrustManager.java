@@ -1,4 +1,4 @@
-package info.guardianproject.onionkit;
+package info.guardianproject.onionkit.certs;
 
 
 /**
@@ -26,6 +26,11 @@ import info.guardianproject.bouncycastle.asn1.DERSequence;
 import info.guardianproject.bouncycastle.asn1.DERString;
 import info.guardianproject.bouncycastle.asn1.x509.GeneralName;
 import info.guardianproject.bouncycastle.asn1.x509.X509Extensions;
+import info.guardianproject.onionkit.R;
+import info.guardianproject.onionkit.R.drawable;
+import info.guardianproject.onionkit.R.raw;
+import info.guardianproject.onionkit.R.string;
+import info.guardianproject.onionkit.ui.CertDisplayActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,13 +80,19 @@ class ParanoidCertificateTrustManager implements X509TrustManager {
     private int DEFAULT_NOTIFY_ID = 10;
 
     /** Holds the domain of the remote server we are trying to connect */
-    private String server;
-    private String domain;
+    private String mServer;
+    private String mDomain;
     
     private KeyStore mTrustStore; //root CAs
     private KeyStore mPinnedStore; //pinned certs
 
     private Context context;
+
+    boolean mExpiredCheck = true;
+    boolean mVerifyChain = true;
+    boolean mVerifyRoot = true;
+    boolean mSelfSignedAllowed = false;
+    boolean mCheckMatchingDomain = true;
 
     /**
      * Construct a trust manager for XMPP connections. Certificates are
@@ -100,15 +111,10 @@ class ParanoidCertificateTrustManager implements X509TrustManager {
      * @throws CertificateException 
      * @throws NoSuchAlgorithmException 
      */
-    public ParanoidCertificateTrustManager(Context context, String domain, String requestedServer) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+    public ParanoidCertificateTrustManager(Context context) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
         this.context = context;
-        this.domain = domain;
-        this.server = requestedServer;
-        if (this.server == null) {
-            this.server = domain;
-        }
-
+        
         InputStream in = null;
         
         mTrustStore = KeyStore.getInstance(TRUSTSTORE_TYPE);
@@ -133,12 +139,6 @@ class ParanoidCertificateTrustManager implements X509TrustManager {
 
     public void checkServerTrusted(X509Certificate[] x509Certificates, String keyExchangeAlgo)
             throws CertificateException {
-        
-        boolean mExpiredCheck = true;
-        boolean mVerifyChain = true;
-        boolean mVerifyRoot = true;
-        boolean mSelfSignedAllowed = false;
-        boolean mCheckMatchingDomain = true;
         
         //first check the main cert
         X509Certificate certSite = x509Certificates[0];
@@ -309,18 +309,18 @@ class ParanoidCertificateTrustManager implements X509TrustManager {
             }
         }
 
-        if (mCheckMatchingDomain)
+        if (mCheckMatchingDomain && mDomain != null)
         {
             //get peer identities available in the first cert in the chain
             Collection<String> peerIdentities = getPeerIdentity(x509Certificates[0]);
     
             // Verify that the first certificate in the chain corresponds to
             // the server we desire to authenticate.
-            boolean found = checkMatchingDomain(domain, server, peerIdentities);
+            boolean found = checkMatchingDomain(mDomain, mServer, peerIdentities);
     
             if (!found) {
                 showCertMessage(context.getString(R.string.error_domain_check_failed), join(peerIdentities) + context.getString(R.string.error_does_not_contain_)
-                                                       + "'" + server + "' or '" + domain + "'",
+                                                       + "'" + mServer + "' or '" + mDomain + "'",
                         x509Certificates[0],null);
     
                 throw new CertificateException("target verification failed of " + peerIdentities);
@@ -622,5 +622,77 @@ class ParanoidCertificateTrustManager implements X509TrustManager {
         }
 
     }
+
+	public KeyStore getTrustStore() {
+		return mTrustStore;
+	}
+
+	public void setTrustStore(KeyStore mTrustStore) {
+		this.mTrustStore = mTrustStore;
+	}
+
+	public KeyStore getPinnedStore() {
+		return mPinnedStore;
+	}
+
+	public void setPinnedStore(KeyStore mPinnedStore) {
+		this.mPinnedStore = mPinnedStore;
+	}
+
+	public boolean isExpiredCheck() {
+		return mExpiredCheck;
+	}
+
+	public void setExpiredCheck(boolean mExpiredCheck) {
+		this.mExpiredCheck = mExpiredCheck;
+	}
+
+	public boolean isVerifyChain() {
+		return mVerifyChain;
+	}
+
+	public void setVerifyChain(boolean mVerifyChain) {
+		this.mVerifyChain = mVerifyChain;
+	}
+
+	public boolean isVerifyRoot() {
+		return mVerifyRoot;
+	}
+
+	public void setVerifyRoot(boolean mVerifyRoot) {
+		this.mVerifyRoot = mVerifyRoot;
+	}
+
+	public boolean isSelfSignedAllowed() {
+		return mSelfSignedAllowed;
+	}
+
+	public void setSelfSignedAllowed(boolean mSelfSignedAllowed) {
+		this.mSelfSignedAllowed = mSelfSignedAllowed;
+	}
+
+	public boolean isCheckMatchingDomain() {
+		return mCheckMatchingDomain;
+	}
+
+	public void setCheckMatchingDomain(boolean mCheckMatchingDomain) {
+		this.mCheckMatchingDomain = mCheckMatchingDomain;
+	}
+
+	public String getServer() {
+		return mServer;
+	}
+
+	public void setServer(String server) {
+		this.mServer = server;
+	}
+
+	public String getDomain() {
+		return mDomain;
+	}
+
+	public void setDomain(String domain) {
+		this.mDomain = domain;
+	}
     
 }

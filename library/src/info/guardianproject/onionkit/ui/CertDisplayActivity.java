@@ -1,4 +1,4 @@
-package info.guardianproject.onionkit;
+package info.guardianproject.onionkit.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
