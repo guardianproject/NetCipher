@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">OnionKit</string>
+    	<string name="warning_weak_crypto">WARNING: This service uses a certificate with WEAK cryptography. Please tell the administrator to upgrade.</string>
+	
+	<string name="warning_pinned_cert_mismatch">"Provided Certificate Does Not Match PINNED Certifcate: "</string>
+	
+	<string name="error_signature_chain_verification_failed">"signature chain verification failed of "</string>
+	
+	<string name="error_could_not_find_cert_issuer_certificate_in_chain">"Could not find cert issuer certificate in chain: "</string>
+	
+	<string name="error_could_not_find_root_ca_issuer_certificate_in_chain">Could not find Root CA issuer certificate in chain</string>
+	
+	<string name="could_not_find_self_signed_certificate_in_chain">Could not find self-signed certificate in chain</string>
+	
+	<string name="error_domain_check_failed">Domain check failed</string>
+	
+	<string name="error_does_not_contain_">" does not contain "</string>
+	
+	<string name="error_problem_access_local_root_ca_store">problem access local ROOT CA store</string>
+</resources>
