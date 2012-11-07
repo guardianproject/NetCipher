@@ -27,3 +27,8 @@ SOCKS and HTTP proxies available from Orbot The standard Apache HTTPClient libra
 demonstrates that.  All applications using the SOCKS proxy should not resolve their DNS locally,
 and instead should pass the hostnames through the SOCKS proxy. 
 
+# Orbot Checker
+
+Provides simple helper to check if Orbot (Tor for Android) is installed, and whether it is currently running or not. Allows your app to request Orbot to start (user is prompted whether to start or not). Finally, it can show a user prompt to install Orbot, either from Google Play, or via direct APK download from torproject.org or the guardianproject.info site.
+
+For apps with on-device servers, it can also assists in requesting a Tor Hidden Service from Orbot, and discovering the assigned .ONION address.
