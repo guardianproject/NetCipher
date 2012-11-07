@@ -4,7 +4,8 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
-    <TextView android:text="Orlib Test Sample" 	android:textColor="#ffffff" android:id="@+id/WizardTextTitle" android:textSize="14pt" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:singleLine="true" android:fadingEdge="vertical"></TextView>
+    
+   <EditText android:text="https://"  android:id="@+id/txtUrl" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
     
 <TableLayout android:id="@+id/TableLayout01" android:stretchColumns="*" android:layout_height="fill_parent" android:layout_width="wrap_content">
 
