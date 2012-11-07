@@ -19,13 +19,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
-package info.guardianproject.onionkit.net;
+package info.guardianproject.onionkit.proxy;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import javax.net.ssl.SSLSocket;
 
 import net.sourceforge.jsocks.socks.Socks5Proxy;
 import net.sourceforge.jsocks.socks.SocksSocket;
@@ -42,8 +44,8 @@ import org.apache.http.params.HttpParams;
  */
 public class SocksSocketFactory implements SocketFactory {
 
-	SocksSocket server = null;
-	private static Socks5Proxy sProxy = null;
+	private static Socks5Proxy mSocksProxy = null;
+	private static SocksSocketFactory mInstance;
 
 	/**
 	 * Construct a SocksSocketFactory that uses the provided SOCKS proxy.
@@ -52,10 +54,10 @@ public class SocksSocketFactory implements SocketFactory {
 	 */
 	public SocksSocketFactory(String proxyaddress, int proxyport) throws  UnknownHostException {
 
-		sProxy = new Socks5Proxy(proxyaddress, proxyport);
+		mSocksProxy = new Socks5Proxy(proxyaddress, proxyport);
 		
 		//set this to false - we want the SOCKS proxy to handle DNS for us
-		sProxy.resolveAddrLocally(false);
+		mSocksProxy.resolveAddrLocally(false);
 	
 	}
 	
@@ -85,7 +87,7 @@ public class SocksSocketFactory implements SocketFactory {
             sock.bind(isa);
         }
 
-        return new SocksSocket(sProxy,host, port);
+        return new SocksSocket(mSocksProxy,host, port);
 		
 	}
 	
@@ -112,12 +114,10 @@ public class SocksSocketFactory implements SocketFactory {
             sock.bind(isa);
         }
 
-        return new SocksSocket(sProxy);
+        return new SocksSocket(mSocksProxy);
 		
 	}
 	
-    
-    
 	@Override
 	public Socket createSocket() throws IOException {
 		return new Socket();
@@ -128,14 +128,13 @@ public class SocksSocketFactory implements SocketFactory {
 		return false;
 	}
 	
-	private static SocksSocketFactory _instance;
 	
 	public static SocksSocketFactory getSocketFactory (String host, int port) throws UnknownHostException
 	{
-		if (_instance == null)
-			_instance = new SocksSocketFactory (host, port);
+		if (mInstance == null)
+			mInstance = new SocksSocketFactory (host, port);
 
-		return _instance;
+		return mInstance;
 	}
 
 }

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.guardianproject.onionkit.net;
+package info.guardianproject.onionkit.proxy;
 
 
 import java.io.BufferedReader;
@@ -41,6 +41,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
+import android.content.Context;
 import android.util.Log;
 
 /*
@@ -52,10 +53,10 @@ public class HttpManager {
 	
 	private final static String POST_MIME_TYPE = "application/x-www-form-urlencoded";
 	
-	public static String doGet (String serviceEndpoint, Properties props) throws Exception
+	public static String doGet (Context context, String serviceEndpoint, Properties props) throws Exception
 	{
 
-		HttpClient httpClient = new SocksHttpClient();
+		HttpClient httpClient = new SocksHttpClient(context);
 
 		StringBuilder uriBuilder = new StringBuilder(serviceEndpoint);
 	
@@ -108,10 +109,10 @@ public class HttpManager {
 		
 	}
 	
-	public static String doPost (String serviceEndpoint, Properties props) throws Exception
+	public static String doPost (Context context, String serviceEndpoint, Properties props) throws Exception
 	{
 
-		DefaultHttpClient httpClient = new SocksHttpClient();
+		DefaultHttpClient httpClient = new SocksHttpClient(context);
 		
 		HttpPost request = new HttpPost(serviceEndpoint);
 		HttpResponse response = null;

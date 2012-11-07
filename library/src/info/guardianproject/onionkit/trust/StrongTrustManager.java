@@ -1,4 +1,4 @@
-package info.guardianproject.onionkit.certs;
+package info.guardianproject.onionkit.trust;
 
 
 /**
@@ -34,6 +34,7 @@ import info.guardianproject.onionkit.ui.CertDisplayActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -51,6 +52,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 
@@ -70,12 +72,13 @@ import android.util.Log;
  * 
  * @author Gaston Dombiak
  */
-class ParanoidCertificateTrustManager implements X509TrustManager {
+class StrongTrustManager implements X509TrustManager {
 
     private static final String TAG = "GB.SSL";
     private final static Pattern cnPattern = Pattern.compile("(?i)(cn=)([^,]*)");
 
     private final static String TRUSTSTORE_TYPE = "BKS";
+    private final static String TRUSTSTORE_PASSWORD = "changeme";
     
     private int DEFAULT_NOTIFY_ID = 10;
 
@@ -88,6 +91,7 @@ class ParanoidCertificateTrustManager implements X509TrustManager {
 
     private Context context;
 
+    
     boolean mExpiredCheck = true;
     boolean mVerifyChain = true;
     boolean mVerifyRoot = true;
@@ -111,7 +115,7 @@ class ParanoidCertificateTrustManager implements X509TrustManager {
      * @throws CertificateException 
      * @throws NoSuchAlgorithmException 
      */
-    public ParanoidCertificateTrustManager(Context context) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+    public StrongTrustManager(Context context) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
         this.context = context;
         
@@ -625,6 +629,11 @@ class ParanoidCertificateTrustManager implements X509TrustManager {
 
 	public KeyStore getTrustStore() {
 		return mTrustStore;
+	}
+	
+	public String getTrustStorePassword ()
+	{
+		return TRUSTSTORE_PASSWORD;
 	}
 
 	public void setTrustStore(KeyStore mTrustStore) {

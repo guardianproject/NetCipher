@@ -1,4 +1,4 @@
-package info.guardianproject.onionkit.net;
+package info.guardianproject.onionkit.proxy;
 
 import org.apache.http.conn.ClientConnectionOperator;
 import org.apache.http.conn.scheme.SchemeRegistry;

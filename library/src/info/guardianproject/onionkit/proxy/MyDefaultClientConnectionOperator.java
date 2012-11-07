@@ -1,4 +1,4 @@
-package info.guardianproject.onionkit.net;
+package info.guardianproject.onionkit.proxy;
 
 import java.io.IOException;
 import java.net.ConnectException;
