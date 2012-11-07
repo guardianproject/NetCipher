@@ -22,6 +22,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+         <activity android:name="info.guardianproject.onionkit.ui.CertDisplayActivity"
+            android:configChanges="locale|screenSize|orientation"
+         	android:theme="@android:style/Theme.Dialog"
+         	 android:taskAffinity=""
+            />
     </application>
 
 </manifest>

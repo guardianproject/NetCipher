@@ -25,8 +25,6 @@
 </TableRow>
 <TableRow android:id="@+id/TableRow01" android:layout_width="fill_parent" android:layout_height="30px">
 
-	   	<Button android:text="Socks Socket Test" android:id="@+id/btnWizard1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-    	   
 	   <Button android:text="HTTP Proxy Test" android:id="@+id/btnWizard2" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
 	   <Button android:text="SOCKS Proxy Test" android:id="@+id/btnWizard3" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
 	   	

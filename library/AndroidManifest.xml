@@ -9,6 +9,11 @@
         android:icon="@drawable/ic_launcher"
         android:theme="@style/AppTheme">
 
+         <activity android:name="info.guardianproject.onionkit.ui.CertDisplayActivity"
+            android:configChanges="locale|screenSize|orientation"
+         	android:theme="@android:style/Theme.Dialog"
+         	 android:taskAffinity=""
+            />
     </application>
 
 </manifest>
