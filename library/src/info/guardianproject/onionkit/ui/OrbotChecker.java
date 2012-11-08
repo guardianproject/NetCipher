@@ -1,19 +1,80 @@
 package info.guardianproject.onionkit.ui;
 
+import info.guardianproject.onionkit.R;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+
 public class OrbotChecker {
 
-	public boolean isRunning ()
+	private final static int REQUEST_CODE_STATUS = 100;
+	private final static String URI_ORBOT = "org.torproject.android";
+	private final static String TOR_BIN_PATH = "/data/data/org.torproject.android/app_bin/tor";
+	
+	private final static String ACTION_START_TOR = "org.torproject.android.START_TOR";
+	private final static String ACTION_REQUEST_HS = "org.torproject.android.REQUEST_HS_PORT";
+	
+	private Context mContext = null;
+	
+	public OrbotChecker (Context context)
 	{
-		return true;
+		mContext = context;
 	}
 	
-	public boolean isInstalled ()
+	public boolean isOrbotRunning ()
 	{
-		return true;
+   	 int procId = TorServiceUtils.findProcessId(TOR_BIN_PATH);
+
+		return (procId != -1);
 	}
 	
-	public void promptToInstall ()
+	public boolean isOrbotInstalled ()
 	{
+		return isAppInstalled(URI_ORBOT);
+	}
+	
+	private boolean isAppInstalled(String uri) {
+		 PackageManager pm = mContext.getPackageManager();
+		 boolean installed = false;
+		 try {
+		 pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
+		 installed = true;
+		 } catch (PackageManager.NameNotFoundException e) {
+		 installed = false;
+		 }
+		 return installed;
+		 }
+	
+	public void promptToInstall (Activity activity)
+	{
+		String uriMarket = activity.getString(R.string.market_orbot);
 		//show dialog - install from market, f-droid or direct APK
+		showDownloadDialog(activity,activity.getString(R.string.install_orbot_),
+				activity.getString(R.string.you_must_have_orbot),
+				activity.getString(R.string.yes),activity.getString(R.string.no),uriMarket);
 	}
+	
+	 private static AlertDialog showDownloadDialog(final Activity activity,
+	            CharSequence stringTitle, CharSequence stringMessage, CharSequence stringButtonYes,
+	            CharSequence stringButtonNo, final String uriString) {
+	        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
+	        downloadDialog.setTitle(stringTitle);
+	        downloadDialog.setMessage(stringMessage);
+	        downloadDialog.setPositiveButton(stringButtonYes, new DialogInterface.OnClickListener() {
+	            public void onClick(DialogInterface dialogInterface, int i) {
+	                Uri uri = Uri.parse(uriString);
+	                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+	                activity.startActivity(intent);
+	            }
+	        });
+	        downloadDialog.setNegativeButton(stringButtonNo, new DialogInterface.OnClickListener() {
+	            public void onClick(DialogInterface dialogInterface, int i) {
+	            }
+	        });
+	        return downloadDialog.show();
+	    }
 }
