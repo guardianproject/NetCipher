@@ -14,6 +14,8 @@
 package info.guardianproject.onionkit.proxy;
 
 
+import info.guardianproject.onionkit.trust.StrongHttpsClient;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -56,7 +58,7 @@ public class HttpManager {
 	public static String doGet (Context context, String serviceEndpoint, Properties props) throws Exception
 	{
 
-		HttpClient httpClient = new SocksHttpClient(context);
+		HttpClient httpClient = new StrongHttpsClient(context);
 
 		StringBuilder uriBuilder = new StringBuilder(serviceEndpoint);
 	
@@ -112,7 +114,7 @@ public class HttpManager {
 	public static String doPost (Context context, String serviceEndpoint, Properties props) throws Exception
 	{
 
-		DefaultHttpClient httpClient = new SocksHttpClient(context);
+		DefaultHttpClient httpClient = new StrongHttpsClient(context);
 		
 		HttpPost request = new HttpPost(serviceEndpoint);
 		HttpResponse response = null;
