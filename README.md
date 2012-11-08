@@ -1,4 +1,4 @@
-OnionKit
+OnionKit for Android
 ========
 
 Android Library Project for Multi-Layer Network Connections (Better TLS/SSL and Tor)
