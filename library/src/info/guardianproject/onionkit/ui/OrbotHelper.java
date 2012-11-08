@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 
-public class OrbotChecker {
+public class OrbotHelper {
 
 	private final static int REQUEST_CODE_STATUS = 100;
 	
@@ -22,7 +22,7 @@ public class OrbotChecker {
 	
 	private Context mContext = null;
 	
-	public OrbotChecker (Context context)
+	public OrbotHelper (Context context)
 	{
 		mContext = context;
 	}
