@@ -1,11 +1,15 @@
 OnionKit for Android
 ========
 
-Android Library Project for Multi-Layer Network Connections (Better TLS/SSL and Tor)
+This is an Android Library Project that provides multiple means to improve network security in mobile applications. The "Onion" name refers to not only the Onion Routing concept used by Tor (which provides anonymity and resistance to traffic surveillance), but also the idea of multiple layers of security that any application should utilize.  
 
-The ONION refers to not only Onion Routing used by Tor, but also the concept of multiple layers of security this library provides.
+More specifically this library provides:
 
-You can use this library without using Tor, but obviously we think using strong TLS/SSL connections over Tor is just about the best thing in the world.
+1. StrongTrustManager: a robust implementation of an TLS/SSL certificate verifier, that can be customized with any set of certificate authorities
+2. Proxied Connection Support: HTTP and SOCKS proxy connection support for HTTP and HTTP/S traffic through specific configuration of the Apache HTTPClient library
+3. OrbotHelper: a utility class to support application integration with Orbot: Tor for Android. Check if its installed, running, etc.
+
+IT MUST BE NOTED, that you can use this library without using Orbot/Tor, but obviously we think using strong TLS/SSL connections over Tor is just about the best thing in the world.
 
 # StrongTrustManager
 
@@ -31,7 +35,7 @@ SOCKS and HTTP proxies available from Orbot The standard Apache HTTPClient libra
 demonstrates that.  All applications using the SOCKS proxy should not resolve their DNS locally,
 and instead should pass the hostnames through the SOCKS proxy. 
 
-# Orbot Checker
+# Orbot Helper 
 
 Provides simple helper to check if Orbot (Tor for Android) is installed, and whether it is currently running or not. Allows your app to request Orbot to start (user is prompted whether to start or not). Finally, it can show a user prompt to install Orbot, either from Google Play, or via direct APK download from torproject.org or the guardianproject.info site.
 
