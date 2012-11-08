@@ -2,13 +2,18 @@ package info.guardianproject.onionkit.trust;
 
 
 import android.content.Context;
+
+import org.apache.http.HttpHost;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.ClientConnectionOperator;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
+
+import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +27,8 @@ import java.security.cert.CertificateException;
 public class StrongHttpsClient extends DefaultHttpClient {
 
   final Context context;
-
+  private HttpHost socksProxy;
+  
   public StrongHttpsClient(Context context) {
     this.context = context;
   }
@@ -36,7 +42,29 @@ public class StrongHttpsClient extends DefaultHttpClient {
     } catch (Exception e) {
         throw new AssertionError(e);
       }
-    return new SingleClientConnManager(getParams(), registry);
+    
+    socksProxy = (HttpHost)getParams().getParameter("SOCKS");
+    
+    if (socksProxy == null)
+    {
+    	return  new SingleClientConnManager(getParams(), registry);
+    }
+    else
+    {
+    	
+    
+    return new SingleClientConnManager(getParams(), registry)
+    		{
+
+				@Override
+				protected ClientConnectionOperator createConnectionOperator(
+						SchemeRegistry schreg) {
+					
+					return new SocksProxyClientConnOperator(schreg, socksProxy.getHostName(), socksProxy.getPort());
+				}
+    	
+    		};
+    }
   }
 
 }

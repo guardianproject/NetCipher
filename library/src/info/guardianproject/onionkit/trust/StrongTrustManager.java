@@ -97,6 +97,7 @@ class StrongTrustManager implements X509TrustManager {
     boolean mVerifyRoot = true;
     boolean mSelfSignedAllowed = false;
     boolean mCheckMatchingDomain = true;
+    boolean mCheckChainCrypto = false;
 
     /**
      * Construct a trust manager for XMPP connections. Certificates are
@@ -197,7 +198,7 @@ class StrongTrustManager implements X509TrustManager {
                         //check expiry
                         x509issuer.checkValidity();  
                         
-                        if (!isRootCA) //MD5 collision not a risk for the Root CA in our store
+                        if ((!isRootCA) && mCheckChainCrypto) //MD5 collision not a risk for the Root CA in our store
                             checkStrongCrypto(x509issuer);
                                                 
                         //verify cert with issuer public key
@@ -330,6 +331,10 @@ class StrongTrustManager implements X509TrustManager {
                 throw new CertificateException("target verification failed of " + peerIdentities);
             }
         }
+        
+        showCertMessage("Secure Connection Active",
+        		certSite.getSubjectDN().getName(), certSite, null);
+
 
     }
    
@@ -448,7 +453,7 @@ class StrongTrustManager implements X509TrustManager {
             notification.flags |= flags;
         }
 
-        CharSequence contentTitle = context.getString(R.string.app_name) + ": " + title;
+        CharSequence contentTitle = title;
         CharSequence contentText = notifyMsg;
 
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, nIntent, 0);
@@ -570,7 +575,7 @@ class StrongTrustManager implements X509TrustManager {
     {
         String algo = cert.getSigAlgName().toLowerCase();
         
-        if (!algo.contains("sha1") || algo.contains("sha256"))
+        if (algo.contains("md5"))
         {
             debug("cert uses weak crypto: " + algo);
 
