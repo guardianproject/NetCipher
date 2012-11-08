@@ -12,11 +12,13 @@ import android.net.Uri;
 public class OrbotChecker {
 
 	private final static int REQUEST_CODE_STATUS = 100;
-	private final static String URI_ORBOT = "org.torproject.android";
-	private final static String TOR_BIN_PATH = "/data/data/org.torproject.android/app_bin/tor";
 	
-	private final static String ACTION_START_TOR = "org.torproject.android.START_TOR";
-	private final static String ACTION_REQUEST_HS = "org.torproject.android.REQUEST_HS_PORT";
+	public final static String URI_ORBOT = "org.torproject.android";
+	public final static String TOR_BIN_PATH = "/data/data/org.torproject.android/app_bin/tor";
+	
+	public final static String ACTION_START_TOR = "org.torproject.android.START_TOR";
+	public final static String ACTION_REQUEST_HS = "org.torproject.android.REQUEST_HS_PORT";
+	public final static int HS_REQUEST_CODE = 9999;
 	
 	private Context mContext = null;
 	
@@ -77,4 +79,22 @@ public class OrbotChecker {
 	        });
 	        return downloadDialog.show();
 	    }
+	 
+	 
+	 public void requestOrbotStart ()
+	 {
+
+		 Intent intent = new Intent(URI_ORBOT);
+		 intent.setAction(ACTION_START_TOR);
+		 mContext.startActivity(intent);
+	 }
+	 
+	 public void requestHiddenServiceOnPort (Activity activity,int port)
+	 {
+		 Intent intent = new Intent(URI_ORBOT);
+		 intent.setAction(ACTION_REQUEST_HS);
+		 intent.putExtra("hs_port", port);
+		 
+		 activity.startActivityForResult(intent,HS_REQUEST_CODE);
+	 }
 }
