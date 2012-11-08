@@ -100,9 +100,9 @@ public class OnionKitSampleActivity extends Activity {
 		{
 			oc.promptToInstall(this);
 		}
-		else
+		else if (!oc.isOrbotRunning())
 		{
-			oc.requestOrbotStart();
+			oc.requestOrbotStart(this);
 		}
 		
 		

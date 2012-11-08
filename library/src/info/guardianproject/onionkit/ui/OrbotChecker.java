@@ -81,12 +81,25 @@ public class OrbotChecker {
 	    }
 	 
 	 
-	 public void requestOrbotStart ()
+	 public void requestOrbotStart (Activity activity)
 	 {
 
-		 Intent intent = new Intent(URI_ORBOT);
-		 intent.setAction(ACTION_START_TOR);
-		 mContext.startActivity(intent);
+		 AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
+	        downloadDialog.setTitle(R.string.start_orbot_);
+	        downloadDialog.setMessage(R.string.orbot_doesn_t_appear_to_be_running_would_you_like_to_start_it_up_and_connect_to_tor_);
+	        downloadDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+	            public void onClick(DialogInterface dialogInterface, int i) {
+	            	 Intent intent = new Intent(URI_ORBOT);
+	        		 intent.setAction(ACTION_START_TOR);
+	        		 mContext.startActivity(intent);
+	            }
+	        });
+	        downloadDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+	            public void onClick(DialogInterface dialogInterface, int i) {
+	            }
+	        });
+	         downloadDialog.show();
+		
 	 }
 	 
 	 public void requestHiddenServiceOnPort (Activity activity,int port)
