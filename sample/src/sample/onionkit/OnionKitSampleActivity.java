@@ -5,6 +5,7 @@ import info.guardianproject.onionkit.trust.StrongHttpsClient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
@@ -16,10 +17,12 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.List;
 
 import net.sourceforge.jsocks.socks.Socks5Proxy;
 import net.sourceforge.jsocks.socks.SocksSocket;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -88,15 +91,18 @@ public class OnionKitSampleActivity extends Activity {
     {
 
     		HttpClient httpclient = null;
-    		
+
+			//get an HTTP client configured to work with local Tor SOCKS5 proxy
+			httpclient = new StrongHttpsClient(this);
+			
     		if (proxyType == Proxy.Type.SOCKS)
     		{
-    			//get an HTTP client configured to work with local Tor SOCKS5 proxy
-    			httpclient = new SocksHttpClient(this, host, port);
+    			HttpHost proxy = new HttpHost(host, port);
+        		httpclient.getParams().setParameter("SOCKS", proxy);
+    			
     		}
     		else if (proxyType == Proxy.Type.HTTP)
     		{
-    			httpclient = new StrongHttpsClient(this);
         		HttpHost proxy = new HttpHost(host, port);
         		httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
     		}
@@ -104,9 +110,17 @@ public class OnionKitSampleActivity extends Activity {
         	HttpGet httpget = new HttpGet(url);
     		HttpResponse response = httpclient.execute(httpget);
 
-    		return response.getStatusLine().getStatusCode() + "";
+    		StringBuffer sb = new StringBuffer();
+    		sb.append(response.getStatusLine()).append("\n\n");
+    		
+    		InputStream is = response.getEntity().getContent();
+    		List<String> lines = IOUtils.readLines(is);
+    		sb.append(lines);
+    		return sb.toString();
     	
     }
+    
+   
     
     Runnable runnableNetHttp = new Runnable ()
 	{
@@ -117,8 +131,11 @@ public class OnionKitSampleActivity extends Activity {
 			
 			try
 			{
-				String resp = checkHTTP(url, Proxy.Type.HTTP, proxyHost, proxyHttpPort);
 				Message msg = new Message();
+				msg.getData().putString("status", "connecting through HTTP proxy to: " + url);
+				handler.sendMessage(msg);
+				String resp = checkHTTP(url, Proxy.Type.HTTP, proxyHost, proxyHttpPort);
+				msg = new Message();
 				msg.getData().putString("status", resp);
 				handler.sendMessage(msg);
 
@@ -143,8 +160,12 @@ public class OnionKitSampleActivity extends Activity {
 				
 				try
 				{
-					String resp = checkHTTP(url, Proxy.Type.SOCKS, proxyHost, proxySocksPort);
 					Message msg = new Message();
+					msg.getData().putString("status", "connecting through SOCKS proxy to: " + url);
+					handler.sendMessage(msg);
+					
+					String resp = checkHTTP(url, Proxy.Type.SOCKS, proxyHost, proxySocksPort);
+					msg = new Message();
 					msg.getData().putString("status", resp);
 					handler.sendMessage(msg);
 				}
