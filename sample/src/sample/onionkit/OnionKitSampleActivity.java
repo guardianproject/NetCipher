@@ -36,7 +36,7 @@ public class OnionKitSampleActivity extends Activity {
 	private TextView txtView = null;
 	private EditText txtUrl = null;
 	
-	private final static String PROXY_HOST = "localhost"; //test the local device proxy provided by Orbot/Tor
+	private final static String PROXY_HOST = "127.0.0.1"; //test the local device proxy provided by Orbot/Tor
 	private final static int PROXY_HTTP_PORT = 8118; //default for Orbot/Tor
 	private final static int PROXY_SOCKS_PORT = 9050; //default for Orbot/Tor
 	
