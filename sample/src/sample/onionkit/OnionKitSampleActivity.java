@@ -1,6 +1,7 @@
 package sample.onionkit;
 
 import info.guardianproject.onionkit.trust.StrongHttpsClient;
+import info.guardianproject.onionkit.ui.OrbotChecker;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -88,6 +89,25 @@ public class OnionKitSampleActivity extends Activity {
         
     }
     
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		OrbotChecker oc = new OrbotChecker(this);
+		
+		if (!oc.isOrbotInstalled())
+		{
+			oc.promptToInstall(this);
+		}
+		else
+		{
+			oc.requestOrbotStart();
+		}
+		
+		
+	}
+    
     public String checkHTTP (String url, Proxy.Type pType, String proxyHost, int proxyPort) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException
     {
 
@@ -173,4 +193,5 @@ public class OnionKitSampleActivity extends Activity {
 			}
 			
 		};
+
 }
