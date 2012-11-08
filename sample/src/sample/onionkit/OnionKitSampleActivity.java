@@ -1,17 +1,10 @@
 package sample.onionkit;
 
-import info.guardianproject.onionkit.proxy.SocksHttpClient;
 import info.guardianproject.onionkit.trust.StrongHttpsClient;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.MalformedURLException;
 import java.net.Proxy;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -19,30 +12,23 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
 
-import net.sourceforge.jsocks.socks.Socks5Proxy;
-import net.sourceforge.jsocks.socks.SocksSocket;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.app.Activity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.support.v4.app.NavUtils;
 
 public class OnionKitSampleActivity extends Activity {
 
@@ -50,9 +36,11 @@ public class OnionKitSampleActivity extends Activity {
 	private TextView txtView = null;
 	private EditText txtUrl = null;
 	
-	private String proxyHost = "localhost"; //test the local device proxy provided by Orbot/Tor
-	private int proxyHttpPort = 8118; //default for Orbot/Tor
-	private int proxySocksPort = 9050; //default for Orbot/Tor
+	private final static String PROXY_HOST = "localhost"; //test the local device proxy provided by Orbot/Tor
+	private final static int PROXY_HTTP_PORT = 8118; //default for Orbot/Tor
+	private final static int PROXY_SOCKS_PORT = 9050; //default for Orbot/Tor
+	
+	private Proxy.Type mProxyType = null;
 	
     /** Called when the activity is first created. */
     @Override
@@ -65,12 +53,24 @@ public class OnionKitSampleActivity extends Activity {
         
         Button btn;
         
+        btn = ((Button)findViewById(R.id.btnWizard1));
+        
+        btn.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+			 
+				mProxyType = null;
+				new Thread(runnableNet).start();
+			}
+        });
+        
+        
         btn = ((Button)findViewById(R.id.btnWizard2));
         
         btn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 			 
-				new Thread(runnableNetHttp).start();
+				mProxyType = Proxy.Type.HTTP;
+				new Thread(runnableNet).start();
 			}
         });
         
@@ -80,31 +80,33 @@ public class OnionKitSampleActivity extends Activity {
         btn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 			 
+				mProxyType = Proxy.Type.SOCKS;
 
-				new Thread(runnableNetSocks).start();
+				new Thread(runnableNet).start();
 			}
         });
         
     }
     
-    public String checkHTTP (String url, Proxy.Type proxyType, String host, int port) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException
+    public String checkHTTP (String url, Proxy.Type pType, String proxyHost, int proxyPort) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException
     {
 
-    		HttpClient httpclient = null;
-
-			//get an HTTP client configured to work with local Tor SOCKS5 proxy
-			httpclient = new StrongHttpsClient(this);
+    		
+    		HttpClient httpclient = new StrongHttpsClient(this);
 			
-    		if (proxyType == Proxy.Type.SOCKS)
+			if (pType == null)
+			{
+				//do nothing
+			}
+			else if (pType == Proxy.Type.SOCKS)
     		{
-    			HttpHost proxy = new HttpHost(host, port);
-        		httpclient.getParams().setParameter("SOCKS", proxy);
+        		httpclient.getParams().setParameter("SOCKS",  new HttpHost(proxyHost, proxyPort));
     			
     		}
-    		else if (proxyType == Proxy.Type.HTTP)
+    		else if (pType == Proxy.Type.HTTP)
     		{
-        		HttpHost proxy = new HttpHost(host, port);
-        		httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+        		httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,  new HttpHost(proxyHost, proxyPort));
+
     		}
     		
         	HttpGet httpget = new HttpGet(url);
@@ -121,37 +123,8 @@ public class OnionKitSampleActivity extends Activity {
     }
     
    
-    
-    Runnable runnableNetHttp = new Runnable ()
-	{
-		
-		public void run ()
-		{
-			String url = txtUrl.getText().toString();
-			
-			try
-			{
-				Message msg = new Message();
-				msg.getData().putString("status", "connecting through HTTP proxy to: " + url);
-				handler.sendMessage(msg);
-				String resp = checkHTTP(url, Proxy.Type.HTTP, proxyHost, proxyHttpPort);
-				msg = new Message();
-				msg.getData().putString("status", resp);
-				handler.sendMessage(msg);
-
-			}
-			catch (Exception e)
-			{
-				String err = "error connecting to: " + url + "=" + e.toString();
-				Log.e(TAG,err,e);
-				Message msg = new Message();
-				msg.getData().putString("status", err);
-				handler.sendMessage(msg);
-			}
-		}
-	};
 	
-	 Runnable runnableNetSocks = new Runnable ()
+	 Runnable runnableNet = new Runnable ()
 		{
 			
 			public void run ()
@@ -161,10 +134,18 @@ public class OnionKitSampleActivity extends Activity {
 				try
 				{
 					Message msg = new Message();
-					msg.getData().putString("status", "connecting through SOCKS proxy to: " + url);
+					msg.getData().putString("status", "connecting to: " + url);
 					handler.sendMessage(msg);
 					
-					String resp = checkHTTP(url, Proxy.Type.SOCKS, proxyHost, proxySocksPort);
+					int proxyPort = -1;
+					if (mProxyType != null)
+					{
+						if (mProxyType == Proxy.Type.HTTP)
+							proxyPort = PROXY_HTTP_PORT;
+						else if (mProxyType == Proxy.Type.SOCKS)
+							proxyPort = PROXY_SOCKS_PORT;
+					}
+					String resp = checkHTTP(url, mProxyType, PROXY_HOST, proxyPort);
 					msg = new Message();
 					msg.getData().putString("status", resp);
 					handler.sendMessage(msg);
