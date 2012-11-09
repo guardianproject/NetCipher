@@ -1,7 +1,7 @@
 package sample.onionkit;
 
 import info.guardianproject.onionkit.trust.StrongHttpsClient;
-import info.guardianproject.onionkit.ui.OrbotChecker;
+import info.guardianproject.onionkit.ui.OrbotHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,7 +94,7 @@ public class OnionKitSampleActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		
-		OrbotChecker oc = new OrbotChecker(this);
+		OrbotHelper oc = new OrbotHelper(this);
 		
 		if (!oc.isOrbotInstalled())
 		{
