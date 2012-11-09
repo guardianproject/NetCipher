@@ -64,15 +64,20 @@ import android.content.Intent;
 import android.util.Log;
 
 /**
+ * 
+ * Updated multifaceted StrongTrustManager!
+ * 
+ * Based on TrustManager from Jive:
  * Trust manager that checks all certificates presented by the server. This
  * class is used during TLS negotiation. It is possible to disable/enable some
  * or all checkings by configuring the {@link ConnectionConfiguration}. The
  * truststore file that contains knows and trusted CA root certificates can also
  * be configure in {@link ConnectionConfiguration}.
  * 
+ * @autor n8fr8
  * @author Gaston Dombiak
  */
-class StrongTrustManager implements X509TrustManager {
+public class StrongTrustManager implements X509TrustManager {
 
     private static final String TAG = "GB.SSL";
     private final static Pattern cnPattern = Pattern.compile("(?i)(cn=)([^,]*)");
