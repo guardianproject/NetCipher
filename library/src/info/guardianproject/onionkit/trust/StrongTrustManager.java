@@ -27,14 +27,10 @@ import info.guardianproject.bouncycastle.asn1.DERString;
 import info.guardianproject.bouncycastle.asn1.x509.GeneralName;
 import info.guardianproject.bouncycastle.asn1.x509.X509Extensions;
 import info.guardianproject.onionkit.R;
-import info.guardianproject.onionkit.R.drawable;
-import info.guardianproject.onionkit.R.raw;
-import info.guardianproject.onionkit.R.string;
 import info.guardianproject.onionkit.ui.CertDisplayActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Proxy;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -52,7 +48,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 
@@ -94,8 +89,10 @@ public class StrongTrustManager implements X509TrustManager {
     private KeyStore mTrustStore; //root CAs
     private KeyStore mPinnedStore; //pinned certs
 
-    private Context context;
-
+    private Context mContext;
+    
+    private int mAppIcon = android.R.drawable.ic_secure;
+    private String mAppName = null;
     
     boolean mExpiredCheck = true;
     boolean mVerifyChain = true;
@@ -112,9 +109,7 @@ public class StrongTrustManager implements X509TrustManager {
      * valid <li>The leaf certificate contains the identity of the domain or the
      * requested server </ul>
      * 
-     * @param context - the Android context for presenting notifications
-     * @param domain - the domain requested by the user
-     * @param requestedServer - the connect server requested by the user
+     * @param mContext - the Android mContext for presenting notifications
      * @param configuration - the XMPP configuration
      * @throws KeyStoreException 
      * @throws IOException 
@@ -123,20 +118,51 @@ public class StrongTrustManager implements X509TrustManager {
      */
     public StrongTrustManager(Context context) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
-        this.context = context;
+        mContext = context;
         
         InputStream in = null;
         
         mTrustStore = KeyStore.getInstance(TRUSTSTORE_TYPE);
         //load our bundled cacerts from raw assets
-        in = context.getResources().openRawResource(R.raw.cacerts);
+        in = mContext.getResources().openRawResource(R.raw.cacerts);
         mTrustStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
         
         mPinnedStore = KeyStore.getInstance(TRUSTSTORE_TYPE);
         //load our bundled cacerts from raw assets
-        in = context.getResources().openRawResource(R.raw.pinnedcacerts);
+        in = mContext.getResources().openRawResource(R.raw.pinnedcacerts);
         mPinnedStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
        
+        mAppName = mContext.getApplicationInfo().name;
+    }
+
+    /**
+     * Construct a trust manager for XMPP connections. Certificates are
+     * considered verified if:
+     * 
+     * <ul> <li>The root certificate is in our trust store <li>The chain is
+     * valid <li>The leaf certificate contains the identity of the domain or the
+     * requested server </ul>
+     * 
+     * @param mContext - the Android mContext for presenting notifications
+     * @param appIcon - optional icon to show in notifications
+     * @param configuration - the XMPP configuration
+     * @throws KeyStoreException 
+     * @throws IOException 
+     * @throws CertificateException 
+     * @throws NoSuchAlgorithmException 
+     */
+    public StrongTrustManager(Context mContext, String appName, int appIcon) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException
+    {
+    	this (mContext);
+    	
+    	mAppIcon = appIcon;
+    	mAppName = appName;
+    }
+
+    	
+    public void setAppIcon (int appIcon)
+    {
+    	mAppIcon = appIcon;
     }
 
     public X509Certificate[] getAcceptedIssuers() {
@@ -217,17 +243,17 @@ public class StrongTrustManager implements X509TrustManager {
                     catch (GeneralSecurityException gse) {
                         Log.e(TAG,"ERROR: unverified issuer: " + x509certCurr.getIssuerDN());
 
-                        showCertMessage(context.getString(R.string.error_signature_chain_verification_failed) + gse.getMessage(),
+                        showCertMessage(mContext.getString(R.string.error_signature_chain_verification_failed) + gse.getMessage(),
                                 x509issuer.getIssuerDN().getName(), x509issuer, null);
 
-                        throw new CertificateException(context.getString(R.string.error_signature_chain_verification_failed)
+                        throw new CertificateException(mContext.getString(R.string.error_signature_chain_verification_failed)
                                                        + x509issuer.getIssuerDN().getName() + ": " + gse.getMessage());
                     }
                 } 
                 else {
                     
 
-                    String errMsg = context.getString(R.string.error_could_not_find_cert_issuer_certificate_in_chain) + x509certCurr.getIssuerDN().getName();
+                    String errMsg = mContext.getString(R.string.error_could_not_find_cert_issuer_certificate_in_chain) + x509certCurr.getIssuerDN().getName();
                     
                     Log.e(TAG,errMsg);
                     
@@ -241,7 +267,7 @@ public class StrongTrustManager implements X509TrustManager {
             
             if (mVerifyRoot && (!verifiedRootCA))
             {
-                String errMsg = context.getString(R.string.error_could_not_find_root_ca_issuer_certificate_in_chain);
+                String errMsg = mContext.getString(R.string.error_could_not_find_root_ca_issuer_certificate_in_chain);
                 
                 Log.e(TAG,errMsg);
                 
@@ -292,10 +318,10 @@ public class StrongTrustManager implements X509TrustManager {
                         catch (GeneralSecurityException gse) {
                             Log.e(TAG,"ERROR: unverified issuer: " + x509certCurr.getIssuerDN());
 
-                            showCertMessage(context.getString(R.string.error_signature_chain_verification_failed) + gse.getMessage(),
+                            showCertMessage(mContext.getString(R.string.error_signature_chain_verification_failed) + gse.getMessage(),
                                     x509issuer.getIssuerDN().getName(), x509issuer, null);
 
-                            throw new CertificateException(context.getString(R.string.error_signature_chain_verification_failed)
+                            throw new CertificateException(mContext.getString(R.string.error_signature_chain_verification_failed)
                                                            + x509issuer.getIssuerDN().getName() + ": " + gse.getMessage());
                         }
                         
@@ -308,7 +334,7 @@ public class StrongTrustManager implements X509TrustManager {
             
             if (!foundSelfSig)
             {
-                String errMsg = context.getString(R.string.could_not_find_self_signed_certificate_in_chain);
+                String errMsg = mContext.getString(R.string.could_not_find_self_signed_certificate_in_chain);
                 
                 Log.e(TAG,errMsg);
                 
@@ -319,7 +345,7 @@ public class StrongTrustManager implements X509TrustManager {
             }
         }
 
-        if (mCheckMatchingDomain && mDomain != null)
+        if (mCheckMatchingDomain && mDomain != null && mServer != null)
         {
             //get peer identities available in the first cert in the chain
             Collection<String> peerIdentities = getPeerIdentity(x509Certificates[0]);
@@ -329,7 +355,7 @@ public class StrongTrustManager implements X509TrustManager {
             boolean found = checkMatchingDomain(mDomain, mServer, peerIdentities);
     
             if (!found) {
-                showCertMessage(context.getString(R.string.error_domain_check_failed), join(peerIdentities) + context.getString(R.string.error_does_not_contain_)
+                showCertMessage(mContext.getString(R.string.error_domain_check_failed), join(peerIdentities) + mContext.getString(R.string.error_does_not_contain_)
                                                        + "'" + mServer + "' or '" + mDomain + "'",
                         x509Certificates[0],null);
     
@@ -337,7 +363,7 @@ public class StrongTrustManager implements X509TrustManager {
             }
         }
         
-        showCertMessage("Secure Connection Active",
+        showCertMessage("Secure Connection Active: " + certSite.getSubjectDN().getName(),
         		certSite.getSubjectDN().getName(), certSite, null);
 
 
@@ -406,9 +432,9 @@ public class StrongTrustManager implements X509TrustManager {
                }
             }
         } catch (KeyStoreException e) {
-          Log.e(TAG, context.getString(R.string.error_problem_access_local_root_ca_store),e);
+          Log.e(TAG, mContext.getString(R.string.error_problem_access_local_root_ca_store),e);
 
-          throw new CertificateException(context.getString(R.string.error_problem_access_local_root_ca_store));
+          throw new CertificateException(mContext.getString(R.string.error_problem_access_local_root_ca_store));
         }
        
         return x509issuer;
@@ -416,7 +442,7 @@ public class StrongTrustManager implements X509TrustManager {
 
     private void showCertMessage(String title, String msg, X509Certificate cert, String fingerprint) {
 
-        Intent nIntent = new Intent(context, CertDisplayActivity.class);
+        Intent nIntent = new Intent(mContext, CertDisplayActivity.class);
 
         nIntent.putExtra("issuer", cert.getIssuerDN().getName());
         nIntent.putExtra("subject", cert.getSubjectDN().getName());
@@ -428,29 +454,22 @@ public class StrongTrustManager implements X509TrustManager {
         nIntent.putExtra("expires", cert.getNotAfter().toGMTString());
         nIntent.putExtra("msg", title + ": " + msg);
         
-        showMessage(title, msg, nIntent);
+
+        showToolbarNotification(title, msg, DEFAULT_NOTIFY_ID, mAppIcon,
+                Notification.FLAG_AUTO_CANCEL, nIntent);
 
     }
 
-    private void showMessage(String title, String msg, Intent intent) {
-
-        try {
-            showToolbarNotification(title, msg, DEFAULT_NOTIFY_ID, R.drawable.ic_menu_key,
-                    Notification.FLAG_AUTO_CANCEL, intent);
-        } catch (Exception e) {
-           Log.d(TAG,"could not show notification", e);
-        }
-    }
 
     private void showToolbarNotification(String title, String notifyMsg, int notifyId, int icon,
-            int flags, Intent nIntent) throws Exception {
+            int flags, Intent nIntent) {
         
-        NotificationManager mNotificationManager = (NotificationManager) context
-                .getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager mNotificationManager = (NotificationManager) mContext
+                .getSystemService(mContext.NOTIFICATION_SERVICE);
 
         mNotificationManager.cancel(DEFAULT_NOTIFY_ID);
         
-        CharSequence tickerText = notifyMsg;
+        CharSequence tickerText = mAppName + ": " + title;
         long when = System.currentTimeMillis();
 
         Notification notification = new Notification(icon, tickerText, when);
@@ -461,9 +480,9 @@ public class StrongTrustManager implements X509TrustManager {
         CharSequence contentTitle = title;
         CharSequence contentText = notifyMsg;
 
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, nIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, nIntent, 0);
 
-        notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+        notification.setLatestEventInfo(mContext, contentTitle, contentText, contentIntent);
 
         mNotificationManager.notify(notifyId, notification);
     }
@@ -584,7 +603,7 @@ public class StrongTrustManager implements X509TrustManager {
         {
             debug("cert uses weak crypto: " + algo);
 
-            showCertMessage(context.getString(R.string.warning_weak_crypto),
+            showCertMessage(mContext.getString(R.string.warning_weak_crypto),
                     cert.getIssuerDN().getName(), cert, null);
 
           // we will just WARN and not block for this, for now
@@ -617,13 +636,13 @@ public class StrongTrustManager implements X509TrustManager {
                     if (!Arrays.equals(certPrincipal.getEncoded(), searchPrincipal.getEncoded())) //byte by byte check                    
                     {
                         
-                        showCertMessage(context.getString(R.string.warning_pinned_cert_mismatch),
+                        showCertMessage(mContext.getString(R.string.warning_pinned_cert_mismatch),
                                 x509cert.getSubjectDN().getName(), x509cert, null);
                         
                         debug("Provided Certificate Does Not Match PINNED Cert: " + certPrincipal.getName("RFC1779"));
                         
                         // just warn for now, don't block
-                       // throw new CertificateException(context.getString(R.string.warning_pinned_cert_mismatch) + certPrincipal.getName("RFC1779"));
+                       // throw new CertificateException(mContext.getString(R.string.warning_pinned_cert_mismatch) + certPrincipal.getName("RFC1779"));
                         
                     }
                     
