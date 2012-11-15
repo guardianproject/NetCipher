@@ -91,7 +91,7 @@ public class StrongTrustManager implements X509TrustManager {
 
     private Context mContext;
     
-    private int mAppIcon = android.R.drawable.ic_secure;
+    private int mAppIcon = R.drawable.ic_menu_key;
     private String mAppName = null;
     
     boolean mExpiredCheck = true;
@@ -454,7 +454,6 @@ public class StrongTrustManager implements X509TrustManager {
         nIntent.putExtra("expires", cert.getNotAfter().toGMTString());
         nIntent.putExtra("msg", title + ": " + msg);
         
-
         showToolbarNotification(title, msg, DEFAULT_NOTIFY_ID, mAppIcon,
                 Notification.FLAG_AUTO_CANCEL, nIntent);
 
@@ -467,9 +466,15 @@ public class StrongTrustManager implements X509TrustManager {
         NotificationManager mNotificationManager = (NotificationManager) mContext
                 .getSystemService(mContext.NOTIFICATION_SERVICE);
 
-        mNotificationManager.cancel(DEFAULT_NOTIFY_ID);
+        mNotificationManager.cancelAll();
         
-        CharSequence tickerText = mAppName + ": " + title;
+        CharSequence tickerText = null;
+        
+        if (mAppName != null)
+        	tickerText = mAppName + ": " + title;
+        else
+        	tickerText = title;
+        
         long when = System.currentTimeMillis();
 
         Notification notification = new Notification(icon, tickerText, when);
@@ -480,7 +485,7 @@ public class StrongTrustManager implements X509TrustManager {
         CharSequence contentTitle = title;
         CharSequence contentText = notifyMsg;
 
-        PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, nIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, nIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         notification.setLatestEventInfo(mContext, contentTitle, contentText, contentIntent);
 
