@@ -60,7 +60,7 @@ import android.util.Log;
 
 /**
  * 
- * Updated multifaceted StrongTrustManager!
+ * Updated multifaceted StrongTrustManager
  * 
  * Based on TrustManager from Jive:
  * Trust manager that checks all certificates presented by the server. This
