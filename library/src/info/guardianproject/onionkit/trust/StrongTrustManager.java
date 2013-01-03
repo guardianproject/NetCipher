@@ -82,6 +82,8 @@ public class StrongTrustManager implements X509TrustManager {
     
     private int DEFAULT_NOTIFY_ID = 10;
 
+    private final static boolean DEBUG_LOG = false;
+    
     /** Holds the domain of the remote server we are trying to connect */
     private String mServer;
     private String mDomain;
@@ -101,6 +103,9 @@ public class StrongTrustManager implements X509TrustManager {
     boolean mCheckMatchingDomain = true;
     boolean mCheckChainCrypto = false;
 
+    boolean mNotifyVerificationSuccess = false;
+    boolean mNotifyVerificationFail = true;
+    
     /**
      * Construct a trust manager for XMPP connections. Certificates are
      * considered verified if:
@@ -183,6 +188,16 @@ public class StrongTrustManager implements X509TrustManager {
         if (mExpiredCheck)
             certSite.checkValidity();
         
+        String fingerprint = null;
+        
+        try {
+            fingerprint = getFingerprint(certSite, "SHA-1");
+        }
+        catch (Exception e)
+        {
+            debug("could not get cert fingperint: " + e.getMessage());
+        }
+        
         //then go through the chain
         if (mVerifyChain)
         {
@@ -241,10 +256,11 @@ public class StrongTrustManager implements X509TrustManager {
                     }
 
                     catch (GeneralSecurityException gse) {
-                        Log.e(TAG,"ERROR: unverified issuer: " + x509certCurr.getIssuerDN());
+                       debug("ERROR: unverified issuer: " + x509certCurr.getIssuerDN());
 
-                        showCertMessage(mContext.getString(R.string.error_signature_chain_verification_failed) + gse.getMessage(),
-                                x509issuer.getIssuerDN().getName(), x509issuer, null);
+                        if (mNotifyVerificationFail)
+                            showCertMessage(mContext.getString(R.string.error_signature_chain_verification_failed) + gse.getMessage(),
+                                    x509issuer.getIssuerDN().getName(), x509issuer, fingerprint);
 
                         throw new CertificateException(mContext.getString(R.string.error_signature_chain_verification_failed)
                                                        + x509issuer.getIssuerDN().getName() + ": " + gse.getMessage());
@@ -255,10 +271,11 @@ public class StrongTrustManager implements X509TrustManager {
 
                     String errMsg = mContext.getString(R.string.error_could_not_find_cert_issuer_certificate_in_chain) + x509certCurr.getIssuerDN().getName();
                     
-                    Log.e(TAG,errMsg);
+                    debug(errMsg);
                     
+                    if (mNotifyVerificationFail)
                     showCertMessage(errMsg,
-                            x509certCurr.getIssuerDN().getName(), x509certCurr, null);
+                            x509certCurr.getIssuerDN().getName(), x509certCurr, fingerprint);
 
                     throw new CertificateException(errMsg);
                 }
@@ -269,10 +286,11 @@ public class StrongTrustManager implements X509TrustManager {
             {
                 String errMsg = mContext.getString(R.string.error_could_not_find_root_ca_issuer_certificate_in_chain);
                 
-                Log.e(TAG,errMsg);
-                
+                debug(errMsg);
+
+                if (mNotifyVerificationFail)
                 showCertMessage(errMsg,
-                        x509Certificates[0].getIssuerDN().getName(), x509Certificates[0], null);
+                        x509Certificates[0].getIssuerDN().getName(), x509Certificates[0], fingerprint);
 
                 throw new CertificateException(errMsg);
             }
@@ -316,10 +334,11 @@ public class StrongTrustManager implements X509TrustManager {
                         }
 
                         catch (GeneralSecurityException gse) {
-                            Log.e(TAG,"ERROR: unverified issuer: " + x509certCurr.getIssuerDN());
+                            debug("ERROR: unverified issuer: " + x509certCurr.getIssuerDN());
 
+                            if (mNotifyVerificationFail)
                             showCertMessage(mContext.getString(R.string.error_signature_chain_verification_failed) + gse.getMessage(),
-                                    x509issuer.getIssuerDN().getName(), x509issuer, null);
+                                    x509issuer.getIssuerDN().getName(), x509issuer, fingerprint);
 
                             throw new CertificateException(mContext.getString(R.string.error_signature_chain_verification_failed)
                                                            + x509issuer.getIssuerDN().getName() + ": " + gse.getMessage());
@@ -336,10 +355,11 @@ public class StrongTrustManager implements X509TrustManager {
             {
                 String errMsg = mContext.getString(R.string.could_not_find_self_signed_certificate_in_chain);
                 
-                Log.e(TAG,errMsg);
-                
+                debug(errMsg);
+
+                if (mNotifyVerificationFail)
                 showCertMessage(errMsg,
-                        x509Certificates[0].getIssuerDN().getName(), x509Certificates[0], null);
+                        x509Certificates[0].getIssuerDN().getName(), x509Certificates[0], fingerprint);
 
                 throw new CertificateException(errMsg);
             }
@@ -355,18 +375,27 @@ public class StrongTrustManager implements X509TrustManager {
             boolean found = checkMatchingDomain(mDomain, mServer, peerIdentities);
     
             if (!found) {
+                
+
+                if (mNotifyVerificationFail)
                 showCertMessage(mContext.getString(R.string.error_domain_check_failed), join(peerIdentities) + mContext.getString(R.string.error_does_not_contain_)
                                                        + "'" + mServer + "' or '" + mDomain + "'",
-                        x509Certificates[0],null);
+                        x509Certificates[0],fingerprint);
     
                 throw new CertificateException("target verification failed of " + peerIdentities);
             }
         }
         
-        showCertMessage("Secure Connection Active: " + certSite.getSubjectDN().getName(),
-        		certSite.getSubjectDN().getName(), certSite, null);
+        if (mNotifyVerificationSuccess)
+            showCertMessage(mContext.getString(R.string.secure_connection_active_) + certSite.getSubjectDN().getName(),
+        		certSite.getSubjectDN().getName(), certSite, fingerprint);
 
 
+    }
+    
+    public void setNotifyVerificationSuccess (boolean notifyVerificationSuccess)
+    {
+        mNotifyVerificationSuccess = notifyVerificationSuccess;
     }
    
     static boolean checkMatchingDomain(String domain, String server, Collection<String> peerIdentities) {
@@ -432,9 +461,11 @@ public class StrongTrustManager implements X509TrustManager {
                }
             }
         } catch (KeyStoreException e) {
-          Log.e(TAG, mContext.getString(R.string.error_problem_access_local_root_ca_store),e);
+            
+            String errMsg = mContext.getString(R.string.error_problem_access_local_root_ca_store);
+            debug(errMsg);
 
-          throw new CertificateException(mContext.getString(R.string.error_problem_access_local_root_ca_store));
+          throw new CertificateException(errMsg);
         }
        
         return x509issuer;
@@ -597,7 +628,8 @@ public class StrongTrustManager implements X509TrustManager {
     
     private void debug (String msg)
     {
-        Log.d(TAG, msg);
+       if (DEBUG_LOG) 
+           Log.d(TAG, msg);
     }
 
     private void checkStrongCrypto (X509Certificate cert) throws CertificateException
@@ -608,11 +640,11 @@ public class StrongTrustManager implements X509TrustManager {
         {
             debug("cert uses weak crypto: " + algo);
 
+            if (mNotifyVerificationFail)
             showCertMessage(mContext.getString(R.string.warning_weak_crypto),
                     cert.getIssuerDN().getName(), cert, null);
 
-          // we will just WARN and not block for this, for now
-          //  throw new CertificateException("issuer uses weak crypto: " + algo);
+           throw new CertificateException("issuer uses weak crypto: " + algo);
         }
         
     }
@@ -640,7 +672,8 @@ public class StrongTrustManager implements X509TrustManager {
                     //found matching pinned cert, now check if the certs are the same
                     if (!Arrays.equals(certPrincipal.getEncoded(), searchPrincipal.getEncoded())) //byte by byte check                    
                     {
-                        
+
+                        if (mNotifyVerificationFail)
                         showCertMessage(mContext.getString(R.string.warning_pinned_cert_mismatch),
                                 x509cert.getSubjectDN().getName(), x509cert, null);
                         
