@@ -75,6 +75,8 @@ import android.util.Log;
 public class StrongTrustManager implements X509TrustManager {
 
     private static final String TAG = "GB.SSL";
+    private final static boolean SHOW_DEBUG_OUTPUT = false;
+    
     private final static Pattern cnPattern = Pattern.compile("(?i)(cn=)([^,]*)");
 
     private final static String TRUSTSTORE_TYPE = "BKS";
@@ -100,6 +102,7 @@ public class StrongTrustManager implements X509TrustManager {
     boolean mSelfSignedAllowed = false;
     boolean mCheckMatchingDomain = true;
     boolean mCheckChainCrypto = false;
+    
 
     /**
      * Construct a trust manager for XMPP connections. Certificates are
@@ -597,7 +600,8 @@ public class StrongTrustManager implements X509TrustManager {
     
     private void debug (String msg)
     {
-        Log.d(TAG, msg);
+    	if (SHOW_DEBUG_OUTPUT)
+    		Log.d(TAG, msg);
     }
 
     private void checkStrongCrypto (X509Certificate cert) throws CertificateException
