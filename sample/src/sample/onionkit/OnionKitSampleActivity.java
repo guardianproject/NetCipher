@@ -1,8 +1,5 @@
 package sample.onionkit;
 
-import info.guardianproject.onionkit.trust.StrongHttpsClient;
-import info.guardianproject.onionkit.ui.OrbotHelper;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
