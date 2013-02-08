@@ -29,12 +29,15 @@ public class StrongHttpsClient extends DefaultHttpClient {
   final Context context;
   private HttpHost socksProxy;
   
+  
   public StrongHttpsClient(Context context) {
     this.context = context;
   }
 
   @Override protected ClientConnectionManager createClientConnectionManager() {
-    SchemeRegistry registry = new SchemeRegistry();
+   
+	  
+	  SchemeRegistry registry = new SchemeRegistry();
     registry.register(
         new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
     try {
@@ -48,23 +51,32 @@ public class StrongHttpsClient extends DefaultHttpClient {
     if (socksProxy == null)
     {
     	return  new SingleClientConnManager(getParams(), registry);
+    	
     }
     else
     {
     	
     
-    return new SingleClientConnManager(getParams(), registry)
-    		{
-
-				@Override
-				protected ClientConnectionOperator createConnectionOperator(
-						SchemeRegistry schreg) {
-					
-					return new SocksProxyClientConnOperator(schreg, socksProxy.getHostName(), socksProxy.getPort());
-				}
-    	
-    		};
-    }
+	    return new SingleClientConnManager(getParams(), registry)
+	    		{
+	
+					@Override
+					protected ClientConnectionOperator createConnectionOperator(
+							SchemeRegistry schreg) {
+						
+						return new SocksProxyClientConnOperator(schreg, socksProxy.getHostName(), socksProxy.getPort());
+					}
+	    	
+	    		};
+	    }
   }
 
+  public void useProxy (boolean enableTor, String type, String host, int port)
+  {
+	  if (enableTor)
+		getParams().setParameter(type,  new HttpHost(host, port));
+	  else
+		  getParams().removeParameter(type);
+	  
+  }
 }

@@ -75,6 +75,8 @@ import android.util.Log;
 public class StrongTrustManager implements X509TrustManager {
 
     private static final String TAG = "GB.SSL";
+    private final static boolean SHOW_DEBUG_OUTPUT = false;
+    
     private final static Pattern cnPattern = Pattern.compile("(?i)(cn=)([^,]*)");
 
     private final static String TRUSTSTORE_TYPE = "BKS";
@@ -82,8 +84,6 @@ public class StrongTrustManager implements X509TrustManager {
     
     private int DEFAULT_NOTIFY_ID = 10;
 
-    private final static boolean DEBUG_LOG = false;
-    
     /** Holds the domain of the remote server we are trying to connect */
     private String mServer;
     private String mDomain;
@@ -102,6 +102,7 @@ public class StrongTrustManager implements X509TrustManager {
     boolean mSelfSignedAllowed = false;
     boolean mCheckMatchingDomain = true;
     boolean mCheckChainCrypto = false;
+    
 
     boolean mNotifyVerificationSuccess = false;
     boolean mNotifyVerificationFail = true;
@@ -628,8 +629,8 @@ public class StrongTrustManager implements X509TrustManager {
     
     private void debug (String msg)
     {
-       if (DEBUG_LOG) 
-           Log.d(TAG, msg);
+    	if (SHOW_DEBUG_OUTPUT)
+    		Log.d(TAG, msg);
     }
 
     private void checkStrongCrypto (X509Certificate cert) throws CertificateException
