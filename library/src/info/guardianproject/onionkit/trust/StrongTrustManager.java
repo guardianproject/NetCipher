@@ -398,6 +398,11 @@ public class StrongTrustManager implements X509TrustManager {
     {
         mNotifyVerificationSuccess = notifyVerificationSuccess;
     }
+    
+    public void setNotifyVerificationFail (boolean notifyVerificationFail)
+    {
+        mNotifyVerificationFail = notifyVerificationFail;
+    }
    
     static boolean checkMatchingDomain(String domain, String server, Collection<String> peerIdentities) {
         boolean found = false;
