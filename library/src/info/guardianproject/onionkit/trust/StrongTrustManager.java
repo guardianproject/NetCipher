@@ -20,15 +20,21 @@ package info.guardianproject.onionkit.trust;
  */
 
 
+import info.guardianproject.bouncycastle.asn1.ASN1InputStream;
 import info.guardianproject.bouncycastle.asn1.ASN1Object;
 import info.guardianproject.bouncycastle.asn1.ASN1OctetString;
+import info.guardianproject.bouncycastle.asn1.ASN1String;
+import info.guardianproject.bouncycastle.asn1.DERObject;
+import info.guardianproject.bouncycastle.asn1.DEROctetString;
 import info.guardianproject.bouncycastle.asn1.DERSequence;
 import info.guardianproject.bouncycastle.asn1.DERString;
+import info.guardianproject.bouncycastle.asn1.x509.BasicConstraints;
 import info.guardianproject.bouncycastle.asn1.x509.GeneralName;
 import info.guardianproject.bouncycastle.asn1.x509.X509Extensions;
 import info.guardianproject.onionkit.R;
 import info.guardianproject.onionkit.ui.CertDisplayActivity;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -45,6 +51,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,8 +81,8 @@ import android.util.Log;
  */
 public class StrongTrustManager implements X509TrustManager {
 
-    private static final String TAG = "GB.SSL";
-    private final static boolean SHOW_DEBUG_OUTPUT = false;
+    private static final String TAG = "ONIONKIT";
+    public static boolean SHOW_DEBUG_OUTPUT = false;
     
     private final static Pattern cnPattern = Pattern.compile("(?i)(cn=)([^,]*)");
 
@@ -210,6 +217,7 @@ public class StrongTrustManager implements X509TrustManager {
             {
                 X509Certificate x509certCurr = x509Certificates[i];
                 
+                
                 debug(i + ": verifying cert issuer for: " + x509certCurr.getSubjectDN() + "; " + x509certCurr.getSigAlgName());
 
                 X509Certificate x509issuer = null;
@@ -229,8 +237,9 @@ public class StrongTrustManager implements X509TrustManager {
                         
                         break;
                     }
-                }                           
+                }
                 
+
                 //this is now verifying against the root store
                 //did not find signing cert in chain, so check our store
                 if (x509issuer == null)
@@ -244,6 +253,59 @@ public class StrongTrustManager implements X509TrustManager {
                     try {
                         //check expiry
                         x509issuer.checkValidity();  
+                        
+                        Set<String> extOids = x509issuer.getCriticalExtensionOIDs();
+                        for (String oid : extOids)
+                        {
+                        	String val = new String(x509issuer.getExtensionValue(oid));
+                        	debug ("extension: " + oid + "=" + val);
+                        }
+                        
+                        //check basic constraints
+                        int bConLen = x509issuer.getBasicConstraints();
+                        if (bConLen == -1)
+                        {
+                        	throw new GeneralSecurityException("Basic Constraints CA not set for issuer in chain");
+                        }
+                        else
+                        {
+                        	/*
+                        	 * basicConstraints=CA:TRUE
+ 								basicConstraints=CA:FALSE
+ 								basicConstraints=critical,CA:TRUE, pathlen:0
+                        	 */
+                        //	String OID_BASIC_CONSTRAINTS = "2.5.29.19";
+                        	
+                        	try
+                        	{
+                        		Object bsVal = getExtensionValue(x509issuer, X509Extensions.BasicConstraints.getId());
+                        		
+	                        	if (bsVal != null && bsVal instanceof BasicConstraints )
+	                        	{
+		                        	BasicConstraints basicConstraints = (BasicConstraints)bsVal;
+		                        	//BasicConstraints.getInstance(ASN1Object.fromByteArray(bsValBytes));
+
+	                        		debug ("Basic Constraints=CA:" + basicConstraints.isCA());
+	                        		
+	                        		if (!basicConstraints.isCA())
+	                        			throw new GeneralSecurityException("Basic Constraints CA = true not set for issuer in chain");
+	                        	}
+	                        	else
+	                        	{
+	                        		throw new GeneralSecurityException("Basic Constraints CA = true not set for issuer in chain");
+	                        	}
+                        	}
+                        	catch (IOException e)
+                        	{
+                        		throw new GeneralSecurityException("Basic Constraints CA = error reading extension");
+                        	}
+                        
+                        	
+                        }
+                        
+                       
+                        
+                        
                         
                         if ((!isRootCA) && mCheckChainCrypto) //MD5 collision not a risk for the Root CA in our store
                             checkStrongCrypto(x509issuer);
@@ -775,6 +837,45 @@ public class StrongTrustManager implements X509TrustManager {
 
 	public void setDomain(String domain) {
 		this.mDomain = domain;
+	}
+	
+	private Object getExtensionValue(X509Certificate X509Certificate, String oid) throws IOException
+	{
+	    String decoded = null;
+	    byte[] extensionValue = X509Certificate.getExtensionValue(oid);
+	    
+
+	    if (extensionValue != null)
+	    {
+	        DERObject derObject = toDERObject(extensionValue);
+	        if (derObject instanceof DEROctetString)
+	        {
+	            DEROctetString derOctetString = (DEROctetString) derObject;
+	            
+	            
+	            derObject = toDERObject(derOctetString.getOctets());
+	            if (derObject instanceof ASN1String)
+	            {
+	                ASN1String s = (ASN1String)derObject;
+	                decoded = s.getString();
+	            }
+	            else
+	            {
+	            	return BasicConstraints.getInstance(ASN1Object.fromByteArray(derOctetString.getOctets()));
+	            }
+	           
+
+	        }
+	    }
+	    return decoded;
+	}
+
+	private DERObject toDERObject(byte[] data) throws IOException
+	{
+	    ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+	    ASN1InputStream asnInputStream = new ASN1InputStream(inStream);
+
+	    return asnInputStream.readObject();
 	}
     
 }
