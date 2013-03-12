@@ -1,7 +1,7 @@
 package info.guardianproject.onionkit.trust;
 
 
-import android.content.Context;
+import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
 
 import org.apache.http.HttpHost;
 import org.apache.http.conn.ClientConnectionManager;
@@ -9,55 +9,50 @@ import org.apache.http.conn.ClientConnectionOperator;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
 
-import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
+import android.content.Context;
 
 public class StrongHttpsClient extends DefaultHttpClient {
 
   final Context context;
   private HttpHost socksProxy;
   
+  private StrongSSLSocketFactory sFactory;
+  private SchemeRegistry mRegistry;
   
   public StrongHttpsClient(Context context) {
     this.context = context;
+    
+    mRegistry = new SchemeRegistry();
+    mRegistry.register(
+      new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+  
+  
+  try {
+  	sFactory = new StrongSSLSocketFactory(context);
+  	mRegistry.register(new Scheme("https", sFactory, 443));
+  } catch (Exception e) {
+      throw new AssertionError(e);
+    }
   }
 
   @Override protected ClientConnectionManager createClientConnectionManager() {
    
-	  
-	  SchemeRegistry registry = new SchemeRegistry();
-    registry.register(
-        new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-    try {
-		registry.register(new Scheme("https", new StrongSSLSocketFactory(context), 443));
-    } catch (Exception e) {
-        throw new AssertionError(e);
-      }
     
     socksProxy = (HttpHost)getParams().getParameter("SOCKS");
     
     if (socksProxy == null)
     {
-    	return  new SingleClientConnManager(getParams(), registry);
+    	return  new SingleClientConnManager(getParams(), mRegistry);
     	
     }
     else
     {
     	
     
-	    return new SingleClientConnManager(getParams(), registry)
+	    return new SingleClientConnManager(getParams(), mRegistry)
 	    		{
 	
 					@Override
@@ -69,6 +64,11 @@ public class StrongHttpsClient extends DefaultHttpClient {
 	    	
 	    		};
 	    }
+  }
+  
+  public StrongTrustManager getStrongTrustManager ()
+  {
+	  return sFactory.getStrongTrustManager();
   }
 
   public void useProxy (boolean enableTor, String type, String host, int port)
