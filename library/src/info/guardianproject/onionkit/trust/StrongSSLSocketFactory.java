@@ -41,24 +41,30 @@ public class StrongSSLSocketFactory extends org.apache.http.conn.ssl.SSLSocketFa
     public static final String SSL   = "SSL";
     public static final String SSLV2 = "SSLv2";
     
-    private X509HostnameVerifier mHostnameVerifier = new StrictHostnameVerifier();
+//    private X509HostnameVerifier mHostnameVerifier = new StrictHostnameVerifier();
     //private final HostNameResolver mNameResolver = new StrongHostNameResolver();
 
+    private StrongTrustManager mStrongTrustManager = null;
     
 	public StrongSSLSocketFactory (Context context) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException
     {
     	super(null);
  
         SSLContext sslContext = SSLContext.getInstance ("TLS");
-        StrongTrustManager tmStrong = new StrongTrustManager (context);
-        TrustManager[] tm = new TrustManager[] { tmStrong };
-        KeyManager[] km = createKeyManagers(tmStrong.getTrustStore(),tmStrong.getTrustStorePassword());
+        mStrongTrustManager = new StrongTrustManager (context);
+        TrustManager[] tm = new TrustManager[] { mStrongTrustManager };
+        KeyManager[] km = createKeyManagers(mStrongTrustManager.getTrustStore(),mStrongTrustManager.getTrustStorePassword());
         sslContext.init (km, tm, new SecureRandom ());
 
         mFactory = sslContext.getSocketFactory ();
    
     }
 
+	public StrongTrustManager getStrongTrustManager ()
+	{
+		return mStrongTrustManager;
+	}
+	
 	private KeyManager[] createKeyManagers(final KeyStore keystore, final String password)
         throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
         if (keystore == null) {

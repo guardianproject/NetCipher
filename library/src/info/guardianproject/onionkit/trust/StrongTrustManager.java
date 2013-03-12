@@ -20,15 +20,22 @@ package info.guardianproject.onionkit.trust;
  */
 
 
+import info.guardianproject.bouncycastle.asn1.ASN1InputStream;
 import info.guardianproject.bouncycastle.asn1.ASN1Object;
 import info.guardianproject.bouncycastle.asn1.ASN1OctetString;
+import info.guardianproject.bouncycastle.asn1.ASN1String;
+import info.guardianproject.bouncycastle.asn1.DERObject;
+import info.guardianproject.bouncycastle.asn1.DEROctetString;
 import info.guardianproject.bouncycastle.asn1.DERSequence;
 import info.guardianproject.bouncycastle.asn1.DERString;
+import info.guardianproject.bouncycastle.asn1.x509.BasicConstraints;
+import info.guardianproject.bouncycastle.asn1.x509.KeyUsage;
 import info.guardianproject.bouncycastle.asn1.x509.GeneralName;
 import info.guardianproject.bouncycastle.asn1.x509.X509Extensions;
 import info.guardianproject.onionkit.R;
 import info.guardianproject.onionkit.ui.CertDisplayActivity;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -45,6 +52,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,8 +82,8 @@ import android.util.Log;
  */
 public class StrongTrustManager implements X509TrustManager {
 
-    private static final String TAG = "GB.SSL";
-    private final static boolean SHOW_DEBUG_OUTPUT = false;
+    private static final String TAG = "ONIONKIT";
+    public static boolean SHOW_DEBUG_OUTPUT = true;
     
     private final static Pattern cnPattern = Pattern.compile("(?i)(cn=)([^,]*)");
 
@@ -89,8 +97,6 @@ public class StrongTrustManager implements X509TrustManager {
     private String mDomain;
     
     private KeyStore mTrustStore; //root CAs
-    private KeyStore mPinnedStore; //pinned certs
-
     private Context mContext;
     
     private int mAppIcon = R.drawable.ic_menu_key;
@@ -101,10 +107,9 @@ public class StrongTrustManager implements X509TrustManager {
     boolean mVerifyRoot = true;
     boolean mSelfSignedAllowed = false;
     boolean mCheckMatchingDomain = true;
-    boolean mCheckChainCrypto = false;
-    
+    boolean mCheckChainCrypto = true;
 
-    boolean mNotifyVerificationSuccess = false;
+	boolean mNotifyVerificationSuccess = false;
     boolean mNotifyVerificationFail = true;
     
     /**
@@ -133,10 +138,6 @@ public class StrongTrustManager implements X509TrustManager {
         in = mContext.getResources().openRawResource(R.raw.cacerts);
         mTrustStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
         
-        mPinnedStore = KeyStore.getInstance(TRUSTSTORE_TYPE);
-        //load our bundled cacerts from raw assets
-        in = mContext.getResources().openRawResource(R.raw.pinnedcacerts);
-        mPinnedStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
        
         mAppName = mContext.getApplicationInfo().name;
     }
@@ -185,7 +186,7 @@ public class StrongTrustManager implements X509TrustManager {
         //first check the main cert
         X509Certificate certSite = x509Certificates[0];
         checkStrongCrypto(certSite);        
-        checkPinning(certSite);
+        
         if (mExpiredCheck)
             certSite.checkValidity();
         
@@ -210,10 +211,11 @@ public class StrongTrustManager implements X509TrustManager {
             {
                 X509Certificate x509certCurr = x509Certificates[i];
                 
+                
                 debug(i + ": verifying cert issuer for: " + x509certCurr.getSubjectDN() + "; " + x509certCurr.getSigAlgName());
 
                 X509Certificate x509issuer = null;
-                boolean isRootCA = false;
+                boolean isLocalRootCA = false;
                 
                 for (X509Certificate x509search : x509Certificates)
                 {                                      
@@ -225,18 +227,18 @@ public class StrongTrustManager implements X509TrustManager {
                         //now check if it is a root
                         X509Certificate x509root = findCertIssuerInStore(x509certCurr, mTrustStore);
                         if (x509root != null)
-                            isRootCA = true;
+                        	isLocalRootCA = true;
                         
                         break;
                     }
-                }                           
+                }
                 
                 //this is now verifying against the root store
                 //did not find signing cert in chain, so check our store
                 if (x509issuer == null)
                 {
                    x509issuer = findCertIssuerInStore(x509certCurr, mTrustStore);
-                   isRootCA = true;
+                   isLocalRootCA = true;
                 }
                 
                 if (x509issuer != null) {
@@ -244,20 +246,71 @@ public class StrongTrustManager implements X509TrustManager {
                     try {
                         //check expiry
                         x509issuer.checkValidity();  
+                       
+                        /*
+                        //list critical oids for debugging
+                        Set<String> extOids = x509issuer.getCriticalExtensionOIDs();
+                        if (extOids != null)
+	                        for (String oid : extOids)
+	                        {
+	                        	String val = new String(x509issuer.getExtensionValue(oid));
+	                        	debug ("critical extension: " + oid + "=" + val);
+	                        }
                         
-                        if ((!isRootCA) && mCheckChainCrypto) //MD5 collision not a risk for the Root CA in our store
+                        //list other oids for debugging
+                        extOids = x509issuer.getNonCriticalExtensionOIDs();
+                        if (extOids != null)
+	                        for (String oid : extOids)
+	                        {
+	                        	String val = new String(x509issuer.getExtensionValue(oid));
+	                        	debug ("non-critical extension: " + oid + "=" + val);
+	                        }
+	                        */
+                        
+                      //  checkBasicConstraints(x509issuer);
+                       // checkKeyUsage(x509issuer);
+                        
+                        if (!isLocalRootCA)
+                        {
+	                        boolean foundInChain = false;
+	                        
+	                        //make sure there isn't the same named cert in the chain, that is not meant for signing
+	                        for (X509Certificate x509search : x509Certificates)
+	                        {                                      
+	                            if(x509issuer.getSubjectDN().equals(x509search.getSubjectDN()))                 
+	                            {                                       
+	                               debug ("found matching subject cert in chain: verifying it can act as CA: " + x509issuer.getSubjectDN());
+	                               checkBasicConstraints(x509search);
+	                               checkKeyUsage(x509search);
+	                               foundInChain = true;
+	                            }
+	                        }
+	                        
+	                        if (!foundInChain)//this should not happen, but just in case
+	                        {
+	                        	throw new GeneralSecurityException("Error verifiying cert extension: " + x509issuer.getSubjectDN());
+	                        }
+                        }
+                        
+                        //isRootCA means we have it in our local store; can meet root CA or any chain we have imported like CACert's
+                      //MD5 collision not a risk for the Root CA in our store
+                        if ((!isLocalRootCA) && mCheckChainCrypto) 
                             checkStrongCrypto(x509issuer);
                                                 
                         //verify cert with issuer public key
                         x509certCurr.verify(x509issuer.getPublicKey());
                         debug("SUCCESS: verified issuer: " + x509certCurr.getIssuerDN());
 
-                        if (isRootCA)
+                        if (isLocalRootCA)
                             verifiedRootCA = true;
                     }
 
                     catch (GeneralSecurityException gse) {
-                       debug("ERROR: unverified issuer: " + x509certCurr.getIssuerDN());
+                    	
+                    	if (SHOW_DEBUG_OUTPUT)
+                    		Log.d(TAG, "cert general security exception", gse);
+                    	
+                       debug("ERROR: invalid or unverifiable issuer: " + x509certCurr.getIssuerDN());
 
                         if (mNotifyVerificationFail)
                             showCertMessage(mContext.getString(R.string.error_signature_chain_verification_failed) + gse.getMessage(),
@@ -593,11 +646,11 @@ public class StrongTrustManager implements X509TrustManager {
                 }
             }
             return Collections.unmodifiableCollection(identities);
-        } catch (IOException e) {
-            Log.w(TAG, e.getMessage(), e);
+     
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
+            Log.e(TAG, "getSubjectAlternativeNames()", e);
         }
+        
         return identities;
     }
 
@@ -654,51 +707,6 @@ public class StrongTrustManager implements X509TrustManager {
         }
         
     }
-    
-    private void checkPinning (X509Certificate x509cert) throws CertificateException
-    {
-        
-        X500Principal certPrincipal = x509cert.getSubjectX500Principal();
-        debug("checking pinning for: " + certPrincipal.getName("RFC1779"));
-        
-         Enumeration<String> enumAliases;
-        try {
-            enumAliases = mPinnedStore.aliases();
-            X509Certificate x509search = null;
-            while (enumAliases.hasMoreElements()) {
-                x509search = (X509Certificate) mPinnedStore
-                        .getCertificate(enumAliases.nextElement());
-                
-                X500Principal searchPrincipal = x509search.getSubjectX500Principal();
-                debug("checking pinning against: " + searchPrincipal.getName("RFC1779"));
-                
-                if (certPrincipal.getName("RFC1779").equals(searchPrincipal.getName("RFC1779"))) //name check
-                {
-                    debug("matched pinning to: " + certPrincipal.getName("RFC1779"));
-                    //found matching pinned cert, now check if the certs are the same
-                    if (!Arrays.equals(certPrincipal.getEncoded(), searchPrincipal.getEncoded())) //byte by byte check                    
-                    {
-
-                        if (mNotifyVerificationFail)
-                        showCertMessage(mContext.getString(R.string.warning_pinned_cert_mismatch),
-                                x509cert.getSubjectDN().getName(), x509cert, null);
-                        
-                        debug("Provided Certificate Does Not Match PINNED Cert: " + certPrincipal.getName("RFC1779"));
-                        
-                        // just warn for now, don't block
-                       // throw new CertificateException(mContext.getString(R.string.warning_pinned_cert_mismatch) + certPrincipal.getName("RFC1779"));
-                        
-                    }
-                    
-                    break;
-                }
-            }
-        } catch (KeyStoreException e) {
-          Log.e(TAG, "problem access local keystore",e);
-          throw new CertificateException("problem access local keystore");
-        }
-
-    }
 
 	public KeyStore getTrustStore() {
 		return mTrustStore;
@@ -711,14 +719,6 @@ public class StrongTrustManager implements X509TrustManager {
 
 	public void setTrustStore(KeyStore mTrustStore) {
 		this.mTrustStore = mTrustStore;
-	}
-
-	public KeyStore getPinnedStore() {
-		return mPinnedStore;
-	}
-
-	public void setPinnedStore(KeyStore mPinnedStore) {
-		this.mPinnedStore = mPinnedStore;
 	}
 
 	public boolean isExpiredCheck() {
@@ -775,6 +775,143 @@ public class StrongTrustManager implements X509TrustManager {
 
 	public void setDomain(String domain) {
 		this.mDomain = domain;
+	}
+	
+
+    public boolean hasCheckChainCrypto() {
+		return mCheckChainCrypto;
+	}
+
+	public void setCheckChainCrypto(boolean mCheckChainCrypto) {
+		this.mCheckChainCrypto = mCheckChainCrypto;
+	}
+
+	/*
+	 * Ensure that a cert that is signing another cert, is actually allowed to do so
+	 * by checking the KeyUsage x509 certificate extension
+	 */
+	private void checkKeyUsage (X509Certificate cert) throws GeneralSecurityException
+	{
+		try
+    	{
+			Object bsVal = getExtensionValue(cert, X509Extensions.KeyUsage.getId(), KeyUsage.class);
+			
+	    	if (bsVal != null && bsVal instanceof KeyUsage )
+	    	{
+	    		KeyUsage keyUsage = (KeyUsage)bsVal;
+	    		//SSLCA: 			CERT_SIGN;			SSL_CA;+ 
+	    		debug ("KeyUsage="  + keyUsage.intValue() + ";" +  keyUsage.getString());
+	    		
+	    		if (keyUsage.intValue() != (KeyUsage.cRLSign|KeyUsage.keyCertSign))
+	    			throw new GeneralSecurityException("KeyUsage = not set for signing");
+	    		
+	    	}
+    	}
+    	catch (IOException e)
+    	{
+    		throw new GeneralSecurityException("Basic Constraints CA = error reading extension");
+    	}
+	}
+
+	/*
+	 * ensure that a cert that is acting as an authority, either as a root or in the chain,
+	 * is allowed to act as a CA, by checking the BasicConstraints CA extension
+	 */
+	private void checkBasicConstraints (X509Certificate cert) throws GeneralSecurityException
+	{
+		 //check basic constraints
+        int bConLen = cert.getBasicConstraints();
+        if (bConLen == -1)
+        {
+        	throw new GeneralSecurityException("Basic Constraints CA not set for issuer in chain");
+        }
+        else
+        {
+        	/*
+        	 * basicConstraints=CA:TRUE
+					basicConstraints=CA:FALSE
+					basicConstraints=critical,CA:TRUE, pathlen:0
+        	 */
+        //	String OID_BASIC_CONSTRAINTS = "2.5.29.19";
+        	
+        	try
+        	{
+        		Object bsVal = getExtensionValue(cert, X509Extensions.BasicConstraints.getId(), BasicConstraints.class);
+        		
+            	if (bsVal != null && bsVal instanceof BasicConstraints )
+            	{
+                	BasicConstraints basicConstraints = (BasicConstraints)bsVal;
+                	//BasicConstraints.getInstance(ASN1Object.fromByteArray(bsValBytes));
+
+            		debug ("Basic Constraints=CA:" + basicConstraints.isCA());
+            		
+            		if ( basicConstraints.getPathLenConstraint() != null)
+            			debug("Basic Constraints: pathLen=" + basicConstraints.getPathLenConstraint().intValue());
+            		
+            		if (!basicConstraints.isCA())
+            			throw new GeneralSecurityException("Basic Constraints CA = true not set for issuer in chain");
+            	}
+            	else
+            	{
+            		throw new GeneralSecurityException("Basic Constraints CA = true not set for issuer in chain");
+            	}
+        	}
+        	catch (IOException e)
+        	{
+        		throw new GeneralSecurityException("Basic Constraints CA = error reading extension");
+        	}
+        
+        	
+        }
+	}
+	
+	/*
+	 * Turn DER encoded bytes from x509 cert extension into their matching BouncyCastle classes
+	 */
+	private Object getExtensionValue(X509Certificate X509Certificate, String oid, Object what) throws IOException
+	{
+	    String decoded = null;
+	    byte[] extensionValue = X509Certificate.getExtensionValue(oid);
+	    
+
+	    if (extensionValue != null)
+	    {
+	        DERObject derObject = toDERObject(extensionValue);
+	        if (derObject instanceof DEROctetString)
+	        {
+	            DEROctetString derOctetString = (DEROctetString) derObject;
+	            
+	            
+	            derObject = toDERObject(derOctetString.getOctets());
+	            
+	            if (what == BasicConstraints.class)
+	            {
+	            	return BasicConstraints.getInstance(ASN1Object.fromByteArray(derOctetString.getOctets()));
+	            }
+	            else if (what == KeyUsage.class)
+	            {
+	            	return KeyUsage.getInstance(ASN1Object.fromByteArray(derOctetString.getOctets()));
+
+	            }
+	            else if (derObject instanceof ASN1String)
+	            {
+	                ASN1String s = (ASN1String)derObject;
+	                decoded = s.getString();
+	            }
+		            
+	           
+
+	        }
+	    }
+	    return decoded;
+	}
+
+	private DERObject toDERObject(byte[] data) throws IOException
+	{
+	    ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+	    ASN1InputStream asnInputStream = new ASN1InputStream(inStream);
+
+	    return asnInputStream.readObject();
 	}
     
 }

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URLEncoder;
 import java.util.StringTokenizer;
 
 import android.util.Log;
@@ -96,7 +97,7 @@ public class TorServiceUtils {
 			}
 			catch (Exception e2)
 			{
-				Log.w(TAG,"Unable to get proc id for: " + command,e2);
+				Log.e(TAG,"Unable to get proc id for command: " + URLEncoder.encode(command),e2);
 			}
 		}
 		
