@@ -593,11 +593,11 @@ public class StrongTrustManager implements X509TrustManager {
                 }
             }
             return Collections.unmodifiableCollection(identities);
-        } catch (IOException e) {
-            Log.w(TAG, e.getMessage(), e);
+     
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
+            Log.e(TAG, "getSubjectAlternativeNames()", e);
         }
+        
         return identities;
     }
 
