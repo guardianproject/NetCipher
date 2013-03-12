@@ -186,8 +186,6 @@ public class StrongTrustManager implements X509TrustManager {
         //first check the main cert
         X509Certificate certSite = x509Certificates[0];
         checkStrongCrypto(certSite);        
-     
-        //checkPinning(certSite); //removing pinning support for now
         
         if (mExpiredCheck)
             certSite.checkValidity();
@@ -761,6 +759,10 @@ public class StrongTrustManager implements X509TrustManager {
 		this.mCheckChainCrypto = mCheckChainCrypto;
 	}
 
+	/*
+	 * Ensure that a cert that is signing another cert, is actually allowed to do so
+	 * by checking the KeyUsage x509 certificate extension
+	 */
 	private void checkKeyUsage (X509Certificate cert) throws GeneralSecurityException
 	{
 		try
@@ -784,6 +786,10 @@ public class StrongTrustManager implements X509TrustManager {
     	}
 	}
 
+	/*
+	 * ensure that a cert that is acting as an authority, either as a root or in the chain,
+	 * is allowed to act as a CA, by checking the BasicConstraints CA extension
+	 */
 	private void checkBasicConstraints (X509Certificate cert) throws GeneralSecurityException
 	{
 		 //check basic constraints
@@ -832,6 +838,9 @@ public class StrongTrustManager implements X509TrustManager {
         }
 	}
 	
+	/*
+	 * Turn DER encoded bytes from x509 cert extension into their matching BouncyCastle classes
+	 */
 	private Object getExtensionValue(X509Certificate X509Certificate, String oid, Object what) throws IOException
 	{
 	    String decoded = null;
