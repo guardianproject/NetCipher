@@ -215,7 +215,7 @@ public class StrongTrustManager implements X509TrustManager {
                 debug(i + ": verifying cert issuer for: " + x509certCurr.getSubjectDN() + "; " + x509certCurr.getSigAlgName());
 
                 X509Certificate x509issuer = null;
-                boolean isRootCA = false;
+                boolean isLocalRootCA = false;
                 
                 for (X509Certificate x509search : x509Certificates)
                 {                                      
@@ -227,19 +227,18 @@ public class StrongTrustManager implements X509TrustManager {
                         //now check if it is a root
                         X509Certificate x509root = findCertIssuerInStore(x509certCurr, mTrustStore);
                         if (x509root != null)
-                            isRootCA = true;
+                        	isLocalRootCA = true;
                         
                         break;
                     }
                 }
                 
-
                 //this is now verifying against the root store
                 //did not find signing cert in chain, so check our store
                 if (x509issuer == null)
                 {
                    x509issuer = findCertIssuerInStore(x509certCurr, mTrustStore);
-                   isRootCA = true;
+                   isLocalRootCA = true;
                 }
                 
                 if (x509issuer != null) {
@@ -247,7 +246,8 @@ public class StrongTrustManager implements X509TrustManager {
                     try {
                         //check expiry
                         x509issuer.checkValidity();  
-                        
+                       
+                        /*
                         //list critical oids for debugging
                         Set<String> extOids = x509issuer.getCriticalExtensionOIDs();
                         if (extOids != null)
@@ -265,25 +265,52 @@ public class StrongTrustManager implements X509TrustManager {
 	                        	String val = new String(x509issuer.getExtensionValue(oid));
 	                        	debug ("non-critical extension: " + oid + "=" + val);
 	                        }
+	                        */
                         
-                        checkBasicConstraints(x509issuer);
-                        checkKeyUsage(x509issuer);
+                      //  checkBasicConstraints(x509issuer);
+                       // checkKeyUsage(x509issuer);
+                        
+                        if (!isLocalRootCA)
+                        {
+	                        boolean foundInChain = false;
+	                        
+	                        //make sure there isn't the same named cert in the chain, that is not meant for signing
+	                        for (X509Certificate x509search : x509Certificates)
+	                        {                                      
+	                            if(x509issuer.getSubjectDN().equals(x509search.getSubjectDN()))                 
+	                            {                                       
+	                               debug ("found matching subject cert in chain: verifying it can act as CA: " + x509issuer.getSubjectDN());
+	                               checkBasicConstraints(x509search);
+	                               checkKeyUsage(x509search);
+	                               foundInChain = true;
+	                            }
+	                        }
+	                        
+	                        if (!foundInChain)//this should not happen, but just in case
+	                        {
+	                        	throw new GeneralSecurityException("Error verifiying cert extension: " + x509issuer.getSubjectDN());
+	                        }
+                        }
                         
                         //isRootCA means we have it in our local store; can meet root CA or any chain we have imported like CACert's
                       //MD5 collision not a risk for the Root CA in our store
-                        if ((!isRootCA) && mCheckChainCrypto) 
+                        if ((!isLocalRootCA) && mCheckChainCrypto) 
                             checkStrongCrypto(x509issuer);
                                                 
                         //verify cert with issuer public key
                         x509certCurr.verify(x509issuer.getPublicKey());
                         debug("SUCCESS: verified issuer: " + x509certCurr.getIssuerDN());
 
-                        if (isRootCA)
+                        if (isLocalRootCA)
                             verifiedRootCA = true;
                     }
 
                     catch (GeneralSecurityException gse) {
-                       debug("ERROR: unverified issuer: " + x509certCurr.getIssuerDN());
+                    	
+                    	if (SHOW_DEBUG_OUTPUT)
+                    		Log.d(TAG, "cert general security exception", gse);
+                    	
+                       debug("ERROR: invalid or unverifiable issuer: " + x509certCurr.getIssuerDN());
 
                         if (mNotifyVerificationFail)
                             showCertMessage(mContext.getString(R.string.error_signature_chain_verification_failed) + gse.getMessage(),
