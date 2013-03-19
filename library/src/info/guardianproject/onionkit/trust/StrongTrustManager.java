@@ -29,8 +29,8 @@ import info.guardianproject.bouncycastle.asn1.DEROctetString;
 import info.guardianproject.bouncycastle.asn1.DERSequence;
 import info.guardianproject.bouncycastle.asn1.DERString;
 import info.guardianproject.bouncycastle.asn1.x509.BasicConstraints;
-import info.guardianproject.bouncycastle.asn1.x509.KeyUsage;
 import info.guardianproject.bouncycastle.asn1.x509.GeneralName;
+import info.guardianproject.bouncycastle.asn1.x509.KeyUsage;
 import info.guardianproject.bouncycastle.asn1.x509.X509Extensions;
 import info.guardianproject.onionkit.R;
 import info.guardianproject.onionkit.ui.CertDisplayActivity;
@@ -52,7 +52,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -247,29 +246,6 @@ public class StrongTrustManager implements X509TrustManager {
                         //check expiry
                         x509issuer.checkValidity();  
                        
-                        /*
-                        //list critical oids for debugging
-                        Set<String> extOids = x509issuer.getCriticalExtensionOIDs();
-                        if (extOids != null)
-	                        for (String oid : extOids)
-	                        {
-	                        	String val = new String(x509issuer.getExtensionValue(oid));
-	                        	debug ("critical extension: " + oid + "=" + val);
-	                        }
-                        
-                        //list other oids for debugging
-                        extOids = x509issuer.getNonCriticalExtensionOIDs();
-                        if (extOids != null)
-	                        for (String oid : extOids)
-	                        {
-	                        	String val = new String(x509issuer.getExtensionValue(oid));
-	                        	debug ("non-critical extension: " + oid + "=" + val);
-	                        }
-	                        */
-                        
-                      //  checkBasicConstraints(x509issuer);
-                       // checkKeyUsage(x509issuer);
-                        
                         if (!isLocalRootCA)
                         {
 	                        boolean foundInChain = false;
@@ -288,7 +264,7 @@ public class StrongTrustManager implements X509TrustManager {
 	                        
 	                        if (!foundInChain)//this should not happen, but just in case
 	                        {
-	                        	throw new GeneralSecurityException("Error verifiying cert extension: " + x509issuer.getSubjectDN());
+	                        	throw new GeneralSecurityException("Error verifying cert extension: " + x509issuer.getSubjectDN());
 	                        }
                         }
                         
