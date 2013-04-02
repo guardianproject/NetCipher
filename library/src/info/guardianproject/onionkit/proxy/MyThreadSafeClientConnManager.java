@@ -1,9 +1,9 @@
 package info.guardianproject.onionkit.proxy;
 
-import org.apache.http.conn.ClientConnectionOperator;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.HttpParams;
+import ch.boye.httpclientandroidlib.conn.ClientConnectionOperator;
+import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
+import ch.boye.httpclientandroidlib.impl.conn.tsccm.ThreadSafeClientConnManager;
+import ch.boye.httpclientandroidlib.params.HttpParams;
 
 
 public class MyThreadSafeClientConnManager extends ThreadSafeClientConnManager {
