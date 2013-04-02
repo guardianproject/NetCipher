@@ -28,23 +28,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-
 import android.content.Context;
 import android.util.Log;
+import ch.boye.httpclientandroidlib.HttpEntity;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.HttpStatus;
+import ch.boye.httpclientandroidlib.NameValuePair;
+import ch.boye.httpclientandroidlib.client.HttpClient;
+import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
+import ch.boye.httpclientandroidlib.client.methods.HttpGet;
+import ch.boye.httpclientandroidlib.client.methods.HttpPost;
+import ch.boye.httpclientandroidlib.entity.mime.MultipartEntity;
+import ch.boye.httpclientandroidlib.entity.mime.content.FileBody;
+import ch.boye.httpclientandroidlib.entity.mime.content.StringBody;
+import ch.boye.httpclientandroidlib.impl.client.DefaultHttpClient;
+import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
+import ch.boye.httpclientandroidlib.protocol.HTTP;
 
 /*
  * General HTTP handler class

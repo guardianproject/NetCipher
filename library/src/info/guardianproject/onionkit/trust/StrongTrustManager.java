@@ -82,7 +82,7 @@ import android.util.Log;
 public class StrongTrustManager implements X509TrustManager {
 
     private static final String TAG = "ONIONKIT";
-    public static boolean SHOW_DEBUG_OUTPUT = true;
+    public static boolean SHOW_DEBUG_OUTPUT = false;
     
     private final static Pattern cnPattern = Pattern.compile("(?i)(cn=)([^,]*)");
 
