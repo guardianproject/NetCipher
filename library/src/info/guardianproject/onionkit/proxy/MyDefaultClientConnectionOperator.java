@@ -5,15 +5,17 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import org.apache.http.HttpHost;
-import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.conn.OperatedClientConnection;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.scheme.SocketFactory;
-import org.apache.http.impl.conn.DefaultClientConnectionOperator;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HttpContext;
+import ch.boye.httpclientandroidlib.HttpHost;
+import ch.boye.httpclientandroidlib.conn.HttpHostConnectException;
+import ch.boye.httpclientandroidlib.conn.OperatedClientConnection;
+import ch.boye.httpclientandroidlib.conn.scheme.Scheme;
+import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
+import ch.boye.httpclientandroidlib.conn.scheme.SocketFactory;
+import ch.boye.httpclientandroidlib.impl.conn.DefaultClientConnectionOperator;
+import ch.boye.httpclientandroidlib.params.HttpParams;
+import ch.boye.httpclientandroidlib.protocol.HttpContext;
+
+
 
 public class MyDefaultClientConnectionOperator extends
 		DefaultClientConnectionOperator {

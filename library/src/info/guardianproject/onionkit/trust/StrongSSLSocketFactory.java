@@ -2,7 +2,6 @@ package info.guardianproject.onionkit.trust;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -18,19 +17,15 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.scheme.HostNameResolver;
-import org.apache.http.conn.scheme.LayeredSchemeSocketFactory;
-import org.apache.http.conn.ssl.StrictHostnameVerifier;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.params.HttpParams;
-
 import android.content.Context;
+import ch.boye.httpclientandroidlib.conn.scheme.HostNameResolver;
+import ch.boye.httpclientandroidlib.conn.scheme.LayeredSchemeSocketFactory;
+import ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory;
+import ch.boye.httpclientandroidlib.params.HttpParams;
 
-public class StrongSSLSocketFactory extends org.apache.http.conn.ssl.SSLSocketFactory implements LayeredSchemeSocketFactory
+public class StrongSSLSocketFactory extends SSLSocketFactory implements LayeredSchemeSocketFactory
 {
 	
 	private SSLSocketFactory mFactory = null;
@@ -48,15 +43,15 @@ public class StrongSSLSocketFactory extends org.apache.http.conn.ssl.SSLSocketFa
     
 	public StrongSSLSocketFactory (Context context) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException
     {
-    	super(null);
- 
+    	super(KeyStore.getInstance(KeyStore.getDefaultType()));
+		
         SSLContext sslContext = SSLContext.getInstance ("TLS");
         mStrongTrustManager = new StrongTrustManager (context);
         TrustManager[] tm = new TrustManager[] { mStrongTrustManager };
         KeyManager[] km = createKeyManagers(mStrongTrustManager.getTrustStore(),mStrongTrustManager.getTrustStorePassword());
         sslContext.init (km, tm, new SecureRandom ());
 
-        mFactory = sslContext.getSocketFactory ();
+        mFactory = SSLSocketFactory.getSocketFactory();
    
     }
 
@@ -89,8 +84,6 @@ public class StrongSSLSocketFactory extends org.apache.http.conn.ssl.SSLSocketFa
 		return mFactory.createSocket(socket, host, port, autoClose);
 	}
 
-	
-
 	@Override
 	public boolean isSecure(Socket sock) throws IllegalArgumentException {
 		return (sock instanceof SSLSocket);
@@ -121,13 +114,14 @@ public class StrongSSLSocketFactory extends org.apache.http.conn.ssl.SSLSocketFa
 		
 	}
 
+	/*
 	@Override
 	public Socket connectSocket(Socket sock, InetSocketAddress arg1,
 			InetSocketAddress arg2, HttpParams arg3) throws IOException,
 			UnknownHostException, ConnectTimeoutException {
 	
 		return connectSocket(sock, arg1.getHostName(), arg1.getPort(), InetAddress.getByName(arg2.getHostName()), arg2.getPort(),arg3);
-	}
+	}*/
 
 	@Override
 	public Socket createSocket(HttpParams arg0) throws IOException {
@@ -141,5 +135,7 @@ public class StrongSSLSocketFactory extends org.apache.http.conn.ssl.SSLSocketFa
 			boolean arg3) throws IOException, UnknownHostException {
 		return ((LayeredSchemeSocketFactory)mFactory).createLayeredSocket(arg0, arg1, arg2, arg3);
 	}
+
+	
 	
 }
