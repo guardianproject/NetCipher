@@ -1,5 +1,8 @@
 package sample.onionkit;
 
+import info.guardianproject.onionkit.trust.StrongHttpsClient;
+import info.guardianproject.onionkit.ui.OrbotHelper;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
@@ -11,11 +14,6 @@ import java.security.cert.CertificateException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.params.ConnRoutePNames;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -27,6 +25,11 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import ch.boye.httpclientandroidlib.HttpHost;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.client.HttpClient;
+import ch.boye.httpclientandroidlib.client.methods.HttpGet;
+import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
 
 public class OnionKitSampleActivity extends Activity {
 
