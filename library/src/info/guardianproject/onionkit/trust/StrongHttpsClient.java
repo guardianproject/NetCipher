@@ -39,19 +39,24 @@ public class StrongHttpsClient extends DefaultHttpClient {
   @Override protected ThreadSafeClientConnManager createClientConnectionManager() {
    
     
-	  if (mConnMgr != null)
-	  {
-		  
-		  return mConnMgr;
-	  }
-	  else
-	  {
-	 
-	    socksProxy = (HttpHost)getParams().getParameter("SOCKS");
-	    
-	    if (socksProxy == null)
-	    {
-	    	return  mConnMgr = new ThreadSafeClientConnManager(getParams(), mRegistry);
+    if (socksProxy == null)
+    {
+    	return  new MyThreadSafeClientConnManager(getParams(), registry);
+    	
+    }
+    else
+    {
+    	
+    
+	    return new MyThreadSafeClientConnManager(getParams(), registry)
+	    		{
+	
+					@Override
+					protected ClientConnectionOperator createConnectionOperator(
+							SchemeRegistry schreg) {
+						
+						return new SocksProxyClientConnOperator(schreg, socksProxy.getHostName(), socksProxy.getPort());
+					}
 	    	
 	    }
 	    else
