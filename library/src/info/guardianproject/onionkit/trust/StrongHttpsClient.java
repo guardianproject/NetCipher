@@ -1,6 +1,7 @@
 package info.guardianproject.onionkit.trust;
 
 
+import info.guardianproject.onionkit.proxy.MyThreadSafeClientConnManager;
 import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
 import android.content.Context;
 import ch.boye.httpclientandroidlib.HttpHost;
@@ -41,28 +42,11 @@ public class StrongHttpsClient extends DefaultHttpClient {
     
     if (socksProxy == null)
     {
-    	return  new MyThreadSafeClientConnManager(getParams(), registry);
+    	return  new MyThreadSafeClientConnManager(getParams(), mRegistry);
     	
     }
     else
     {
-    	
-    
-	    return new MyThreadSafeClientConnManager(getParams(), registry)
-	    		{
-	
-					@Override
-					protected ClientConnectionOperator createConnectionOperator(
-							SchemeRegistry schreg) {
-						
-						return new SocksProxyClientConnOperator(schreg, socksProxy.getHostName(), socksProxy.getPort());
-					}
-	    	
-	    }
-	    else
-	    {
-	    	
-	    
 		    return mConnMgr = new ThreadSafeClientConnManager(getParams(), mRegistry)
 		    		{
 		
@@ -74,8 +58,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
 						}
 		    	
 		    		};
-		    }
-	  }
+	}
   }
   
   public StrongTrustManager getStrongTrustManager ()
