@@ -81,7 +81,7 @@ public class OrbotHelper {
 	    }
 	 
 	 
-	 public void requestOrbotStart (Activity activity)
+	 public void requestOrbotStart (final Activity activity)
 	 {
 
 		 AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
@@ -91,7 +91,7 @@ public class OrbotHelper {
 	            public void onClick(DialogInterface dialogInterface, int i) {
 	            	 Intent intent = new Intent(URI_ORBOT);
 	        		 intent.setAction(ACTION_START_TOR);
-	        		 mContext.startActivity(intent);
+	        		 activity.startActivityForResult(intent, 1);
 	            }
 	        });
 	        downloadDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
