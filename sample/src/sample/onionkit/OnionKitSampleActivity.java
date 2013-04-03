@@ -3,8 +3,10 @@ package sample.onionkit;
 import info.guardianproject.onionkit.trust.StrongHttpsClient;
 import info.guardianproject.onionkit.ui.OrbotHelper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Proxy;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -12,8 +14,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
-
-import org.apache.commons.io.IOUtils;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -136,8 +136,14 @@ public class OnionKitSampleActivity extends Activity {
     		sb.append(response.getStatusLine()).append("\n\n");
     		
     		InputStream is = response.getEntity().getContent();
-    		List<String> lines = IOUtils.readLines(is);
-    		sb.append(lines);
+    		
+    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    		
+    		String line = null;
+    		
+    		while ((line = br.readLine())!=null)
+    			sb.append(line);
+    		
     		return sb.toString();
     	
     }
