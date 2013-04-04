@@ -4,6 +4,7 @@ package info.guardianproject.onionkit.trust;
 import info.guardianproject.onionkit.proxy.MyThreadSafeClientConnManager;
 import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
 import android.content.Context;
+import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.conn.ClientConnectionOperator;
 import ch.boye.httpclientandroidlib.conn.scheme.PlainSocketFactory;
@@ -15,11 +16,12 @@ import ch.boye.httpclientandroidlib.impl.conn.tsccm.ThreadSafeClientConnManager;
 public class StrongHttpsClient extends DefaultHttpClient {
 
   final Context context;
-  private HttpHost socksProxy;
+  private HttpHost proxyHost;
+  private String proxyType;
   
   private StrongSSLSocketFactory sFactory;
+  private StrongTrustManager mTrustManager;
   private SchemeRegistry mRegistry;
-  private ThreadSafeClientConnManager mConnMgr;
   
   public StrongHttpsClient(Context context) {
     this.context = context;
@@ -28,37 +30,49 @@ public class StrongHttpsClient extends DefaultHttpClient {
     mRegistry.register(
       new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
   
-  
   try {
-  	sFactory = new StrongSSLSocketFactory(context);
+	 mTrustManager = new StrongTrustManager (context);
+  	sFactory = new StrongSSLSocketFactory(context, mTrustManager);
   	mRegistry.register(new Scheme("https", 443, sFactory));
   } catch (Exception e) {
       throw new AssertionError(e);
     }
   }
+  
+  
 
   @Override protected ThreadSafeClientConnManager createClientConnectionManager() {
    
     
-    if (socksProxy == null)
+    if (proxyHost == null && proxyType == null)
     {
+    	Log.d("StrongHTTPS","not proxying");
+    	
     	return  new MyThreadSafeClientConnManager(getParams(), mRegistry);
     	
     }
+    else if (proxyHost != null && proxyType.equalsIgnoreCase("socks"))
+    {
+    	Log.d("StrongHTTPS","proxying using: " + proxyType);
+
+		    return new MyThreadSafeClientConnManager(getParams(), mRegistry)
+    		{
+
+				@Override
+				protected ClientConnectionOperator createConnectionOperator(
+						SchemeRegistry schreg) {
+					
+					return new SocksProxyClientConnOperator(schreg, proxyHost.getHostName(), proxyHost.getPort());
+				}
+    	
+    		};
+	}
     else
     {
-		    return mConnMgr = new ThreadSafeClientConnManager(getParams(), mRegistry)
-		    		{
-		
-						@Override
-						protected ClientConnectionOperator createConnectionOperator(
-								SchemeRegistry schreg) {
-							
-							return new SocksProxyClientConnOperator(schreg, socksProxy.getHostName(), socksProxy.getPort());
-						}
-		    	
-		    		};
-	}
+    	Log.d("StrongHTTPS","proxying with: " + proxyType);
+    	
+    	return  new MyThreadSafeClientConnManager(getParams(), mRegistry);
+    }
   }
   
   public StrongTrustManager getStrongTrustManager ()
@@ -68,10 +82,25 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
   public void useProxy (boolean enableTor, String type, String host, int port)
   {
+
+	  if (proxyType != null)
+	  {
+		  getParams().removeParameter(proxyType);
+		  proxyHost = null;
+	  }
+	  
 	  if (enableTor)
-		getParams().setParameter(type,  new HttpHost(host, port));
-	  else
-		  getParams().removeParameter(type);
+	  {
+		this.proxyType = type;
+		
+		HttpHost proxyHost =  new HttpHost(host, port);
+		getParams().setParameter(type, proxyHost);
+		
+		if (type.equalsIgnoreCase("socks"))
+		{
+			this.proxyHost = proxyHost;
+		}
+	  }
 	  
   }
 }

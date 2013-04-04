@@ -1,7 +1,6 @@
 package info.guardianproject.onionkit.trust;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Proxy;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -17,15 +16,14 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
 import android.content.Context;
-import ch.boye.httpclientandroidlib.conn.scheme.HostNameResolver;
 import ch.boye.httpclientandroidlib.conn.scheme.LayeredSchemeSocketFactory;
-import ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory;
 import ch.boye.httpclientandroidlib.params.HttpParams;
 
-public class StrongSSLSocketFactory extends SSLSocketFactory implements LayeredSchemeSocketFactory
+public class StrongSSLSocketFactory extends ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory implements LayeredSchemeSocketFactory
 {
 	
 	private SSLSocketFactory mFactory = null;
@@ -36,22 +34,24 @@ public class StrongSSLSocketFactory extends SSLSocketFactory implements LayeredS
     public static final String SSL   = "SSL";
     public static final String SSLV2 = "SSLv2";
     
-//    private X509HostnameVerifier mHostnameVerifier = new StrictHostnameVerifier();
+   // private X509HostnameVerifier mHostnameVerifier = new StrictHostnameVerifier();
     //private final HostNameResolver mNameResolver = new StrongHostNameResolver();
 
-    private StrongTrustManager mStrongTrustManager = null;
+    private StrongTrustManager mStrongTrustManager;
     
-	public StrongSSLSocketFactory (Context context) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException
+
+	public StrongSSLSocketFactory (Context context, StrongTrustManager strongTrustManager) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException
     {
-    	super(KeyStore.getInstance(KeyStore.getDefaultType()));
-		
+    	super(strongTrustManager.getKeyStore());
+ 
+    	mStrongTrustManager = strongTrustManager;
+    	
         SSLContext sslContext = SSLContext.getInstance ("TLS");
-        mStrongTrustManager = new StrongTrustManager (context);
         TrustManager[] tm = new TrustManager[] { mStrongTrustManager };
         KeyManager[] km = createKeyManagers(mStrongTrustManager.getTrustStore(),mStrongTrustManager.getTrustStorePassword());
         sslContext.init (km, tm, new SecureRandom ());
 
-        mFactory = SSLSocketFactory.getSocketFactory();
+        mFactory = sslContext.getSocketFactory ();
    
     }
 
@@ -84,6 +84,8 @@ public class StrongSSLSocketFactory extends SSLSocketFactory implements LayeredS
 		return mFactory.createSocket(socket, host, port, autoClose);
 	}
 
+	
+
 	@Override
 	public boolean isSecure(Socket sock) throws IllegalArgumentException {
 		return (sock instanceof SSLSocket);
@@ -99,34 +101,11 @@ public class StrongSSLSocketFactory extends SSLSocketFactory implements LayeredS
 		return mProxy;
 	}
 	
-	class StrongHostNameResolver implements HostNameResolver
-	{
-
-		@Override
-		public InetAddress resolve(String host) throws IOException {
-			
-			//can we do proxied name look ups here?
-			
-			//what can we implement to make name resolution strong
-			
-			return InetAddress.getByName(host);
-		}
-		
-	}
-
-	/*
-	@Override
-	public Socket connectSocket(Socket sock, InetSocketAddress arg1,
-			InetSocketAddress arg2, HttpParams arg3) throws IOException,
-			UnknownHostException, ConnectTimeoutException {
-	
-		return connectSocket(sock, arg1.getHostName(), arg1.getPort(), InetAddress.getByName(arg2.getHostName()), arg2.getPort(),arg3);
-	}*/
 
 	@Override
 	public Socket createSocket(HttpParams arg0) throws IOException {
 		
-		return createSocket();
+		return mFactory.createSocket();
 		
 	}
 
@@ -135,7 +114,5 @@ public class StrongSSLSocketFactory extends SSLSocketFactory implements LayeredS
 			boolean arg3) throws IOException, UnknownHostException {
 		return ((LayeredSchemeSocketFactory)mFactory).createLayeredSocket(arg0, arg1, arg2, arg3);
 	}
-
-	
 	
 }

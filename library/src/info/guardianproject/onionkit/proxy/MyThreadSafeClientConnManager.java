@@ -10,7 +10,6 @@ public class MyThreadSafeClientConnManager extends ThreadSafeClientConnManager {
 
 	public MyThreadSafeClientConnManager(HttpParams params, SchemeRegistry schreg) {
 		super(params, schreg);
-		
 	}
 
 	@Override
