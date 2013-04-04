@@ -1,3 +1,16 @@
+v1.1
+715ea8d updated code for new http changes
+b99f9e4 updated sample for latest onionkit changes
+e90cca7 switched to threading client
+96d8580 updating orbothelper to ask for a result
+21dd670 Merge pull request #7 from n8fr8/master
+e2ca95f moved to httpclientandroidlib project
+741a11f switched to new httpclient clean lib build
+b6ecf03 Merge pull request #6 from n8fr8/master
+54f62b3 remove debug output; re-add exception throwing
+dd67c7c Merge pull request #5 from n8fr8/master
+8344bfc verify all instances of same DN/CN in chain
+c4e8523 removing prototype pinning support (for now)
 
 v1
 - first release!
