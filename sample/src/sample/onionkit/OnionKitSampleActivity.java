@@ -112,22 +112,28 @@ public class OnionKitSampleActivity extends Activity {
     {
 
     		
-    		HttpClient httpclient = new StrongHttpsClient(this);
+    		StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext());
+			httpclient.getStrongTrustManager().setNotifyVerificationFail(true);
+			httpclient.getStrongTrustManager().setNotifyVerificationSuccess(true);
 			
 			if (pType == null)
 			{
 				//do nothing
+        		httpclient.useProxy(false, null, null, -1);
+
 			}
 			else if (pType == Proxy.Type.SOCKS)
     		{
-        		httpclient.getParams().setParameter("SOCKS",  new HttpHost(proxyHost, proxyPort));
+				
+        		httpclient.useProxy(true, "SOCKS",  proxyHost, proxyPort);
     			
     		}
     		else if (pType == Proxy.Type.HTTP)
     		{
-        		httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,  new HttpHost(proxyHost, proxyPort));
+    			httpclient.useProxy(true, ConnRoutePNames.DEFAULT_PROXY,  proxyHost, proxyPort);
 
     		}
+    		
     		
         	HttpGet httpget = new HttpGet(url);
     		HttpResponse response = httpclient.execute(httpget);
