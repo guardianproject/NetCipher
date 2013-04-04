@@ -82,7 +82,7 @@ import android.util.Log;
 public class StrongTrustManager implements X509TrustManager {
 
     private static final String TAG = "ONIONKIT";
-    public static boolean SHOW_DEBUG_OUTPUT = false;
+    public static boolean SHOW_DEBUG_OUTPUT = true;
     
     private final static Pattern cnPattern = Pattern.compile("(?i)(cn=)([^,]*)");
 
@@ -140,6 +140,11 @@ public class StrongTrustManager implements X509TrustManager {
        
         mAppName = mContext.getApplicationInfo().name;
     }
+    
+    public KeyStore getKeyStore ()
+    {
+    	return mTrustStore;
+    }
 
     /**
      * Construct a trust manager for XMPP connections. Certificates are
@@ -176,7 +181,8 @@ public class StrongTrustManager implements X509TrustManager {
     }
 
     public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-        //not yet implemented
+        
+    	debug ("WARNING: Client Cert Trust NOT YET IMPLEMENTED");
     }
 
     public void checkServerTrusted(X509Certificate[] x509Certificates, String keyExchangeAlgo)
@@ -778,7 +784,15 @@ public class StrongTrustManager implements X509TrustManager {
 	    		//SSLCA: 			CERT_SIGN;			SSL_CA;+ 
 	    		debug ("KeyUsage="  + keyUsage.intValue() + ";" +  keyUsage.getString());
 	    		
-	    		if (keyUsage.intValue() != (KeyUsage.cRLSign|KeyUsage.keyCertSign))
+	    		int flags = keyUsage.intValue();
+	    		
+	    		if ((flags & KeyUsage.cRLSign) == KeyUsage.cRLSign
+	    			|| (flags & KeyUsage.keyCertSign) == KeyUsage.keyCertSign
+	    				)
+	    		{
+	    			//we okay
+	    		}
+	    		else
 	    			throw new GeneralSecurityException("KeyUsage = not set for signing");
 	    		
 	    	}
