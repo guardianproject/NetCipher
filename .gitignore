@@ -13,5 +13,10 @@ build.xml
 bin/
 gen/
 
+# eclipse
+.settings
+.project
+.classpath
+
 # Local configuration file (sdk path, etc)
 local.properties
