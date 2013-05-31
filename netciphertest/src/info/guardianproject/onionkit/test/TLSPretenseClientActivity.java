@@ -1,7 +1,21 @@
+
 package info.guardianproject.onionkit.test;
 
+import android.app.Activity;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.client.methods.HttpGet;
+import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
 import info.guardianproject.onionkit.trust.StrongHttpsClient;
-import info.guardianproject.onionkit.ui.OrbotHelper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,179 +28,154 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.List;
-
-import javax.net.ssl.TrustManagerFactory;
-
-import android.app.Activity;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import ch.boye.httpclientandroidlib.HttpHost;
-import ch.boye.httpclientandroidlib.HttpResponse;
-import ch.boye.httpclientandroidlib.client.HttpClient;
-import ch.boye.httpclientandroidlib.client.methods.HttpGet;
-import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
 
 public class TLSPretenseClientActivity extends Activity {
 
-	private final static String TAG = "OrlibSample";
-	private TextView txtView = null;
-	private EditText txtUrl = null;
-	
-	private final static String PROXY_HOST = "127.0.0.1"; //test the local device proxy provided by Orbot/Tor
-	private final static int PROXY_HTTP_PORT = 8118; //default for Orbot/Tor
-	private final static int PROXY_SOCKS_PORT = 9050; //default for Orbot/Tor
-	
-	private Proxy.Type mProxyType = null;
-	
+    private final static String TAG = "OrlibSample";
+    private TextView txtView = null;
+    private EditText txtUrl = null;
+
+    private final static String PROXY_HOST = "127.0.0.1";
+    private final static int PROXY_HTTP_PORT = 8118; // default for Orbot/Tor
+    private final static int PROXY_SOCKS_PORT = 9050; // default for Orbot/Tor
+
+    private Proxy.Type mProxyType = null;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
-        txtUrl = (EditText)findViewById(R.id.txtUrl);
-        txtView = (TextView)findViewById(R.id.WizardTextBody);
-        
+
+        txtUrl = (EditText) findViewById(R.id.txtUrl);
+        txtView = (TextView) findViewById(R.id.WizardTextBody);
+
         Button btn;
-        
-        btn = ((Button)findViewById(R.id.btnStartTest));
-        
+
+        btn = ((Button) findViewById(R.id.btnStartTest));
+
         btn.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-			 
-				mProxyType = null;
-				new Thread(runnableNet).start();
-			}
+            @Override
+            public void onClick(View v) {
+
+                mProxyType = null;
+                new Thread(runnableNet).start();
+            }
         });
     }
-    
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		
-		/*OrbotHelper oc = new OrbotHelper(this);
-		
-		if (!oc.isOrbotInstalled())
-		{
-			oc.promptToInstall(this);
-		}
-		else if (!oc.isOrbotRunning())
-		{
-			oc.requestOrbotStart(this);
-		}*/
-		
-		
-	}
-    
-    public String checkHTTP (String url, Proxy.Type pType, String proxyHost, int proxyPort) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException
-    {
-    	KeyStore trustStore = KeyStore.getInstance("BKS");
-        //load our bundled cacerts from raw assets
-		InputStream in = this.getResources().openRawResource(R.raw.gp_tlspretense_ca);
-		trustStore.load(in, "changeit".toCharArray());
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-    		StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext(), trustStore);
-			httpclient.getStrongTrustManager().setNotifyVerificationFail(true);
-			httpclient.getStrongTrustManager().setNotifyVerificationSuccess(true);
-			
-			if (pType == null)
-			{
-				//do nothing
-        		httpclient.useProxy(false, null, null, -1);
+        /*
+         *  Not using orbot in this test suite for now
+         * OrbotHelper oc = new OrbotHelper(this); if (!oc.isOrbotInstalled()) {
+         * oc.promptToInstall(this); } else if (!oc.isOrbotRunning()) {
+         * oc.requestOrbotStart(this); }
+         */
 
-			}
-			else if (pType == Proxy.Type.SOCKS)
-    		{
-				
-        		httpclient.useProxy(true, "SOCKS",  proxyHost, proxyPort);
-    			
-    		}
-    		else if (pType == Proxy.Type.HTTP)
-    		{
-    			httpclient.useProxy(true, ConnRoutePNames.DEFAULT_PROXY,  proxyHost, proxyPort);
-
-    		}
-    		
-    		
-        	HttpGet httpget = new HttpGet(url);
-    		HttpResponse response = httpclient.execute(httpget);
-
-    		StringBuffer sb = new StringBuffer();
-    		sb.append(response.getStatusLine()).append("\n\n");
-    		
-    		InputStream is = response.getEntity().getContent();
-    		
-    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
-    		
-    		String line = null;
-    		
-    		while ((line = br.readLine())!=null)
-    			sb.append(line);
-    		
-    		return sb.toString();
-    	
     }
-    
-   
-	
-	 Runnable runnableNet = new Runnable ()
-		{
-			
-			public void run ()
-			{
-				String url = txtUrl.getText().toString();
-				
-				try
-				{
-					Message msg = new Message();
-					msg.getData().putString("status", "connecting to: " + url);
-					handler.sendMessage(msg);
-					
-					int proxyPort = -1;
-					if (mProxyType != null)
-					{
-						if (mProxyType == Proxy.Type.HTTP)
-							proxyPort = PROXY_HTTP_PORT;
-						else if (mProxyType == Proxy.Type.SOCKS)
-							proxyPort = PROXY_SOCKS_PORT;
-					}
-					String resp = checkHTTP(url, mProxyType, PROXY_HOST, proxyPort);
-					msg = new Message();
-					msg.getData().putString("status", resp);
-					handler.sendMessage(msg);
-				}
-				catch (Exception e)
-				{
-					String err = "error connecting to: " + url + "=" + e.toString();
-					Log.e(TAG,err,e);
-					Message msg = new Message();
-					msg.getData().putString("status", err);
-					handler.sendMessage(msg);
-				}
-			}
-		};
-		
-		Handler handler = new Handler ()
-		{
 
-			@Override
-			public void handleMessage(Message msg) {
-				
-				String msgText = msg.getData().getString("status");
-				
-				txtView.setText(msgText);
-			}
-			
-		};
+    public String checkHTTP(String url, Proxy.Type pType, String proxyHost, int proxyPort)
+            throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException,
+            KeyStoreException, CertificateException, IOException
+    {
+        KeyStore trustStore = KeyStore.getInstance("BKS");
+        // load our bundled cacerts from raw assets
+        InputStream in = this.getResources().openRawResource(R.raw.gp_tlspretense_ca);
+        trustStore.load(in, "changeit".toCharArray());
+
+        StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext(), trustStore);
+        httpclient.getStrongTrustManager().setNotifyVerificationFail(true);
+        httpclient.getStrongTrustManager().setNotifyVerificationSuccess(true);
+
+        if (pType == null)
+        {
+            // do nothing
+            httpclient.useProxy(false, null, null, -1);
+
+        }
+        else if (pType == Proxy.Type.SOCKS)
+        {
+
+            httpclient.useProxy(true, "SOCKS", proxyHost, proxyPort);
+
+        }
+        else if (pType == Proxy.Type.HTTP)
+        {
+            httpclient.useProxy(true, ConnRoutePNames.DEFAULT_PROXY, proxyHost, proxyPort);
+
+        }
+
+        HttpGet httpget = new HttpGet(url);
+        HttpResponse response = httpclient.execute(httpget);
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(response.getStatusLine()).append("\n\n");
+
+        InputStream is = response.getEntity().getContent();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+        String line = null;
+
+        while ((line = br.readLine()) != null)
+            sb.append(line);
+
+        return sb.toString();
+
+    }
+
+    Runnable runnableNet = new Runnable()
+    {
+
+        @Override
+        public void run()
+        {
+            String url = txtUrl.getText().toString();
+
+            try
+            {
+                Message msg = new Message();
+                msg.getData().putString("status", "connecting to: " + url);
+                handler.sendMessage(msg);
+
+                int proxyPort = -1;
+                if (mProxyType != null)
+                {
+                    if (mProxyType == Proxy.Type.HTTP)
+                        proxyPort = PROXY_HTTP_PORT;
+                    else if (mProxyType == Proxy.Type.SOCKS)
+                        proxyPort = PROXY_SOCKS_PORT;
+                }
+                String resp = checkHTTP(url, mProxyType, PROXY_HOST, proxyPort);
+                msg = new Message();
+                msg.getData().putString("status", resp);
+                handler.sendMessage(msg);
+            }
+            catch (Exception e)
+            {
+                String err = "error connecting to: " + url + "=" + e.toString();
+                Log.e(TAG, err, e);
+                Message msg = new Message();
+                msg.getData().putString("status", err);
+                handler.sendMessage(msg);
+            }
+        }
+    };
+
+    Handler handler = new Handler()
+    {
+
+        @Override
+        public void handleMessage(Message msg) {
+
+            String msgText = msg.getData().getString("status");
+
+            txtView.setText(msgText);
+        }
+
+    };
 
 }
-
