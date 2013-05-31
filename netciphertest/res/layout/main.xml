@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+   <EditText android:text="@string/default_url"  android:id="@+id/txtUrl" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+    
+<TableLayout android:id="@+id/TableLayout01" android:stretchColumns="*" android:layout_height="fill_parent" android:layout_width="wrap_content">
+
+<TableRow android:id="@+id/TableRow01"  android:layout_weight="1" android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+
+	<ScrollView android:id="@+id/helpscrollview" 
+		android:orientation="vertical"
+		android:layout_width="fill_parent" 
+		android:layout_height="fill_parent"
+		 android:layout_span="3">    
+
+			<TextView android:text="press the button below to start the test..."  android:id="@+id/WizardTextBody" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+
+		</ScrollView>
+		
+</TableRow>
+
+<TableRow
+    android:id="@+id/TableRow01"
+    android:layout_width="fill_parent"
+    android:layout_height="30px"
+    android:layout_weight="0" >
+
+    <Button
+        android:id="@+id/btnStartTest"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Test"
+        android:layout_span="3" />
+</TableRow>
+			
+</TableLayout>
+</LinearLayout>
+
+
