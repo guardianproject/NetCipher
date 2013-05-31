@@ -19,19 +19,17 @@ package info.guardianproject.onionkit.trust;
  * the License.
  */
 
-
-import info.guardianproject.bouncycastle.asn1.ASN1InputStream;
-import info.guardianproject.bouncycastle.asn1.ASN1Object;
-import info.guardianproject.bouncycastle.asn1.ASN1OctetString;
-import info.guardianproject.bouncycastle.asn1.ASN1String;
-import info.guardianproject.bouncycastle.asn1.DERObject;
-import info.guardianproject.bouncycastle.asn1.DEROctetString;
-import info.guardianproject.bouncycastle.asn1.DERSequence;
-import info.guardianproject.bouncycastle.asn1.DERString;
-import info.guardianproject.bouncycastle.asn1.x509.BasicConstraints;
-import info.guardianproject.bouncycastle.asn1.x509.GeneralName;
-import info.guardianproject.bouncycastle.asn1.x509.KeyUsage;
-import info.guardianproject.bouncycastle.asn1.x509.X509Extensions;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Primitive;
+import org.spongycastle.asn1.ASN1String;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.x509.BasicConstraints;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.KeyUsage;
+import org.spongycastle.asn1.x509.X509Extensions;
 import info.guardianproject.onionkit.R;
 import info.guardianproject.onionkit.ui.CertDisplayActivity;
 
@@ -612,10 +610,10 @@ public class StrongTrustManager implements X509TrustManager {
                 return Collections.emptyList();
             }
 
-            ASN1OctetString octs = (ASN1OctetString)ASN1Object.fromByteArray(extVal);
+            ASN1OctetString octs = (ASN1OctetString)ASN1Primitive.fromByteArray(extVal);
             
             @SuppressWarnings("rawtypes")
-            Enumeration it = DERSequence.getInstance(ASN1Object.fromByteArray(octs.getOctets())).getObjects();
+            Enumeration it = DERSequence.getInstance(ASN1Primitive.fromByteArray(octs.getOctets())).getObjects();
             
             while (it.hasMoreElements())
             {
@@ -623,7 +621,7 @@ public class StrongTrustManager implements X509TrustManager {
                 switch (genName.getTagNo())
                 {
                 case GeneralName.dNSName:
-                    identities.add(((DERString)genName.getName()).getString());
+                    identities.add(((ASN1String)genName.getName()).getString());
                     break;
                 }
             }
@@ -866,21 +864,21 @@ public class StrongTrustManager implements X509TrustManager {
 
 	    if (extensionValue != null)
 	    {
-	        DERObject derObject = toDERObject(extensionValue);
+	    	ASN1Primitive derObject = toASN1Primitive(extensionValue);
 	        if (derObject instanceof DEROctetString)
 	        {
 	            DEROctetString derOctetString = (DEROctetString) derObject;
 	            
 	            
-	            derObject = toDERObject(derOctetString.getOctets());
+	            derObject = toASN1Primitive(derOctetString.getOctets());
 	            
 	            if (what == BasicConstraints.class)
 	            {
-	            	return BasicConstraints.getInstance(ASN1Object.fromByteArray(derOctetString.getOctets()));
+	            	return BasicConstraints.getInstance(ASN1Primitive.fromByteArray(derOctetString.getOctets()));
 	            }
 	            else if (what == KeyUsage.class)
 	            {
-	            	return KeyUsage.getInstance(ASN1Object.fromByteArray(derOctetString.getOctets()));
+	            	return KeyUsage.getInstance(ASN1Primitive.fromByteArray(derOctetString.getOctets()));
 
 	            }
 	            else if (derObject instanceof ASN1String)
@@ -896,7 +894,7 @@ public class StrongTrustManager implements X509TrustManager {
 	    return decoded;
 	}
 
-	private DERObject toDERObject(byte[] data) throws IOException
+	private ASN1Primitive toASN1Primitive(byte[] data) throws IOException
 	{
 	    ByteArrayInputStream inStream = new ByteArrayInputStream(data);
 	    ASN1InputStream asnInputStream = new ASN1InputStream(inStream);
