@@ -1,6 +1,8 @@
 package info.guardianproject.onionkit.trust;
 
 
+import java.security.KeyStore;
+
 import info.guardianproject.onionkit.proxy.MyThreadSafeClientConnManager;
 import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
 import android.content.Context;
@@ -38,6 +40,22 @@ public class StrongHttpsClient extends DefaultHttpClient {
       throw new AssertionError(e);
     }
   }
+  
+  public StrongHttpsClient(Context context, KeyStore keystore) {
+	    this.context = context;
+	    
+	    mRegistry = new SchemeRegistry();
+	    mRegistry.register(
+	      new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+	  
+	  try {
+		 mTrustManager = new StrongTrustManager (context, keystore);
+	  	sFactory = new StrongSSLSocketFactory(context, mTrustManager);
+	  	mRegistry.register(new Scheme("https", 443, sFactory));
+	  } catch (Exception e) {
+	      throw new AssertionError(e);
+	    }
+	  }
   
   
 

@@ -139,6 +139,14 @@ public class StrongTrustManager implements X509TrustManager {
         mAppName = mContext.getApplicationInfo().name;
     }
     
+    public StrongTrustManager(Context context, KeyStore keystore) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+
+        mContext = context;
+        mTrustStore = keystore;
+
+        mAppName = mContext.getApplicationInfo().name;
+    }
+    
     public KeyStore getKeyStore ()
     {
     	return mTrustStore;
