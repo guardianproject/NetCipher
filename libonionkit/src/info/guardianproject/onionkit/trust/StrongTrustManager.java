@@ -24,6 +24,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import info.guardianproject.onionkit.R;
@@ -70,7 +71,7 @@ import javax.security.auth.x500.X500Principal;
  * or all checkings by configuring the {@link ConnectionConfiguration}. The
  * truststore file that contains knows and trusted CA root certificates can also
  * be configure in {@link ConnectionConfiguration}.
- * 
+ *
  * @autor n8fr8
  * @author Gaston Dombiak
  */
@@ -115,7 +116,7 @@ public class StrongTrustManager implements X509TrustManager {
      * <li>The leaf certificate contains the identity of the domain or the
      * requested server
      * </ul>
-     * 
+     *
      * @param mContext - the Android mContext for presenting notifications
      * @param configuration - the XMPP configuration
      * @throws KeyStoreException
@@ -161,7 +162,7 @@ public class StrongTrustManager implements X509TrustManager {
      * <li>The leaf certificate contains the identity of the domain or the
      * requested server
      * </ul>
-     * 
+     *
      * @param mContext - the Android mContext for presenting notifications
      * @param appIcon - optional icon to show in notifications
      * @param configuration - the XMPP configuration
@@ -581,7 +582,7 @@ public class StrongTrustManager implements X509TrustManager {
             int flags, Intent nIntent) {
 
         NotificationManager mNotificationManager = (NotificationManager) mContext
-                .getSystemService(mContext.NOTIFICATION_SERVICE);
+                .getSystemService(Context.NOTIFICATION_SERVICE);
 
         mNotificationManager.cancelAll();
 
@@ -593,19 +594,23 @@ public class StrongTrustManager implements X509TrustManager {
             tickerText = title;
 
         long when = System.currentTimeMillis();
-
-        Notification notification = new Notification(icon, tickerText, when);
-        if (flags > 0) {
-            notification.flags |= flags;
-        }
-
         CharSequence contentTitle = title;
         CharSequence contentText = notifyMsg;
-
         PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, nIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
-        notification.setLatestEventInfo(mContext, contentTitle, contentText, contentIntent);
+        Notification notification = new NotificationCompat.Builder(mContext)
+        .setContentTitle(contentTitle)
+        .setContentText(contentText)
+        .setContentIntent(contentIntent)
+        .setWhen(when)
+        .setSmallIcon(icon)
+        .setTicker(tickerText)
+        .build();
+
+        if (flags > 0) {
+            notification.flags |= flags;
+        }
 
         mNotificationManager.notify(notifyId, notification);
     }
@@ -617,7 +622,7 @@ public class StrongTrustManager implements X509TrustManager {
      * "xmpp". When the extension is being used then the identity defined in the
      * extension in going to be returned. Otherwise, the value stored in the
      * subjectDN is returned.
-     * 
+     *
      * @param x509Certificate the certificate the holds the identity of the
      *            remote server.
      * @return the identity of the remote server as defined in the specified
@@ -643,7 +648,7 @@ public class StrongTrustManager implements X509TrustManager {
      * Returns the JID representation of an XMPP entity contained as a
      * SubjectAltName extension in the certificate. If none was found then
      * return <tt>null</tt>.
-     * 
+     *
      * @param certificate the certificate presented by the remote entity.
      * @return the JID representation of an XMPP entity contained as a
      *         SubjectAltName extension in the certificate. If none was found
