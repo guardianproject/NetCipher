@@ -960,8 +960,9 @@ public class StrongTrustManager implements X509TrustManager {
     {
         ByteArrayInputStream inStream = new ByteArrayInputStream(data);
         ASN1InputStream asnInputStream = new ASN1InputStream(inStream);
-
-        return asnInputStream.readObject();
+        ASN1Primitive obj = asnInputStream.readObject();
+        asnInputStream.close();
+        return obj;
     }
 
 }
