@@ -14,14 +14,10 @@ import android.widget.TextView;
 
 import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.methods.HttpGet;
-import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
 import info.guardianproject.onionkit.trust.StrongHttpsClient;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.Proxy;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -31,7 +27,7 @@ import java.security.cert.CertificateException;
 
 public class TLSPretenseClientActivity extends Activity {
 
-    private final static String TAG = "OrlibSample";
+    private final static String TAG = "TlsPretenseTestClient";
     private TextView txtView = null;
     private EditText txtUrl = null;
     private EditText numTestsView = null;
@@ -48,7 +44,6 @@ public class TLSPretenseClientActivity extends Activity {
         txtView = (TextView) findViewById(R.id.WizardTextBody);
         numTestsView = (EditText) findViewById(R.id.numTestsEdit);
         consoleScroll = (ScrollView) findViewById(R.id.consoleScrollView);
-
 
         Button btn;
 
@@ -72,15 +67,15 @@ public class TLSPretenseClientActivity extends Activity {
         super.onResume();
 
         /*
-         *  Not using orbot in this test suite for now
-         * OrbotHelper oc = new OrbotHelper(this); if (!oc.isOrbotInstalled()) {
+         * Not using orbot in this test suite for now OrbotHelper oc = new
+         * OrbotHelper(this); if (!oc.isOrbotInstalled()) {
          * oc.promptToInstall(this); } else if (!oc.isOrbotRunning()) {
          * oc.requestOrbotStart(this); }
          */
 
     }
 
-    public String checkHTTP(String url, Proxy.Type pType, String proxyHost, int proxyPort)
+    public String checkHTTP(String url)
             throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException,
             KeyStoreException, CertificateException, IOException
     {
@@ -93,41 +88,9 @@ public class TLSPretenseClientActivity extends Activity {
         httpclient.getStrongTrustManager().setNotifyVerificationFail(true);
         httpclient.getStrongTrustManager().setNotifyVerificationSuccess(true);
 
-        if (pType == null)
-        {
-            // do nothing
-            httpclient.useProxy(false, null, null, -1);
-
-        }
-        else if (pType == Proxy.Type.SOCKS)
-        {
-
-            httpclient.useProxy(true, "SOCKS", proxyHost, proxyPort);
-
-        }
-        else if (pType == Proxy.Type.HTTP)
-        {
-            httpclient.useProxy(true, ConnRoutePNames.DEFAULT_PROXY, proxyHost, proxyPort);
-
-        }
-
         HttpGet httpget = new HttpGet(url);
         HttpResponse response = httpclient.execute(httpget);
-
-        StringBuffer sb = new StringBuffer();
-        sb.append(response.getStatusLine()).append("\n\n");
-
-        InputStream is = response.getEntity().getContent();
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-
-        String line = null;
-
-        while ((line = br.readLine()) != null)
-            sb.append(line);
-
-        return sb.toString();
-
+        return response.toString();
     }
 
     public void appendMsg(String msg) {
@@ -145,7 +108,8 @@ public class TLSPretenseClientActivity extends Activity {
         String url = "";
         boolean paused = false;
 
-        public TestQueue() { }
+        public TestQueue() {
+        }
 
         public void start(int numTests, String url) {
             reset();
@@ -160,9 +124,10 @@ public class TLSPretenseClientActivity extends Activity {
         }
 
         public void start() {
-            if( paused ) return;
+            if (paused)
+                return;
             currentTest++;
-            if( currentTest <= numTests ) {
+            if (currentTest <= numTests) {
                 appendMsg("Starting test #" + currentTest);
                 TlsConnectTask task = new TlsConnectTask(TLSPretenseClientActivity.this, this);
                 task.execute(url);
@@ -179,36 +144,36 @@ public class TLSPretenseClientActivity extends Activity {
         }
 
         public void testFinished(String result) {
-            appendMsg(" ... "+result+"\n");
+            appendMsg(" ... " + result + "\n");
             start();
         }
     }
 
-    public class TlsConnectTask extends AsyncTask <String,Void,String> {
+    public class TlsConnectTask extends AsyncTask<String, Void, String> {
 
         Context context;
         TestQueue callbackObj;
+
         public TlsConnectTask(Context c, TestQueue o) {
             context = c;
             callbackObj = o;
         }
+
         @Override
         protected String doInBackground(String... url) {
-            Proxy.Type ptype = null;
             try {
-                String resp = TLSPretenseClientActivity.this.checkHTTP(url[0], ptype, "", -1);
-            } catch (Exception e ) {
+                TLSPretenseClientActivity.this.checkHTTP(url[0]);
+            } catch (Exception e) {
                 return e.toString();
             }
             return "complete";
         }
+
         @Override
         protected void onPostExecute(String result) {
             callbackObj.testFinished(result);
         }
 
-
     }
-
 
 }
