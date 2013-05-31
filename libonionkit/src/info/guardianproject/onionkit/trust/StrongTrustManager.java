@@ -52,12 +52,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -569,8 +572,10 @@ public class StrongTrustManager implements X509TrustManager {
         if (fingerprint != null)
             nIntent.putExtra("fingerprint", fingerprint);
 
-        nIntent.putExtra("issued", cert.getNotBefore().toGMTString());
-        nIntent.putExtra("expires", cert.getNotAfter().toGMTString());
+        SimpleDateFormat df = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US);
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        nIntent.putExtra("issued", df.format(cert.getNotBefore()) + " GMT");
+        nIntent.putExtra("expires", df.format(cert.getNotAfter()) + " GMT");
         nIntent.putExtra("msg", title + ": " + msg);
 
         showToolbarNotification(title, msg, DEFAULT_NOTIFY_ID, mAppIcon,
