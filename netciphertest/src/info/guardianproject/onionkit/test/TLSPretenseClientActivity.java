@@ -2,14 +2,14 @@
 package info.guardianproject.onionkit.test;
 
 import android.app.Activity;
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import ch.boye.httpclientandroidlib.HttpResponse;
@@ -34,12 +34,9 @@ public class TLSPretenseClientActivity extends Activity {
     private final static String TAG = "OrlibSample";
     private TextView txtView = null;
     private EditText txtUrl = null;
-
-    private final static String PROXY_HOST = "127.0.0.1";
-    private final static int PROXY_HTTP_PORT = 8118; // default for Orbot/Tor
-    private final static int PROXY_SOCKS_PORT = 9050; // default for Orbot/Tor
-
-    private Proxy.Type mProxyType = null;
+    private EditText numTestsView = null;
+    private ScrollView consoleScroll = null;
+    private TestQueue testQueue = new TestQueue();
 
     /** Called when the activity is first created. */
     @Override
@@ -49,6 +46,9 @@ public class TLSPretenseClientActivity extends Activity {
 
         txtUrl = (EditText) findViewById(R.id.txtUrl);
         txtView = (TextView) findViewById(R.id.WizardTextBody);
+        numTestsView = (EditText) findViewById(R.id.numTestsEdit);
+        consoleScroll = (ScrollView) findViewById(R.id.consoleScrollView);
+
 
         Button btn;
 
@@ -58,8 +58,11 @@ public class TLSPretenseClientActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                mProxyType = null;
-                new Thread(runnableNet).start();
+                txtView.setText("");
+                int numTests = Integer.parseInt(numTestsView.getText().toString());
+                String url = txtUrl.getText().toString();
+                testQueue.start(numTests, url);
+
             }
         });
     }
@@ -127,55 +130,85 @@ public class TLSPretenseClientActivity extends Activity {
 
     }
 
-    Runnable runnableNet = new Runnable()
-    {
+    public void appendMsg(String msg) {
+        String text = txtView.getText().toString();
+        text += msg;
+        txtView.setText(text);
+        consoleScroll.scrollTo(0, txtView.getHeight());
 
-        @Override
-        public void run()
-        {
-            String url = txtUrl.getText().toString();
+    }
 
-            try
-            {
-                Message msg = new Message();
-                msg.getData().putString("status", "connecting to: " + url);
-                handler.sendMessage(msg);
+    public class TestQueue {
 
-                int proxyPort = -1;
-                if (mProxyType != null)
-                {
-                    if (mProxyType == Proxy.Type.HTTP)
-                        proxyPort = PROXY_HTTP_PORT;
-                    else if (mProxyType == Proxy.Type.SOCKS)
-                        proxyPort = PROXY_SOCKS_PORT;
-                }
-                String resp = checkHTTP(url, mProxyType, PROXY_HOST, proxyPort);
-                msg = new Message();
-                msg.getData().putString("status", resp);
-                handler.sendMessage(msg);
-            }
-            catch (Exception e)
-            {
-                String err = "error connecting to: " + url + "=" + e.toString();
-                Log.e(TAG, err, e);
-                Message msg = new Message();
-                msg.getData().putString("status", err);
-                handler.sendMessage(msg);
-            }
-        }
-    };
+        int numTests = 0;
+        int currentTest = 0;
+        String url = "";
+        boolean paused = false;
 
-    Handler handler = new Handler()
-    {
+        public TestQueue() { }
 
-        @Override
-        public void handleMessage(Message msg) {
-
-            String msgText = msg.getData().getString("status");
-
-            txtView.setText(msgText);
+        public void start(int numTests, String url) {
+            reset();
+            this.numTests = numTests;
+            this.url = url;
+            start();
         }
 
-    };
+        public void reset() {
+            currentTest = 0;
+            paused = false;
+        }
+
+        public void start() {
+            if( paused ) return;
+            currentTest++;
+            if( currentTest <= numTests ) {
+                appendMsg("Starting test #" + currentTest);
+                TlsConnectTask task = new TlsConnectTask(TLSPretenseClientActivity.this, this);
+                task.execute(url);
+            }
+        }
+
+        public void pause() {
+            paused = true;
+            appendMsg("paused\n");
+        }
+
+        public void stop() {
+            reset();
+        }
+
+        public void testFinished(String result) {
+            appendMsg(" ... "+result+"\n");
+            start();
+        }
+    }
+
+    public class TlsConnectTask extends AsyncTask <String,Void,String> {
+
+        Context context;
+        TestQueue callbackObj;
+        public TlsConnectTask(Context c, TestQueue o) {
+            context = c;
+            callbackObj = o;
+        }
+        @Override
+        protected String doInBackground(String... url) {
+            Proxy.Type ptype = null;
+            try {
+                String resp = TLSPretenseClientActivity.this.checkHTTP(url[0], ptype, "", -1);
+            } catch (Exception e ) {
+                return e.toString();
+            }
+            return "complete";
+        }
+        @Override
+        protected void onPostExecute(String result) {
+            callbackObj.testFinished(result);
+        }
+
+
+    }
+
 
 }

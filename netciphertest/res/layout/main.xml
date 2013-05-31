@@ -12,7 +12,7 @@
 <TableRow android:id="@+id/TableRow01"  android:layout_weight="1" android:layout_width="fill_parent" android:layout_height="fill_parent">
 
 
-	<ScrollView android:id="@+id/helpscrollview" 
+	<ScrollView android:id="@+id/consoleScrollView" 
 		android:orientation="vertical"
 		android:layout_width="fill_parent" 
 		android:layout_height="fill_parent"
@@ -30,12 +30,24 @@
     android:layout_height="30px"
     android:layout_weight="0" >
 
+    <EditText
+        android:id="@+id/numTestsEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_span="1"
+        android:inputType="number"
+        android:maxEms="1"
+        android:text="25" >
+
+        <requestFocus />
+    </EditText>
+
     <Button
         android:id="@+id/btnStartTest"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Start Test"
-        android:layout_span="3" />
+        android:text="Start Tests"
+        android:layout_span="2" />
 </TableRow>
 			
 </TableLayout>
