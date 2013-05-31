@@ -1,0 +1,8 @@
+<resources>
+
+    <string name="app_name">NetCipher Test</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_onion_kit_sample">TLS Pretense Client</string>
+	<string name="default_url">https://duckduckgo.com/?q=what+is+my+ip</string>
+</resources>
