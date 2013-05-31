@@ -31,7 +31,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
         mRegistry = new SchemeRegistry();
         mRegistry.register(
-                new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+                new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 
         try {
             mTrustManager = new StrongTrustManager(context);
@@ -47,7 +47,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
         mRegistry = new SchemeRegistry();
         mRegistry.register(
-                new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+                new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 
         try {
             mTrustManager = new StrongTrustManager(context, keystore);
