@@ -719,11 +719,10 @@ public class StrongTrustManager implements X509TrustManager {
     {
         boolean result = false;
 
-        if (Arrays.equals(subject.getEncoded(), issuer.getEncoded())) // byte by
-                                                                      // byte
-                                                                      // check
-            if (subject.getName("RFC1779").equals(issuer.getName("RFC1779"))) // name
-                                                                              // check
+        // byte by byte check
+        if (Arrays.equals(subject.getEncoded(), issuer.getEncoded()))
+            // name check
+            if (subject.getName("RFC1779").equals(issuer.getName("RFC1779")))
                 result = true;
 
         return result;
