@@ -1,7 +1,11 @@
 OnionKit for Android
 ========
 
-This is an Android Library Project that provides multiple means to improve network security in mobile applications. The "Onion" name refers to not only the Onion Routing concept used by Tor (which provides anonymity and resistance to traffic surveillance), but also the idea of multiple layers of security that any application should utilize.  
+This is an Android Library Project that provides multiple means to improve
+network security in mobile applications. The "Onion" name refers to not only
+the Onion Routing concept used by Tor (which provides anonymity and resistance
+to traffic surveillance), but also the idea of multiple layers of security
+that any application should utilize.
 
 More specifically this library provides:
 
@@ -40,3 +44,20 @@ and instead should pass the hostnames through the SOCKS proxy.
 Provides simple helper to check if Orbot (Tor for Android) is installed, and whether it is currently running or not. Allows your app to request Orbot to start (user is prompted whether to start or not). Finally, it can show a user prompt to install Orbot, either from Google Play, or via direct APK download from torproject.org or the guardianproject.info site.
 
 For apps with on-device servers, it can also assists in requesting a Tor Hidden Service from Orbot, and discovering the assigned .ONION address.
+
+# Add this to your AndroidManifest.xml
+
+To have the CertDisplayActivity show up, you need to add this to your app's AndroidManifest.xml:
+
+    <application android:label="@string/app_name" >
+       <activity android:name="info.guardianproject.onionkit.ui.CertDisplayActivity"
+                android:configChanges="locale|orientation"
+                android:theme="@android:style/Theme.Dialog"
+                android:taskAffinity="" />
+    </application>
+
+If you are targetting android-13 as the minimum, then add in "screenSize" to
+configChanges:
+
+                android:configChanges="locale|screenSize|orientation"
+
