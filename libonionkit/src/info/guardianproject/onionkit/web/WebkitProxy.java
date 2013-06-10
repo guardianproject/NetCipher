@@ -1,3 +1,4 @@
+
 package info.guardianproject.onionkit.web;
 
 import java.io.IOException;
@@ -22,121 +23,122 @@ import android.util.Log;
 
 public class WebkitProxy {
 
-	private final static String DEFAULT_HOST = "127.0.0.1";
-	private final static int DEFAULT_PORT = 8118;
-	private final static int DEFAULT_SOCKET_PORT = 9050;
-	
-	private final static int REQUEST_CODE = 0;
-	
-	private final static String TAG = "OrbotHelpher";
+    private final static String DEFAULT_HOST = "127.0.0.1";
+    private final static int DEFAULT_PORT = 8118;
+    private final static int DEFAULT_SOCKET_PORT = 9050;
 
-	
-	public static void setProxy (Context ctx) throws Exception
-	{
-		setProxy (ctx, DEFAULT_HOST, DEFAULT_PORT);
-	}
-	
-	public static boolean setProxy (Context ctx, String host, int port) throws Exception
-	{
-		setSystemProperties (host, port);
-		
-		boolean worked = false;
+    private final static int REQUEST_CODE = 0;
 
-		if (Build.VERSION.SDK_INT < 14) 
-		{
-			worked = setWebkitProxyGingerbread(ctx, host, port);
-		}
-		else
-		{
-			worked = setWebkitProxyICS(ctx, host, port);
-		}
-		
-		return worked;
-	}
+    private final static String TAG = "OrbotHelpher";
 
-	private static void setSystemProperties (String host, int port)
-	{
+    public static void setProxy(Context ctx) throws Exception
+    {
+        setProxy(ctx, DEFAULT_HOST, DEFAULT_PORT);
+    }
 
-		System.setProperty("http.proxyHost", host);
-		System.setProperty("http.proxyPort", port + "");
-		
-		/*
-		System.setProperty("https.proxyHost", host);
-		System.setProperty("https.proxyPort", port + "");
-		
-		System.setProperty("socks.proxyHost", host);
-		System.setProperty("socks.proxyPort", port + "");
-		*/
-		
-		System.getProperty("networkaddress.cache.ttl","-1");
-		
-		
-	}
-	  /**
+    public static boolean setProxy(Context ctx, String host, int port) throws Exception
+    {
+        setSystemProperties(host, port);
+
+        boolean worked = false;
+
+        if (Build.VERSION.SDK_INT < 14)
+        {
+            worked = setWebkitProxyGingerbread(ctx, host, port);
+        }
+        else
+        {
+            worked = setWebkitProxyICS(ctx, host, port);
+        }
+
+        return worked;
+    }
+
+    private static void setSystemProperties(String host, int port)
+    {
+
+        System.setProperty("http.proxyHost", host);
+        System.setProperty("http.proxyPort", port + "");
+
+        /*
+         * System.setProperty("https.proxyHost", host);
+         * System.setProperty("https.proxyPort", port + "");
+         * System.setProperty("socks.proxyHost", host);
+         * System.setProperty("socks.proxyPort", port + "");
+         */
+
+        System.getProperty("networkaddress.cache.ttl", "-1");
+
+    }
+
+    /**
      * Override WebKit Proxy settings
-     *
+     * 
      * @param ctx Android ApplicationContext
      * @param host
      * @param port
-     * @return  true if Proxy was successfully set
+     * @return true if Proxy was successfully set
      */
-    private static boolean setWebkitProxyGingerbread(Context ctx, String host, int port) throws Exception
+    private static boolean setWebkitProxyGingerbread(Context ctx, String host, int port)
+            throws Exception
     {
         boolean ret = false;
-	     
-	    Object requestQueueObject = getRequestQueue(ctx);
-	    if (requestQueueObject != null) {
-	        //Create Proxy config object and set it into request Q
-	        HttpHost httpHost = new HttpHost(host, port, "http");	
-	        setDeclaredField(requestQueueObject, "mProxyHost", httpHost);
-	        return true;
-	    }
-	    return false;
-        
+
+        Object requestQueueObject = getRequestQueue(ctx);
+        if (requestQueueObject != null) {
+            // Create Proxy config object and set it into request Q
+            HttpHost httpHost = new HttpHost(host, port, "http");
+            setDeclaredField(requestQueueObject, "mProxyHost", httpHost);
+            return true;
+        }
+        return false;
+
     }
-    
+
     private static boolean setWebkitProxyICS(Context ctx, String host, int port) throws Exception
     {
-    	 
+
         // PSIPHON: added support for Android 4.x WebView proxy
-        try 
+        try
         {
-           Class webViewCoreClass = Class.forName("android.webkit.WebViewCore");
-           
+            Class webViewCoreClass = Class.forName("android.webkit.WebViewCore");
+
             Class proxyPropertiesClass = Class.forName("android.net.ProxyProperties");
-            if (webViewCoreClass != null && proxyPropertiesClass != null) 
+            if (webViewCoreClass != null && proxyPropertiesClass != null)
             {
-                Method m = webViewCoreClass.getDeclaredMethod("sendStaticMessage", Integer.TYPE, Object.class);
-                Constructor c = proxyPropertiesClass.getConstructor(String.class, Integer.TYPE, String.class);
-                
+                Method m = webViewCoreClass.getDeclaredMethod("sendStaticMessage", Integer.TYPE,
+                        Object.class);
+                Constructor c = proxyPropertiesClass.getConstructor(String.class, Integer.TYPE,
+                        String.class);
+
                 if (m != null && c != null)
                 {
-                	m.setAccessible(true);
-                	c.setAccessible(true);
-                	Object properties = c.newInstance(host, port, null);
-                
-                	// android.webkit.WebViewCore.EventHub.PROXY_CHANGED = 193;
-                	m.invoke(null, 193, properties);
-                	return true;
+                    m.setAccessible(true);
+                    c.setAccessible(true);
+                    Object properties = c.newInstance(host, port, null);
+
+                    // android.webkit.WebViewCore.EventHub.PROXY_CHANGED = 193;
+                    m.invoke(null, 193, properties);
+                    return true;
                 }
                 else
-                	return false;
+                    return false;
             }
-        }
-        catch (Exception e) 
+        } catch (Exception e)
         {
-            Log.e("ProxySettings","Exception setting WebKit proxy through android.net.ProxyProperties: " + e.toString());
-        }
-        catch (Error e) 
+            Log.e("ProxySettings",
+                    "Exception setting WebKit proxy through android.net.ProxyProperties: "
+                            + e.toString());
+        } catch (Error e)
         {
-            Log.e("ProxySettings","Exception setting WebKit proxy through android.webkit.Network: " + e.toString());
+            Log.e("ProxySettings",
+                    "Exception setting WebKit proxy through android.webkit.Network: "
+                            + e.toString());
         }
-        
+
         return false;
-        
+
     }
-    
-    
 
     public static void resetProxy(Context ctx) throws Exception {
         Object requestQueueObject = getRequestQueue(ctx);
@@ -149,7 +151,9 @@ public class WebkitProxy {
         Object ret = null;
         Class networkClass = Class.forName("android.webkit.Network");
         if (networkClass != null) {
-            Object networkObj = invokeMethod(networkClass, "getInstance", new Object[]{ctx}, Context.class);
+            Object networkObj = invokeMethod(networkClass, "getInstance", new Object[] {
+                ctx
+            }, Context.class);
             if (networkObj != null) {
                 ret = getDeclaredField(networkObj, "mRequestQueue");
             }
@@ -163,7 +167,8 @@ public class WebkitProxy {
         Field f = obj.getClass().getDeclaredField(name);
         f.setAccessible(true);
         Object out = f.get(obj);
-        //System.out.println(obj.getClass().getName() + "." + name + " = "+ out);
+        // System.out.println(obj.getClass().getName() + "." + name + " = "+
+        // out);
         return out;
     }
 
@@ -175,7 +180,8 @@ public class WebkitProxy {
         f.set(obj, value);
     }
 
-    private static Object invokeMethod(Object object, String methodName, Object[] params, Class... types) throws Exception {
+    private static Object invokeMethod(Object object, String methodName, Object[] params,
+            Class... types) throws Exception {
         Object out = null;
         Class c = object instanceof Class ? (Class) object : object.getClass();
         if (types != null) {
@@ -185,22 +191,24 @@ public class WebkitProxy {
             Method method = c.getMethod(methodName);
             out = method.invoke(object);
         }
-        //System.out.println(object.getClass().getName() + "." + methodName + "() = "+ out);
+        // System.out.println(object.getClass().getName() + "." + methodName +
+        // "() = "+ out);
         return out;
     }
 
-    public static Socket getSocket (Context context, String proxyHost, int proxyPort) throws IOException
+    public static Socket getSocket(Context context, String proxyHost, int proxyPort)
+            throws IOException
     {
-    	Socket sock = new Socket();
+        Socket sock = new Socket();
 
-		sock.connect(new InetSocketAddress(proxyHost, proxyPort), 10000);
+        sock.connect(new InetSocketAddress(proxyHost, proxyPort), 10000);
 
-		return sock;
+        return sock;
     }
 
-    public static Socket getSocket (Context context) throws IOException
+    public static Socket getSocket(Context context) throws IOException
     {
-    	return getSocket (context, DEFAULT_HOST, DEFAULT_SOCKET_PORT);
+        return getSocket(context, DEFAULT_HOST, DEFAULT_SOCKET_PORT);
 
     }
 
@@ -210,36 +218,37 @@ public class WebkitProxy {
             CharSequence stringButtonYes,
             CharSequence stringButtonNo,
             CharSequence stringDesiredBarcodeFormats) {
-Intent intentScan = new Intent("org.torproject.android.START_TOR");
-intentScan.addCategory(Intent.CATEGORY_DEFAULT);
+        Intent intentScan = new Intent("org.torproject.android.START_TOR");
+        intentScan.addCategory(Intent.CATEGORY_DEFAULT);
 
-
-try {
-activity.startActivityForResult(intentScan, REQUEST_CODE);
-return null;
-} catch (ActivityNotFoundException e) {
-return showDownloadDialog(activity, stringTitle, stringMessage, stringButtonYes, stringButtonNo);
-}
-}
+        try {
+            activity.startActivityForResult(intentScan, REQUEST_CODE);
+            return null;
+        } catch (ActivityNotFoundException e) {
+            return showDownloadDialog(activity, stringTitle, stringMessage, stringButtonYes,
+                    stringButtonNo);
+        }
+    }
 
     private static AlertDialog showDownloadDialog(final Activity activity,
             CharSequence stringTitle,
             CharSequence stringMessage,
             CharSequence stringButtonYes,
             CharSequence stringButtonNo) {
-				AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
-				downloadDialog.setTitle(stringTitle);
-				downloadDialog.setMessage(stringMessage);
-				downloadDialog.setPositiveButton(stringButtonYes, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogInterface, int i) {
-				Uri uri = Uri.parse("market://search?q=pname:org.torproject.android");
-				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-				activity.startActivity(intent);
-				}
-				});
-				downloadDialog.setNegativeButton(stringButtonNo, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogInterface, int i) {}
-				});
-				return downloadDialog.show();
-				}
+        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
+        downloadDialog.setTitle(stringTitle);
+        downloadDialog.setMessage(stringMessage);
+        downloadDialog.setPositiveButton(stringButtonYes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Uri uri = Uri.parse("market://search?q=pname:org.torproject.android");
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                activity.startActivity(intent);
+            }
+        });
+        downloadDialog.setNegativeButton(stringButtonNo, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
+            }
+        });
+        return downloadDialog.show();
+    }
 }
