@@ -136,7 +136,7 @@ public class StrongTrustManager implements X509TrustManager {
 
         mTrustStore = KeyStore.getInstance(TRUSTSTORE_TYPE);
         // load our bundled cacerts from raw assets
-        in = mContext.getResources().openRawResource(R.raw.cacerts);
+        in = mContext.getResources().openRawResource(R.raw.debiancacerts);
         mTrustStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
 
         mAppName = mContext.getApplicationInfo().name;
