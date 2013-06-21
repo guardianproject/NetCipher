@@ -141,6 +141,50 @@ public class WebkitProxy {
     }
 
     public static void resetProxy(Context ctx) throws Exception {
+         if (Build.VERSION.SDK_INT < 14)
+        {
+            resetProxyForGingerBread(ctx);
+        }
+        else
+        {
+            resetProxyForICS();
+        }
+    }
+
+    private static void resetProxyForICS() throws Exception{
+        try
+        {
+            Class webViewCoreClass = Class.forName("android.webkit.WebViewCore");
+            Class proxyPropertiesClass = Class.forName("android.net.ProxyProperties");
+            if (webViewCoreClass != null && proxyPropertiesClass != null)
+            {
+                Method m = webViewCoreClass.getDeclaredMethod("sendStaticMessage", Integer.TYPE,
+                        Object.class);
+
+                if (m != null)
+                {
+                    m.setAccessible(true);
+
+                    // android.webkit.WebViewCore.EventHub.PROXY_CHANGED = 193;
+                    m.invoke(null, 193, null);
+                }
+            }
+        } catch (Exception e)
+        {
+            Log.e("ProxySettings",
+                    "Exception setting WebKit proxy through android.net.ProxyProperties: "
+                            + e.toString());
+            throw e;
+        } catch (Error e)
+        {
+            Log.e("ProxySettings",
+                    "Exception setting WebKit proxy through android.webkit.Network: "
+                            + e.toString());
+            throw e;
+        }
+    }
+
+    private static void resetProxyForGingerBread(Context ctx) throws Exception {
         Object requestQueueObject = getRequestQueue(ctx);
         if (requestQueueObject != null) {
             setDeclaredField(requestQueueObject, "mProxyHost", null);
