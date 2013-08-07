@@ -8,7 +8,13 @@ buildscript {
 }
 apply plugin: 'android-library'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
+    compile 'com.android.support:support-v4:18.0.+'
+    compile group:'com.madgag', name:'sc-light-jdk15on', version:'1.47.0.2'
     compile fileTree(dir: 'libs', include: '*.jar')
 }
 
