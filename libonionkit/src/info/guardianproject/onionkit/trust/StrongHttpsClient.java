@@ -7,6 +7,7 @@ import android.content.Context;
 import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.conn.ClientConnectionOperator;
+import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
 import ch.boye.httpclientandroidlib.conn.scheme.PlainSocketFactory;
 import ch.boye.httpclientandroidlib.conn.scheme.Scheme;
 import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
@@ -53,7 +54,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
     }
     else if (proxyHost != null && proxyType.equalsIgnoreCase("socks"))
     {
-    	Log.d("StrongHTTPS","proxying using: " + proxyType);
+    	Log.d("StrongHTTPS","proxying with: " + proxyType);
 
 		    return new MyThreadSafeClientConnManager(getParams(), mRegistry)
     		{
@@ -95,6 +96,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
 		
 		HttpHost proxyHost =  new HttpHost(host, port);
 		getParams().setParameter(type, proxyHost);
+		getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,proxyHost);
 		
 		if (type.equalsIgnoreCase("socks"))
 		{
