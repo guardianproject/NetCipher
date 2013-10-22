@@ -9,7 +9,8 @@ that any application should utilize.
 
 More specifically this library provides:
 
-1. StrongTrustManager: a robust implementation of an TLS/SSL certificate verifier, that can be customized with any set of certificate authorities
+REMOVED FOR NOW (UNDER REVIEW FOR VERIFICATION BUG) --> 1. StrongTrustManager: a robust implementation of an TLS/SSL certificate verifier, that can be customized with any set of certificate authorities
+
 2. Proxied Connection Support: HTTP and SOCKS proxy connection support for HTTP and HTTP/S traffic through specific configuration of the Apache HTTPClient library
 3. OrbotHelper: a utility class to support application integration with Orbot: Tor for Android. Check if its installed, running, etc.
 
