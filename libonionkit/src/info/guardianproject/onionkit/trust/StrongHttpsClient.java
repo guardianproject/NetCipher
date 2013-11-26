@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.conn.ClientConnectionOperator;
+import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
 import ch.boye.httpclientandroidlib.conn.scheme.PlainSocketFactory;
 import ch.boye.httpclientandroidlib.conn.scheme.Scheme;
 import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
@@ -160,4 +161,6 @@ public class StrongHttpsClient extends DefaultHttpClient {
         }
 
     }
+  }
+  
 }
