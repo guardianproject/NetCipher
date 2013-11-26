@@ -24,6 +24,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class StrongSSLSocketFactory extends ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory
         implements LayeredSchemeSocketFactory
@@ -42,31 +43,31 @@ public class StrongSSLSocketFactory extends ch.boye.httpclientandroidlib.conn.ss
     // private final HostNameResolver mNameResolver = new
     // StrongHostNameResolver();
 
-    private StrongTrustManager mStrongTrustManager;
+    private TrustManager mTrustManager;
 
-    public StrongSSLSocketFactory(Context context, StrongTrustManager strongTrustManager)
+    public StrongSSLSocketFactory(Context context, TrustManager trustManager, KeyStore kStore, String kStorePasswd)
             throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException,
             KeyStoreException, CertificateException, IOException
     {
-        super(strongTrustManager.getKeyStore());
+        super(kStore);
 
-        mStrongTrustManager = strongTrustManager;
+        mTrustManager = trustManager;
 
         SSLContext sslContext = SSLContext.getInstance("TLS");
         TrustManager[] tm = new TrustManager[] {
-                mStrongTrustManager
+        		mTrustManager
         };
-        KeyManager[] km = createKeyManagers(mStrongTrustManager.getTrustStore(),
-                mStrongTrustManager.getTrustStorePassword());
+        KeyManager[] km = createKeyManagers(kStore,
+        		kStorePasswd);
         sslContext.init(km, tm, new SecureRandom());
 
         mFactory = sslContext.getSocketFactory();
 
     }
 
-    public StrongTrustManager getStrongTrustManager()
+    public TrustManager getStrongTrustManager()
     {
-        return mStrongTrustManager;
+        return mTrustManager;
     }
 
     private KeyManager[] createKeyManagers(final KeyStore keystore, final String password)
