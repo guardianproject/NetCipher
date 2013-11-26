@@ -161,6 +161,6 @@ public class StrongHttpsClient extends DefaultHttpClient {
         }
 
     }
-  }
+  
   
 }
