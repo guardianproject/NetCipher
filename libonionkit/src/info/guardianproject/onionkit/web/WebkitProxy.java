@@ -16,7 +16,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -46,11 +45,17 @@ public class WebkitProxy {
         {
             worked = setWebkitProxyGingerbread(ctx, host, port);
         }
-        else
+        else if (Build.VERSION.SDK_INT < 19)
         {
             worked = setWebkitProxyICS(ctx, host, port);
         }
+        else        	
+        {
+            worked = setWebkitProxyICS(ctx, host, port);
 
+            worked = setKitKatProxy(ctx, host, port);
+        }
+        
         return worked;
     }
 
@@ -139,6 +144,96 @@ public class WebkitProxy {
         return false;
 
     }
+    
+    private static boolean setKitKatProxy (Context ctx, String host, int port)
+    {
+    	
+    	 try
+         {
+             Class webViewCoreClass = Class.forName("android.net.Proxy");
+
+             Class proxyPropertiesClass = Class.forName("android.net.ProxyProperties");
+             if (webViewCoreClass != null && proxyPropertiesClass != null)
+             {
+            	 for (Method method : webViewCoreClass.getDeclaredMethods())
+            	 {
+            		 Log.d("Orweb","Proxy methods: " + method.getName());
+            	 }
+            	 
+                 Method m = webViewCoreClass.getDeclaredMethod("setHttpProxySystemProperty", 
+                		 proxyPropertiesClass);
+                 Constructor c = proxyPropertiesClass.getConstructor(String.class, Integer.TYPE,
+                         String.class);
+
+                 if (m != null && c != null)
+                 {
+                     m.setAccessible(true);
+                     c.setAccessible(true);
+                     Object properties = c.newInstance(host, port, null);
+
+                     m.invoke(null, properties);
+                     return true;
+                 }
+                 else
+                     return false;
+             }
+         } catch (Exception e)
+         {
+             Log.e("ProxySettings",
+                     "Exception setting WebKit proxy through android.net.ProxyProperties: "
+                             + e.toString());
+         } catch (Error e)
+         {
+             Log.e("ProxySettings",
+                     "Exception setting WebKit proxy through android.webkit.Network: "
+                             + e.toString());
+         }
+    	 
+    	 return false;
+    }
+    
+    private static boolean resetProxyForKitKat ()
+    {
+    	
+    	 try
+         {
+             Class webViewCoreClass = Class.forName("android.net.Proxy");
+
+             Class proxyPropertiesClass = Class.forName("android.net.ProxyProperties");
+             if (webViewCoreClass != null && proxyPropertiesClass != null)
+             {
+            	 for (Method method : webViewCoreClass.getDeclaredMethods())
+            	 {
+            		 Log.d("Orweb","Proxy methods: " + method.getName());
+            	 }
+            	 
+                 Method m = webViewCoreClass.getDeclaredMethod("setHttpProxySystemProperty", 
+                		 proxyPropertiesClass);
+
+                 if (m != null)
+                 {
+                     m.setAccessible(true);
+
+                     m.invoke(null, null);
+                     return true;
+                 }
+                 else
+                     return false;
+             }
+         } catch (Exception e)
+         {
+             Log.e("ProxySettings",
+                     "Exception setting WebKit proxy through android.net.ProxyProperties: "
+                             + e.toString());
+         } catch (Error e)
+         {
+             Log.e("ProxySettings",
+                     "Exception setting WebKit proxy through android.webkit.Network: "
+                             + e.toString());
+         }
+    	 
+    	 return false;
+    }
 
     public static void resetProxy(Context ctx) throws Exception {
          if (Build.VERSION.SDK_INT < 14)
@@ -148,6 +243,7 @@ public class WebkitProxy {
         else
         {
             resetProxyForICS();
+            resetProxyForKitKat();
         }
     }
 
