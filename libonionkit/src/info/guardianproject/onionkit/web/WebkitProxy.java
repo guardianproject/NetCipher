@@ -16,15 +16,17 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Parcelable;
 import android.util.Log;
 
 public class WebkitProxy {
 
-    private final static String DEFAULT_HOST = "127.0.0.1";
+    private final static String DEFAULT_HOST = "localhost";//"127.0.0.1";
     private final static int DEFAULT_PORT = 8118;
-    private final static int DEFAULT_SOCKET_PORT = 9050;
+    private final static int DEFAULT_SOCKS_PORT = 9050;
 
     private final static int REQUEST_CODE = 0;
 
@@ -37,7 +39,8 @@ public class WebkitProxy {
 
     public static boolean setProxy(Context ctx, String host, int port) throws Exception
     {
-        setSystemProperties(host, port);
+      
+    	setSystemProperties(host, port);
 
         boolean worked = false;
 
@@ -51,9 +54,15 @@ public class WebkitProxy {
         }
         else        	
         {
+           // worked = setKitKatProxy0(ctx, host, port);
             worked = setWebkitProxyICS(ctx, host, port);
 
             worked = setKitKatProxy(ctx, host, port);
+            
+         //   worked = setKitKatProxy2(ctx, host, port);
+            
+          //  sendProxyChangedIntent(ctx, host, port);
+            
         }
         
         return worked;
@@ -62,17 +71,35 @@ public class WebkitProxy {
     private static void setSystemProperties(String host, int port)
     {
 
+    	System.setProperty("proxyHost", host);
+        System.setProperty("proxyPort", port + "");
+
         System.setProperty("http.proxyHost", host);
         System.setProperty("http.proxyPort", port + "");
 
+        System.setProperty("https.proxyHost", host);
+        System.setProperty("https.proxyPort", port + "");
+
+        
+        System.setProperty("socks.proxyHost", host);
+        System.setProperty("socks.proxyPort", DEFAULT_SOCKS_PORT + "");
+
+        System.setProperty("socksProxyHost", host);
+        System.setProperty("socksProxyPort", DEFAULT_SOCKS_PORT + "");
+        
+        
         /*
-         * System.setProperty("https.proxyHost", host);
-         * System.setProperty("https.proxyPort", port + "");
-         * System.setProperty("socks.proxyHost", host);
-         * System.setProperty("socks.proxyPort", port + "");
-         */
+        ProxySelector pSelect = new ProxySelector();
+        pSelect.addProxy(Proxy.Type.HTTP, host, port);
+        ProxySelector.setDefault(pSelect);
+        */
+        /*
+        System.setProperty("http_proxy", "http://" + host + ":" + port);
+        System.setProperty("proxy-server", "http://" + host + ":" + port);
+        System.setProperty("host-resolver-rules","MAP * 0.0.0.0 , EXCLUDE myproxy");
 
         System.getProperty("networkaddress.cache.ttl", "-1");
+        */
 
     }
 
@@ -86,7 +113,8 @@ public class WebkitProxy {
      */
     private static boolean setWebkitProxyGingerbread(Context ctx, String host, int port)
             throws Exception
-    {
+            {
+    	
         boolean ret = false;
 
         Object requestQueueObject = getRequestQueue(ctx);
@@ -100,7 +128,7 @@ public class WebkitProxy {
 
     }
 
-    private static boolean setWebkitProxyICS(Context ctx, String host, int port) throws Exception
+    private static boolean setWebkitProxyICS(Context ctx, String host, int port)
     {
 
         // PSIPHON: added support for Android 4.x WebView proxy
@@ -124,11 +152,13 @@ public class WebkitProxy {
 
                     // android.webkit.WebViewCore.EventHub.PROXY_CHANGED = 193;
                     m.invoke(null, 193, properties);
+                    
+                 
                     return true;
                 }
-                else
-                    return false;
-            }
+
+                
+           }
         } catch (Exception e)
         {
             Log.e("ProxySettings",
@@ -144,6 +174,129 @@ public class WebkitProxy {
         return false;
 
     }
+    
+    private static boolean sendProxyChangedIntent(Context ctx, String host, int port) 
+    {
+
+        try
+        {
+            Class proxyPropertiesClass = Class.forName("android.net.ProxyProperties");
+            if (proxyPropertiesClass != null)
+            {
+                Constructor c = proxyPropertiesClass.getConstructor(String.class, Integer.TYPE,
+                        String.class);
+                
+                if (c != null)
+                {
+                    c.setAccessible(true);
+                    Object properties = c.newInstance(host, port, null);
+
+                    Intent intent = new Intent(android.net.Proxy.PROXY_CHANGE_ACTION);
+                    intent.putExtra("proxy",(Parcelable)properties);
+                    ctx.sendBroadcast(intent);
+                 
+                }
+                                
+           }
+        } catch (Exception e)
+        {
+            Log.e("ProxySettings",
+                    "Exception sending Intent ",e);
+        } catch (Error e)
+        {
+            Log.e("ProxySettings",
+                    "Exception sending Intent ",e);
+        }
+
+        return false;
+
+    }
+    
+    private static boolean setKitKatProxy0(Context ctx, String host, int port) 
+    {
+    	
+    	try
+        {
+            Class cmClass = Class.forName("android.net.ConnectivityManager");
+
+            Class proxyPropertiesClass = Class.forName("android.net.ProxyProperties");
+            if (cmClass != null && proxyPropertiesClass != null)
+            {
+                Constructor c = proxyPropertiesClass.getConstructor(String.class, Integer.TYPE,
+                        String.class);
+
+                if (c != null)
+                {
+                    c.setAccessible(true);
+
+                    Object proxyProps = c.newInstance(host, port, null);
+                    ConnectivityManager cm =
+                            (ConnectivityManager)ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+                    Method mSetGlobalProxy = cmClass.getDeclaredMethod("setGlobalProxy", proxyPropertiesClass);
+                    
+                    mSetGlobalProxy.invoke(cm, proxyProps);
+                 
+                    return true;
+                }
+                
+           }
+        } catch (Exception e)
+        {
+            Log.e("ProxySettings",
+                    "ConnectivityManager.setGlobalProxy ",e);
+        }
+
+        return false;
+
+    }
+    
+  //;
+	
+	//CommandLine.initFromFile(COMMAND_LINE_FILE);
+	
+    private static boolean setKitKatProxy2 (Context ctx, String host, int port)
+    {
+
+    	String commandLinePath = "/data/local/tmp/orweb.conf";
+    	 try
+         {
+             Class webViewCoreClass = Class.forName("org.chromium.content.common.CommandLine");
+
+             if (webViewCoreClass != null)
+             {
+            	 for (Method method : webViewCoreClass.getDeclaredMethods())
+            	 {
+            		 Log.d("Orweb","Proxy methods: " + method.getName());
+            	 }
+            	 
+                 Method m = webViewCoreClass.getDeclaredMethod("initFromFile", 
+                		 String.class);
+                 
+                 if (m != null)
+                 {
+                     m.setAccessible(true);
+                     m.invoke(null, commandLinePath);
+                     return true;
+                 }
+                 else
+                     return false;
+             }
+         } catch (Exception e)
+         {
+             Log.e("ProxySettings",
+                     "Exception setting WebKit proxy through android.net.ProxyProperties: "
+                             + e.toString());
+         } catch (Error e)
+         {
+             Log.e("ProxySettings",
+                     "Exception setting WebKit proxy through android.webkit.Network: "
+                             + e.toString());
+         }
+    	 
+    	 return false;
+    }
+    
     
     private static boolean setKitKatProxy (Context ctx, String host, int port)
     {
@@ -348,7 +501,7 @@ public class WebkitProxy {
 
     public static Socket getSocket(Context context) throws IOException
     {
-        return getSocket(context, DEFAULT_HOST, DEFAULT_SOCKET_PORT);
+        return getSocket(context, DEFAULT_HOST, DEFAULT_SOCKS_PORT);
 
     }
 
@@ -391,4 +544,7 @@ public class WebkitProxy {
         });
         return downloadDialog.show();
     }
+    
+    
+
 }
