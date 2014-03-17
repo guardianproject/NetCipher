@@ -844,13 +844,11 @@ public abstract class StrongTrustManager implements X509TrustManager {
             {
                 KeyUsage keyUsage = (KeyUsage) bsVal;
                 // SSLCA: CERT_SIGN; SSL_CA;+
-                debug("KeyUsage=" + keyUsage.intValue() + ";" + keyUsage.getString());
+//                debug("KeyUsage=" + keyUsage.intValue() + ";" + keyUsage.getString());
 
-                int flags = keyUsage.intValue();
-
-                if ((flags & KeyUsage.cRLSign) == KeyUsage.cRLSign
-                        || (flags & KeyUsage.keyCertSign) == KeyUsage.keyCertSign)
-                {
+                if (keyUsage.hasUsages(KeyUsage.cRLSign)
+                		&& keyUsage.hasUsages(KeyUsage.keyCertSign))
+                {                
                     // we okay
                 }
                 else
