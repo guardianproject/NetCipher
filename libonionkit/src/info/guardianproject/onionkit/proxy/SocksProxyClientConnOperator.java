@@ -13,6 +13,8 @@ import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.conn.OperatedClientConnection;
 import ch.boye.httpclientandroidlib.conn.scheme.Scheme;
 import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
+import ch.boye.httpclientandroidlib.conn.scheme.SchemeSocketFactory;
+import ch.boye.httpclientandroidlib.conn.scheme.SocketFactory;
 import ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory;
 import ch.boye.httpclientandroidlib.impl.conn.DefaultClientConnectionOperator;
 import ch.boye.httpclientandroidlib.params.HttpParams;
@@ -52,7 +54,7 @@ public class SocksProxyClientConnOperator extends DefaultClientConnectionOperato
             }
 
             Scheme scheme = schemeRegistry.getScheme(target.getSchemeName());
-            SSLSocketFactory sslSocketFactory = (SSLSocketFactory)scheme.getSchemeSocketFactory();
+            SchemeSocketFactory schemeSocketFactory = scheme.getSchemeSocketFactory();
 
             int port = scheme.resolvePort(target.getPort());
             String host = target.getHostName();
@@ -98,11 +100,21 @@ public class SocksProxyClientConnOperator extends DefaultClientConnectionOperato
             inputStream.readShort();
             inputStream.readInt();
 
-            sslSocket = sslSocketFactory.createLayeredSocket(socket, host, port, params);
-            conn.opening(sslSocket, target);
-            sslSocket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
-            prepareSocket(sslSocket, context, params);
-            conn.openCompleted(sslSocketFactory.isSecure(sslSocket), params);
+            if (schemeSocketFactory instanceof SSLSocketFactory)
+            {
+	            sslSocket = ((SSLSocketFactory)schemeSocketFactory).createLayeredSocket(socket, host, port, params);
+	            conn.opening(sslSocket, target);
+	            sslSocket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
+	            prepareSocket(sslSocket, context, params);
+	            conn.openCompleted(schemeSocketFactory.isSecure(sslSocket), params);
+            }
+            else
+            {
+            	conn.opening(socket,  target);
+            	socket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
+            	prepareSocket(socket, context, params);
+            	conn.openCompleted(schemeSocketFactory.isSecure(socket), params);
+            }
             // TODO: clarify which connection throws java.net.SocketTimeoutException?
         } catch (IOException e) {
             try {
