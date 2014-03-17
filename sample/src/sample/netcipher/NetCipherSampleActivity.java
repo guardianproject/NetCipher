@@ -114,8 +114,6 @@ public class NetCipherSampleActivity extends Activity {
     {
 
         StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext());
-        //httpclient.getStrongTrustManager().setNotifyVerificationFail(true);
-        //httpclient.getStrongTrustManager().setNotifyVerificationSuccess(true);
 
         if (pType == null)
         {
