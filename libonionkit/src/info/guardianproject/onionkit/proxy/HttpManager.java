@@ -38,7 +38,7 @@ import ch.boye.httpclientandroidlib.client.HttpClient;
 import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
 import ch.boye.httpclientandroidlib.client.methods.HttpGet;
 import ch.boye.httpclientandroidlib.client.methods.HttpPost;
-import ch.boye.httpclientandroidlib.entity.mime.MultipartEntity;
+import ch.boye.httpclientandroidlib.entity.mime.MultipartEntityBuilder;
 import ch.boye.httpclientandroidlib.entity.mime.content.FileBody;
 import ch.boye.httpclientandroidlib.entity.mime.content.StringBody;
 import ch.boye.httpclientandroidlib.impl.client.DefaultHttpClient;
@@ -185,7 +185,7 @@ public class HttpManager {
         HttpClient httpClient = new DefaultHttpClient();
 
         HttpPost request = new HttpPost(serviceEndpoint);
-        MultipartEntity entity = new MultipartEntity();
+        MultipartEntityBuilder entity = MultipartEntityBuilder.create();
 
         Iterator<Map.Entry<Object, Object>> i = properties.entrySet().iterator();
         while (i.hasNext())
@@ -200,7 +200,7 @@ public class HttpManager {
         Log.i("httpman", "upload file (" + upload.getAbsolutePath() + ") size=" + upload.length());
 
         entity.addPart(fileParam, new FileBody(upload));
-        request.setEntity(entity);
+        request.setEntity(entity.build());
 
         HttpResponse response = httpClient.execute(request);
         int status = response.getStatusLine().getStatusCode();
