@@ -46,7 +46,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
         
         try {
-//            mTrustManager = new StrongTrustManager(context);
+            
             KeyStore keyStore = loadKeyStore();
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(keyStore);
@@ -89,8 +89,8 @@ public class StrongHttpsClient extends DefaultHttpClient {
         	    	mTrustManager = trustManagerFactory.getTrustManagers()[0];  
         	    }  
         	} 
-        	
-            sFactory = new StrongSSLSocketFactory(context, mTrustManager, loadKeyStore(), TRUSTSTORE_PASSWORD);
+
+            sFactory = new StrongSSLSocketFactory(context, mTrustManager, keystore, TRUSTSTORE_PASSWORD);
             mRegistry.register(new Scheme("https", 443, sFactory));
         } catch (Exception e) {
             throw new AssertionError(e);

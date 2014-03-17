@@ -46,30 +46,26 @@ public class StrongSSLSocketFactory extends
 	private boolean mEnableStongerDefaultSSLCipherSuite = true;
 	private boolean mEnableStongerDefaultProtocalVersion = true;
 
-	private StrongTrustManager mStrongTrustManager;
+	private TrustManager mTrustManager;
 
 	public StrongSSLSocketFactory(Context context,
-			StrongTrustManager strongTrustManager)
+			TrustManager trustManager, KeyStore keyStore, String keyStorePassword)
 			throws KeyManagementException, UnrecoverableKeyException,
 			NoSuchAlgorithmException, KeyStoreException, CertificateException,
 			IOException {
-		super(strongTrustManager.getKeyStore());
+		super(keyStore);
 
-		mStrongTrustManager = strongTrustManager;
+		mTrustManager = trustManager;
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
-		TrustManager[] tm = new TrustManager[] { mStrongTrustManager };
+		TrustManager[] tm = new TrustManager[] { mTrustManager };
 		KeyManager[] km = createKeyManagers(
-				mStrongTrustManager.getTrustStore(),
-				mStrongTrustManager.getTrustStorePassword());
+				keyStore,
+				keyStorePassword);
 		sslContext.init(km, tm, new SecureRandom());
 
 		mFactory = sslContext.getSocketFactory();
 
-	}
-
-	public StrongTrustManager getStrongTrustManager() {
-		return mStrongTrustManager;
 	}
 
 	private KeyManager[] createKeyManagers(final KeyStore keystore,
