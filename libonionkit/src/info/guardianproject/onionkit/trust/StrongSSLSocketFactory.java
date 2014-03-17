@@ -1,10 +1,6 @@
-
 package info.guardianproject.onionkit.trust;
 
-import android.content.Context;
-
-import ch.boye.httpclientandroidlib.conn.scheme.LayeredSchemeSocketFactory;
-import ch.boye.httpclientandroidlib.params.HttpParams;
+import info.guardianproject.onionkit.OnionKitHelper;
 
 import java.io.IOException;
 import java.net.Proxy;
@@ -26,99 +22,151 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-public class StrongSSLSocketFactory extends ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory
-        implements LayeredSchemeSocketFactory
-{
+import android.content.Context;
+import ch.boye.httpclientandroidlib.conn.scheme.LayeredSchemeSocketFactory;
+import ch.boye.httpclientandroidlib.params.HttpParams;
 
-    private SSLSocketFactory mFactory = null;
+public class StrongSSLSocketFactory extends
+		ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory implements
+		LayeredSchemeSocketFactory {
 
-    private Proxy mProxy = null;
+	private SSLSocketFactory mFactory = null;
 
-    public static final String TLS = "TLS";
-    public static final String SSL = "SSL";
-    public static final String SSLV2 = "SSLv2";
+	private Proxy mProxy = null;
 
-    // private X509HostnameVerifier mHostnameVerifier = new
-    // StrictHostnameVerifier();
-    // private final HostNameResolver mNameResolver = new
-    // StrongHostNameResolver();
+	public static final String TLS = "TLS";
+	public static final String SSL = "SSL";
+	public static final String SSLV2 = "SSLv2";
 
-    private TrustManager mTrustManager;
+	// private X509HostnameVerifier mHostnameVerifier = new
+	// StrictHostnameVerifier();
+	// private final HostNameResolver mNameResolver = new
+	// StrongHostNameResolver();
 
-    public StrongSSLSocketFactory(Context context, TrustManager trustManager, KeyStore kStore, String kStorePasswd)
-            throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException,
-            KeyStoreException, CertificateException, IOException
-    {
-        super(kStore);
+	private boolean mEnableStongerDefaultSSLCipherSuite = true;
+	private boolean mEnableStongerDefaultProtocalVersion = true;
 
-        mTrustManager = trustManager;
+	private StrongTrustManager mStrongTrustManager;
 
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        TrustManager[] tm = new TrustManager[] {
-        		mTrustManager
-        };
-        KeyManager[] km = createKeyManagers(kStore,
-        		kStorePasswd);
-        sslContext.init(km, tm, new SecureRandom());
+	public StrongSSLSocketFactory(Context context,
+			StrongTrustManager strongTrustManager)
+			throws KeyManagementException, UnrecoverableKeyException,
+			NoSuchAlgorithmException, KeyStoreException, CertificateException,
+			IOException {
+		super(strongTrustManager.getKeyStore());
 
-        mFactory = sslContext.getSocketFactory();
+		mStrongTrustManager = strongTrustManager;
 
-    }
+		SSLContext sslContext = SSLContext.getInstance("TLS");
+		TrustManager[] tm = new TrustManager[] { mStrongTrustManager };
+		KeyManager[] km = createKeyManagers(
+				mStrongTrustManager.getTrustStore(),
+				mStrongTrustManager.getTrustStorePassword());
+		sslContext.init(km, tm, new SecureRandom());
 
-    public TrustManager getStrongTrustManager()
-    {
-        return mTrustManager;
-    }
+		mFactory = sslContext.getSocketFactory();
 
-    private KeyManager[] createKeyManagers(final KeyStore keystore, final String password)
-            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
-        if (keystore == null) {
-            throw new IllegalArgumentException("Keystore may not be null");
-        }
-        KeyManagerFactory kmfactory = KeyManagerFactory.getInstance(
-                KeyManagerFactory.getDefaultAlgorithm());
-        kmfactory.init(keystore, password != null ? password.toCharArray() : null);
-        return kmfactory.getKeyManagers();
-    }
+	}
 
-    @Override
-    public Socket createSocket() throws IOException
-    {
-        return mFactory.createSocket();
-    }
+	public StrongTrustManager getStrongTrustManager() {
+		return mStrongTrustManager;
+	}
 
-    @Override
-    public Socket createSocket(Socket socket, String host, int port,
-            boolean autoClose) throws IOException, UnknownHostException {
+	private KeyManager[] createKeyManagers(final KeyStore keystore,
+			final String password) throws KeyStoreException,
+			NoSuchAlgorithmException, UnrecoverableKeyException {
+		if (keystore == null) {
+			throw new IllegalArgumentException("Keystore may not be null");
+		}
+		KeyManagerFactory kmfactory = KeyManagerFactory
+				.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		kmfactory.init(keystore, password != null ? password.toCharArray()
+				: null);
+		return kmfactory.getKeyManagers();
+	}
 
-        return mFactory.createSocket(socket, host, port, autoClose);
-    }
+	@Override
+	public Socket createSocket() throws IOException {
+		Socket newSocket = mFactory.createSocket();
+		enableStrongerDefaults(newSocket);
+		return newSocket;
+	}
 
-    @Override
-    public boolean isSecure(Socket sock) throws IllegalArgumentException {
-        return (sock instanceof SSLSocket);
-    }
+	@Override
+	public Socket createSocket(Socket socket, String host, int port,
+			boolean autoClose) throws IOException, UnknownHostException {
 
-    public void setProxy(Proxy proxy) {
-        mProxy = proxy;
-    }
+		Socket newSocket = mFactory.createSocket(socket, host, port, autoClose);
 
-    public Proxy getProxy()
-    {
-        return mProxy;
-    }
+		enableStrongerDefaults(newSocket);
 
-    @Override
-    public Socket createSocket(HttpParams arg0) throws IOException {
+		return newSocket;
+	}
 
-        return mFactory.createSocket();
+	/**
+	 * Defaults the SSL connection to use a strong cipher suite and TLS version
+	 * 
+	 * @param socket
+	 */
+	private void enableStrongerDefaults(Socket socket) {
+		if (isSecure(socket)) {
 
-    }
+			if (mEnableStongerDefaultProtocalVersion) {
+				((SSLSocket) socket)
+						.setEnabledProtocols(OnionKitHelper.ENABLED_PROTOCOLS);
+			}
 
-    @Override
-    public Socket createLayeredSocket(Socket arg0, String arg1, int arg2,
-            boolean arg3) throws IOException, UnknownHostException {
-        return ((LayeredSchemeSocketFactory) mFactory).createLayeredSocket(arg0, arg1, arg2, arg3);
-    }
+			if (mEnableStongerDefaultSSLCipherSuite) {
+				((SSLSocket) socket)
+						.setEnabledCipherSuites(OnionKitHelper.ENABLED_CIPHERS);
+			}
+		}
+	}
+
+	@Override
+	public boolean isSecure(Socket sock) throws IllegalArgumentException {
+		return (sock instanceof SSLSocket);
+	}
+
+	public void setProxy(Proxy proxy) {
+		mProxy = proxy;
+	}
+
+	public Proxy getProxy() {
+		return mProxy;
+	}
+
+	public boolean isEnableStongerDefaultSSLCipherSuite() {
+		return mEnableStongerDefaultSSLCipherSuite;
+	}
+
+	public void setEnableStongerDefaultSSLCipherSuite(boolean enable) {
+		this.mEnableStongerDefaultSSLCipherSuite = enable;
+	}
+
+	public boolean isEnableStongerDefaultProtocalVersion() {
+		return mEnableStongerDefaultProtocalVersion;
+	}
+
+	public void setEnableStongerDefaultProtocalVersion(boolean enable) {
+		this.mEnableStongerDefaultProtocalVersion = enable;
+	}
+
+	@Override
+	public Socket createSocket(HttpParams httpParams) throws IOException {
+		Socket newSocket = mFactory.createSocket();
+
+		enableStrongerDefaults(newSocket);
+
+		return newSocket;
+
+	}
+
+	@Override
+	public Socket createLayeredSocket(Socket arg0, String arg1, int arg2,
+			boolean arg3) throws IOException, UnknownHostException {
+		return ((LayeredSchemeSocketFactory) mFactory).createLayeredSocket(
+				arg0, arg1, arg2, arg3);
+	}
 
 }
