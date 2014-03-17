@@ -78,7 +78,7 @@ import javax.security.auth.x500.X500Principal;
  * @autor n8fr8
  * @author Gaston Dombiak
  */
-public class StrongTrustManager implements X509TrustManager {
+public abstract class StrongTrustManager implements X509TrustManager {
 
     private static final String TAG = "ONIONKIT";
     public static boolean SHOW_DEBUG_OUTPUT = true;
@@ -195,6 +195,7 @@ public class StrongTrustManager implements X509TrustManager {
                                        // Store
     }
 
+    /**
     @Override
     public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
 
@@ -474,6 +475,7 @@ public class StrongTrustManager implements X509TrustManager {
                     certSite.getSubjectDN().getName(), certSite, fingerprint);
 
     }
+    **/
 
     public void setNotifyVerificationSuccess(boolean notifyVerificationSuccess)
     {
