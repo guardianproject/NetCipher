@@ -178,16 +178,21 @@ public class WebkitProxy {
     @TargetApi(19)
 	public static boolean resetKitKatProxy(String appClass, Context appContext) {
     
-    	return setKitKatProxy(appClass, appContext,"",0);
+    	return setKitKatProxy(appClass, appContext,null,0);
     }
     
     @TargetApi(19)
 	public static boolean setKitKatProxy(String appClass, Context appContext, String host, int port) {
     	//Context appContext = webView.getContext().getApplicationContext();
-        System.setProperty("http.proxyHost", host);
-        System.setProperty("http.proxyPort", port + "");
-        System.setProperty("https.proxyHost", host);
-        System.setProperty("https.proxyPort", port + "");
+    	
+    	if (host != null)
+    	{
+	        System.setProperty("http.proxyHost", host);
+	        System.setProperty("http.proxyPort", port + "");
+	        System.setProperty("https.proxyHost", host);
+	        System.setProperty("https.proxyPort", port + "");
+    	}
+        
         try {
             Class applictionCls = Class.forName(appClass);
             Field loadedApkField = applictionCls.getField("mLoadedApk");
@@ -203,15 +208,18 @@ public class WebkitProxy {
                     if (clazz.getName().contains("ProxyChangeListener")) {
                         Method onReceiveMethod = clazz.getDeclaredMethod("onReceive", Context.class, Intent.class);
                         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
-
-                        /*********** optional, may be need in future *************/
-                        final String CLASS_NAME = "android.net.ProxyProperties";
-                        Class cls = Class.forName(CLASS_NAME);
-                        Constructor constructor = cls.getConstructor(String.class, Integer.TYPE, String.class);
-                        constructor.setAccessible(true);
-                        Object proxyProperties = constructor.newInstance(host, port, null);
-                        intent.putExtra("proxy", (Parcelable) proxyProperties);
-                        /*********** optional, may be need in future *************/
+                        
+                        if (host != null)
+                        {
+	                        /*********** optional, may be need in future *************/
+	                        final String CLASS_NAME = "android.net.ProxyProperties";
+	                        Class cls = Class.forName(CLASS_NAME);
+	                        Constructor constructor = cls.getConstructor(String.class, Integer.TYPE, String.class);
+	                        constructor.setAccessible(true);
+	                        Object proxyProperties = constructor.newInstance(host, port, null);
+	                        intent.putExtra("proxy", (Parcelable) proxyProperties);
+	                        /*********** optional, may be need in future *************/
+                        }
 
                         onReceiveMethod.invoke(rec, appContext, intent);
                     }
@@ -477,6 +485,14 @@ public class WebkitProxy {
     }**/
 
     public static void resetProxy(String appClass, Context ctx) throws Exception {
+    	
+
+        System.clearProperty("http.proxyHost");
+        System.clearProperty("http.proxyPort");
+        System.clearProperty("https.proxyHost");
+        System.clearProperty("https.proxyPort");
+        
+        
          if (Build.VERSION.SDK_INT < 14)
         {
             resetProxyForGingerBread(ctx);
@@ -489,6 +505,7 @@ public class WebkitProxy {
         {
         	resetKitKatProxy(appClass, ctx);
         }
+         
     }
 
     private static void resetProxyForICS() throws Exception{
