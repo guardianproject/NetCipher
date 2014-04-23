@@ -40,7 +40,7 @@ public class WebkitProxy {
     public static boolean setProxy(String appClass, Context ctx, String host, int port) throws Exception
     {
       
-    	setSystemProperties(host, port);
+    	//setSystemProperties(host, port);
 
         boolean worked = false;
 
