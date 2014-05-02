@@ -54,14 +54,10 @@ public class WebkitProxy {
         }
         else        	
         {
-           // worked = setKitKatProxy0(ctx, host, port);
-          //  worked = setWebkitProxyICS(ctx, host, port);
-
             worked = setKitKatProxy(appClass, ctx, host, port);
-            
-         //   worked = setKitKatProxy2(ctx, host, port);
-            
-          //  sendProxyChangedIntent(ctx, host, port);
+        
+            if (!worked) //some kitkat's still use ICS browser component (like Cyanogen 11)
+            	worked = setWebkitProxyICS(ctx, host, port);
             
         }
         
@@ -182,7 +178,7 @@ public class WebkitProxy {
     }
     
     @TargetApi(19)
-	public static boolean setKitKatProxy(String appClass, Context appContext, String host, int port) {
+	private static boolean setKitKatProxy(String appClass, Context appContext, String host, int port) {
     	//Context appContext = webView.getContext().getApplicationContext();
     	
     	if (host != null)
