@@ -1,0 +1,6 @@
+[submodule "libnetcipher/external/memtrust"]
+	path = libnetcipher/external/memtrust
+	url = https://github.com/ge0rg/MemorizingTrustManager.git
+[submodule "libnetcipher/external/pinning"]
+	path = libnetcipher/external/pinning
+	url = https://github.com/moxie0/AndroidPinning.git

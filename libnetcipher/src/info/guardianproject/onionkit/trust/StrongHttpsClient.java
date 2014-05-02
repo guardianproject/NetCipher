@@ -1,6 +1,21 @@
 
 package info.guardianproject.onionkit.trust;
 
+import info.guardianproject.onionkit.R;
+import info.guardianproject.onionkit.proxy.MyThreadSafeClientConnManager;
+import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+
 import android.content.Context;
 import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpHost;
@@ -10,19 +25,6 @@ import ch.boye.httpclientandroidlib.conn.scheme.Scheme;
 import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
 import ch.boye.httpclientandroidlib.impl.client.DefaultHttpClient;
 import ch.boye.httpclientandroidlib.impl.conn.tsccm.ThreadSafeClientConnManager;
-import info.guardianproject.onionkit.R;
-import info.guardianproject.onionkit.proxy.MyThreadSafeClientConnManager;
-import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
-
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 
 public class StrongHttpsClient extends DefaultHttpClient {
 
