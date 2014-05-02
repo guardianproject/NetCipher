@@ -19,27 +19,8 @@ package info.guardianproject.onionkit.trust;
  * the License.
  */
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-
 import info.guardianproject.onionkit.R;
 import info.guardianproject.onionkit.ui.CertDisplayActivity;
-
-import org.spongycastle.asn1.ASN1InputStream;
-import org.spongycastle.asn1.ASN1OctetString;
-import org.spongycastle.asn1.ASN1Primitive;
-import org.spongycastle.asn1.ASN1String;
-import org.spongycastle.asn1.DEROctetString;
-import org.spongycastle.asn1.DERSequence;
-import org.spongycastle.asn1.x509.BasicConstraints;
-import org.spongycastle.asn1.x509.GeneralName;
-import org.spongycastle.asn1.x509.KeyUsage;
-import org.spongycastle.asn1.x509.X509Extensions;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -66,6 +47,25 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
+
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Primitive;
+import org.spongycastle.asn1.ASN1String;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.x509.BasicConstraints;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.KeyUsage;
+import org.spongycastle.asn1.x509.X509Extensions;
+
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 /**
  * Updated multifaceted StrongTrustManager Based on TrustManager from Jive:
