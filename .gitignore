@@ -12,6 +12,8 @@ build.xml
 # generated files
 bin/
 gen/
+build/
+.gradle/
 
 # eclipse
 .settings
