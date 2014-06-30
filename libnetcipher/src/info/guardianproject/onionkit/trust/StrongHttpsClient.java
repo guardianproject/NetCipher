@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.conn.ClientConnectionOperator;
+import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
 import ch.boye.httpclientandroidlib.conn.scheme.PlainSocketFactory;
 import ch.boye.httpclientandroidlib.conn.scheme.Scheme;
 import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
@@ -152,9 +153,9 @@ public class StrongHttpsClient extends DefaultHttpClient {
         {
             this.proxyType = type;
 
-            HttpHost proxyHost = new HttpHost(host, port);
-            getParams().setParameter(type, proxyHost);
-
+            HttpHost proxyHost = new HttpHost(host, port, type);
+            getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHost);
+            
             if (type.equalsIgnoreCase("socks"))
             {
                 this.proxyHost = proxyHost;
