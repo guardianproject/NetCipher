@@ -19,27 +19,8 @@ package info.guardianproject.onionkit.trust;
  * the License.
  */
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-
 import info.guardianproject.onionkit.R;
 import info.guardianproject.onionkit.ui.CertDisplayActivity;
-
-import org.spongycastle.asn1.ASN1InputStream;
-import org.spongycastle.asn1.ASN1OctetString;
-import org.spongycastle.asn1.ASN1Primitive;
-import org.spongycastle.asn1.ASN1String;
-import org.spongycastle.asn1.DEROctetString;
-import org.spongycastle.asn1.DERSequence;
-import org.spongycastle.asn1.x509.BasicConstraints;
-import org.spongycastle.asn1.x509.GeneralName;
-import org.spongycastle.asn1.x509.KeyUsage;
-import org.spongycastle.asn1.x509.X509Extensions;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -67,6 +48,25 @@ import java.util.regex.Pattern;
 import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Primitive;
+import org.spongycastle.asn1.ASN1String;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.x509.BasicConstraints;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.KeyUsage;
+import org.spongycastle.asn1.x509.X509Extensions;
+
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
+
 /**
  * Updated multifaceted StrongTrustManager Based on TrustManager from Jive:
  * Trust manager that checks all certificates presented by the server. This
@@ -78,7 +78,7 @@ import javax.security.auth.x500.X500Principal;
  * @autor n8fr8
  * @author Gaston Dombiak
  */
-public class StrongTrustManager implements X509TrustManager {
+public abstract class StrongTrustManager implements X509TrustManager {
 
     private static final String TAG = "ONIONKIT";
     public static boolean SHOW_DEBUG_OUTPUT = true;
@@ -195,6 +195,7 @@ public class StrongTrustManager implements X509TrustManager {
                                        // Store
     }
 
+    /**
     @Override
     public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
 
@@ -474,6 +475,7 @@ public class StrongTrustManager implements X509TrustManager {
                     certSite.getSubjectDN().getName(), certSite, fingerprint);
 
     }
+    **/
 
     public void setNotifyVerificationSuccess(boolean notifyVerificationSuccess)
     {
@@ -842,13 +844,11 @@ public class StrongTrustManager implements X509TrustManager {
             {
                 KeyUsage keyUsage = (KeyUsage) bsVal;
                 // SSLCA: CERT_SIGN; SSL_CA;+
-                debug("KeyUsage=" + keyUsage.intValue() + ";" + keyUsage.getString());
+//                debug("KeyUsage=" + keyUsage.intValue() + ";" + keyUsage.getString());
 
-                int flags = keyUsage.intValue();
-
-                if ((flags & KeyUsage.cRLSign) == KeyUsage.cRLSign
-                        || (flags & KeyUsage.keyCertSign) == KeyUsage.keyCertSign)
-                {
+                if (keyUsage.hasUsages(KeyUsage.cRLSign)
+                		&& keyUsage.hasUsages(KeyUsage.keyCertSign))
+                {                
                     // we okay
                 }
                 else

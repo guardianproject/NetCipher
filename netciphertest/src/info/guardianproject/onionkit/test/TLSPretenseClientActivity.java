@@ -85,8 +85,8 @@ public class TLSPretenseClientActivity extends Activity {
         trustStore.load(in, "changeit".toCharArray());
 
         StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext(), trustStore);
-        httpclient.getStrongTrustManager().setNotifyVerificationFail(true);
-        httpclient.getStrongTrustManager().setNotifyVerificationSuccess(true);
+        //httpclient.getStrongTrustManager().setNotifyVerificationFail(true);
+        //httpclient.getStrongTrustManager().setNotifyVerificationSuccess(true);
 
         HttpGet httpget = new HttpGet(url);
         HttpResponse response = httpclient.execute(httpget);

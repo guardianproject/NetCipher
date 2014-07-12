@@ -1,25 +1,19 @@
-OnionKit for Android
+NetCipher: Network Security Library for Android
 ========
 
 This is an Android Library Project that provides multiple means to improve
-network security in mobile applications. The "Onion" name refers to not only
-the Onion Routing concept used by Tor (which provides anonymity and resistance
-to traffic surveillance), but also the idea of multiple layers of security
-that any application should utilize.
+network security in mobile applications.
 
 More specifically this library provides:
 
-1. StrongTrustManager: a robust implementation of an TLS/SSL certificate verifier, that can be customized with any set of certificate authorities
-2. Proxied Connection Support: HTTP and SOCKS proxy connection support for HTTP and HTTP/S traffic through specific configuration of the Apache HTTPClient library
-3. OrbotHelper: a utility class to support application integration with Orbot: Tor for Android. Check if its installed, running, etc.
+- A built-in certificate store based on the open Debian root CA trust store (doesn't use the devices CA cert store)
+- Hardening of TLS support and Cipher Suites
+- Proxied Connection Support: HTTP and SOCKS proxy connection support for HTTP and HTTP/S traffic through specific configuration of the Apache HTTPClient library
+- OrbotHelper: a utility class to support application integration with Orbot: Tor for Android. Check if its installed, running, etc.
+
+// REMOVED FOR NOW (UNDER REVIEW FOR VERIFICATION BUG) --> 1. StrongTrustManager: a robust implementation of an TLS/SSL certificate verifier, that can be customized with any set of certificate authorities
 
 IT MUST BE NOTED, that you can use this library without using Orbot/Tor, but obviously we think using strong TLS/SSL connections over Tor is just about the best thing in the world.
-
-# StrongTrustManager
-
-We have implemented a TrustManager for SSL Certificate verification that we believe is better than the default one provided by Android. For app developers, it provides for a consistent implementation of TLS/SSL verification and trust across various versions and devices.
-
-It supports full chain verification, limited pinning, and a custom cacerts store based on the Debian set of certs. By providing our own cacert store, we can be assured that certificates are being validated against a known set of trusted Roots, and not compromised, expired or other non-desireable entities.
 
 Developers can create their own CACert store using the information provided by our CACertMan project:
 https://github.com/guardianproject/cacert

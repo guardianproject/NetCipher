@@ -1,5 +1,5 @@
 
-package sample.onionkit;
+package sample.netcipher;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -29,7 +29,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
-public class OnionKitSampleActivity extends Activity {
+import sample.onionkit.R;
+
+public class NetCipherSampleActivity extends Activity {
 
     private final static String TAG = "OrlibSample";
     private TextView txtView = null;
@@ -112,8 +114,6 @@ public class OnionKitSampleActivity extends Activity {
     {
 
         StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext());
-        httpclient.getStrongTrustManager().setNotifyVerificationFail(true);
-        httpclient.getStrongTrustManager().setNotifyVerificationSuccess(true);
 
         if (pType == null)
         {

@@ -1,20 +1,31 @@
 
 package info.guardianproject.onionkit.trust;
 
+import info.guardianproject.onionkit.R;
+import info.guardianproject.onionkit.proxy.MyThreadSafeClientConnManager;
+import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+
 import android.content.Context;
 import android.util.Log;
-
 import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.conn.ClientConnectionOperator;
+import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
 import ch.boye.httpclientandroidlib.conn.scheme.PlainSocketFactory;
 import ch.boye.httpclientandroidlib.conn.scheme.Scheme;
 import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
 import ch.boye.httpclientandroidlib.impl.client.DefaultHttpClient;
 import ch.boye.httpclientandroidlib.impl.conn.tsccm.ThreadSafeClientConnManager;
-import info.guardianproject.onionkit.proxy.MyThreadSafeClientConnManager;
-import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
-
-import java.security.KeyStore;
 
 public class StrongHttpsClient extends DefaultHttpClient {
 
@@ -23,9 +34,12 @@ public class StrongHttpsClient extends DefaultHttpClient {
     private String proxyType;
 
     private StrongSSLSocketFactory sFactory;
-    private StrongTrustManager mTrustManager;
+    private TrustManager mTrustManager;
     private SchemeRegistry mRegistry;
 
+    private final static String TRUSTSTORE_TYPE = "BKS";
+    private final static String TRUSTSTORE_PASSWORD = "changeit";
+    
     public StrongHttpsClient(Context context) {
         this.context = context;
 
@@ -33,15 +47,36 @@ public class StrongHttpsClient extends DefaultHttpClient {
         mRegistry.register(
                 new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 
+        
         try {
-            mTrustManager = new StrongTrustManager(context);
-            sFactory = new StrongSSLSocketFactory(context, mTrustManager);
+            
+            KeyStore keyStore = loadKeyStore();
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(keyStore);
+        	for (TrustManager trustManager : trustManagerFactory.getTrustManagers()) {          	  
+        	    if (trustManager instanceof X509TrustManager) {  
+        	    	mTrustManager = trustManagerFactory.getTrustManagers()[0];  
+        	    }  
+        	}  
+        	
+            sFactory = new StrongSSLSocketFactory(context, mTrustManager, keyStore, TRUSTSTORE_PASSWORD);
             mRegistry.register(new Scheme("https", 443, sFactory));
         } catch (Exception e) {
             throw new AssertionError(e);
         }
     }
 
+    private KeyStore loadKeyStore () throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException
+    {
+
+        KeyStore trustStore = KeyStore.getInstance(TRUSTSTORE_TYPE);
+        // load our bundled cacerts from raw assets
+        InputStream in = context.getResources().openRawResource(R.raw.debiancacerts);
+        trustStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
+
+        return trustStore;
+    }
+    
     public StrongHttpsClient(Context context, KeyStore keystore) {
         this.context = context;
 
@@ -50,8 +85,15 @@ public class StrongHttpsClient extends DefaultHttpClient {
                 new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 
         try {
-            mTrustManager = new StrongTrustManager(context, keystore);
-            sFactory = new StrongSSLSocketFactory(context, mTrustManager);
+            //mTrustManager = new StrongTrustManager(context, keystore);
+        	TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        	for (TrustManager trustManager : trustManagerFactory.getTrustManagers()) {          	  
+        	    if (trustManager instanceof X509TrustManager) {  
+        	    	mTrustManager = trustManagerFactory.getTrustManagers()[0];  
+        	    }  
+        	} 
+
+            sFactory = new StrongSSLSocketFactory(context, mTrustManager, keystore, TRUSTSTORE_PASSWORD);
             mRegistry.register(new Scheme("https", 443, sFactory));
         } catch (Exception e) {
             throw new AssertionError(e);
@@ -93,9 +135,9 @@ public class StrongHttpsClient extends DefaultHttpClient {
         }
     }
 
-    public StrongTrustManager getStrongTrustManager()
+    public TrustManager getTrustManager()
     {
-        return sFactory.getStrongTrustManager();
+        return mTrustManager;
     }
 
     public void useProxy(boolean enableTor, String type, String host, int port)
@@ -111,9 +153,9 @@ public class StrongHttpsClient extends DefaultHttpClient {
         {
             this.proxyType = type;
 
-            HttpHost proxyHost = new HttpHost(host, port);
-            getParams().setParameter(type, proxyHost);
-
+            HttpHost proxyHost = new HttpHost(host, port, type);
+            getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHost);
+            
             if (type.equalsIgnoreCase("socks"))
             {
                 this.proxyHost = proxyHost;
@@ -121,4 +163,6 @@ public class StrongHttpsClient extends DefaultHttpClient {
         }
 
     }
+  
+  
 }
