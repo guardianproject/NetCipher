@@ -45,7 +45,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
         mRegistry = new SchemeRegistry();
         mRegistry.register(
-                new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+                new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
 
         
         try {
@@ -82,7 +82,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
         mRegistry = new SchemeRegistry();
         mRegistry.register(
-                new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+                new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
 
         try {
             //mTrustManager = new StrongTrustManager(context, keystore);
@@ -142,13 +142,6 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
     public void useProxy(boolean enableTor, String type, String host, int port)
     {
-
-        if (proxyType != null)
-        {
-            getParams().removeParameter(proxyType);
-            proxyHost = null;
-        }
-
         if (enableTor)
         {
             this.proxyType = type;
@@ -156,13 +149,26 @@ public class StrongHttpsClient extends DefaultHttpClient {
             HttpHost proxyHost = new HttpHost(host, port, type);
             getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHost);
             
-            if (type.equalsIgnoreCase("socks"))
+            if (type.equalsIgnoreCase(TYPE_SOCKS))
             {
                 this.proxyHost = proxyHost;
             }
         }
+        else
+        {
+        	getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
+            proxyHost = null;
+        }
 
     }
   
+    public void disableProxy ()
+    {
+    	getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
+        proxyHost = null;
+    }
   
+    public final static String TYPE_SOCKS = "socks";
+    public final static String TYPE_HTTP = "http";
+    
 }
