@@ -13,15 +13,21 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import ch.boye.httpclientandroidlib.conn.scheme.LayeredSchemeSocketFactory;
 import ch.boye.httpclientandroidlib.params.HttpParams;
 
@@ -46,6 +52,9 @@ public class StrongSSLSocketFactory extends
 	private boolean mEnableStongerDefaultProtocalVersion = true;
 
 	private TrustManager mTrustManager;
+	
+	private String[] mProtocols;
+	private String[] mCipherSuites;
 
 	public StrongSSLSocketFactory(Context context,
 			TrustManager trustManager, KeyStore keyStore, String keyStorePassword)
@@ -67,6 +76,26 @@ public class StrongSSLSocketFactory extends
 
 	}
 
+	private void readSSLParameters(SSLSocket sslSocket) {
+		List<String> protocolsToEnable = new ArrayList<String>();
+		List<String> supportedProtocols = Arrays.asList(sslSocket.getSupportedProtocols());
+		for(String enabledProtocol : OnionKitHelper.ENABLED_PROTOCOLS) {
+			if(supportedProtocols.contains(enabledProtocol)) {
+				protocolsToEnable.add(enabledProtocol);
+			}
+		}
+		this.mProtocols = protocolsToEnable.toArray(new String[protocolsToEnable.size()]);
+		
+		List<String> cipherSuitesToEnable = new ArrayList<String>();
+		List<String> supportedCipherSuites = Arrays.asList(sslSocket.getSupportedCipherSuites());
+		for(String enabledCipherSuite : OnionKitHelper.ENABLED_CIPHERS) {
+			if(supportedCipherSuites.contains(enabledCipherSuite)) {
+				cipherSuitesToEnable.add(enabledCipherSuite);
+			}
+		}
+		this.mCipherSuites = cipherSuitesToEnable.toArray(new String[cipherSuitesToEnable.size()]);
+	}
+	
 	private KeyManager[] createKeyManagers(final KeyStore keystore,
 			final String password) throws KeyStoreException,
 			NoSuchAlgorithmException, UnrecoverableKeyException {
@@ -105,15 +134,15 @@ public class StrongSSLSocketFactory extends
 	 */
 	private void enableStrongerDefaults(Socket socket) {
 		if (isSecure(socket)) {
+			SSLSocket sslSocket = (SSLSocket) socket;
+			readSSLParameters(sslSocket);
 
-			if (mEnableStongerDefaultProtocalVersion) {
-				((SSLSocket) socket)
-						.setEnabledProtocols(OnionKitHelper.ENABLED_PROTOCOLS);
+			if (mEnableStongerDefaultProtocalVersion && mProtocols != null) {
+				sslSocket.setEnabledProtocols(mProtocols);
 			}
 
-			if (mEnableStongerDefaultSSLCipherSuite) {
-				((SSLSocket) socket)
-						.setEnabledCipherSuites(OnionKitHelper.ENABLED_CIPHERS);
+			if (mEnableStongerDefaultSSLCipherSuite && mCipherSuites != null) {
+				sslSocket.setEnabledCipherSuites(mCipherSuites);
 			}
 		}
 	}
