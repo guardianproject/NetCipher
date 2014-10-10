@@ -13,6 +13,9 @@ build.xml
 bin/
 gen/
 
+# gradle
+libnetcipher/build/
+
 # eclipse
 .settings
 .project

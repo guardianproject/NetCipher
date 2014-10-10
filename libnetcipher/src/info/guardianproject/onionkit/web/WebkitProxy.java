@@ -24,7 +24,7 @@ import android.net.Proxy;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
-import android.util.ArrayMap;
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
 
 public class WebkitProxy {
