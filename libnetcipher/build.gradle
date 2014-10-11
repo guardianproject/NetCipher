@@ -3,7 +3,6 @@ apply plugin: 'android-library'
 dependencies {
     compile 'com.android.support:support-v4:19.1.0'
     compile files('libs/httpclientandroidlib-1.2.1.jar')
-    compile files('libs/spongycastle-core-1.50.0.0.jar')
 }
 
 android {
