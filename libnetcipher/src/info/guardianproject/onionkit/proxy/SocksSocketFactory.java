@@ -60,33 +60,41 @@ public class SocksSocketFactory implements SocketFactory {
 	
 	@Override
 	public Socket connectSocket(Socket sock, String host, int port,
-			InetAddress localAddress, int localPort, HttpParams params) throws IOException,
-            UnknownHostException, ConnectTimeoutException {
+			InetAddress localAddress, int localPort, HttpParams params) throws IOException {
 		
 		if (host == null) {
             throw new IllegalArgumentException("Target host may not be null.");
         }
         if (params == null) {
-            throw new IllegalArgumentException("Parameters may not be null.");
+//            throw new IllegalArgumentException("Parameters may not be null.");
         }
 
         if (sock == null)
             sock = createSocket();
 
-        if ((localAddress != null) || (localPort > 0)) {
-
-            // we need to bind explicitly
-            if (localPort < 0)
-                localPort = 0; // indicates "any"
-
-            InetSocketAddress isa =
-                new InetSocketAddress(localAddress, localPort);
-            sock.bind(isa);
-        }
+//        if ((localAddress != null) || (localPort > 0)) {
+//
+//            // we need to bind explicitly
+//            if (localPort < 0)
+//                localPort = 0; // indicates "any"
+//
+//            InetSocketAddress isa =
+//                new InetSocketAddress(localAddress, localPort);
+//            sock.bind(isa);
+//        }
 
         return new SocksSocket(sProxy,host, port);
 		
 	}
+
+    /**
+     * Connects to host:port through proxyaddress:proxyport defined in constructor
+     * @param host The host address to connect to. Will be resolved by proxy
+     * @param port The port on specified host to connect to
+     */
+    public Socket connectSocket(String host, int port) throws IOException {
+        return connectSocket(null, host, port, null, 0, null);
+    }
 	
 	public Socket createSocket(Socket sock,
 			InetAddress localAddress, int localPort, HttpParams params) throws IOException,
@@ -94,7 +102,7 @@ public class SocksSocketFactory implements SocketFactory {
 		
 		
         if (params == null) {
-            throw new IllegalArgumentException("Parameters may not be null.");
+//            throw new IllegalArgumentException("Parameters may not be null.");
         }
 
         if (sock == null)
