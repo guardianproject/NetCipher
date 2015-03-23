@@ -1,7 +1,7 @@
 
 package info.guardianproject.onionkit.trust;
 
-import ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory;
+
 import info.guardianproject.onionkit.R;
 import info.guardianproject.onionkit.proxy.MyThreadSafeClientConnManager;
 import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
@@ -64,7 +64,8 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
 
             // TRYING SOMETHING
-            sFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            SMVerifier verifier = new SMVerifier(context);
+            sFactory.setHostnameVerifier(verifier);
 
 
             mRegistry.register(new Scheme("https", 443, sFactory));
