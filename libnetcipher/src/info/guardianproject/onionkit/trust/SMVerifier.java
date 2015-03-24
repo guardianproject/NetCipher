@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
@@ -20,11 +21,16 @@ import info.guardianproject.onionkit.R;
 public class SMVerifier implements X509HostnameVerifier
 {
 
-    private String cloudflareHost;
+    private String[] hosts;
 
     public SMVerifier(Context context) {
         super();
-        cloudflareHost = context.getString(R.string.sm_domain);
+        String hostsString = context.getString(R.string.sm_domains);
+        if ((hostsString != null) && (hostsString.length() > 0)) {
+            hosts = hostsString.split(",");
+        } else {
+            hosts = new String[0];
+        }
     }
 
     @Override
@@ -41,7 +47,7 @@ public class SMVerifier implements X509HostnameVerifier
 
         String dn = peerPrincipal.getName("CANONICAL");
         String cn = null;
-        String [] dnParts = dn.split(",");
+        String[] dnParts = dn.split(",");
 
         for (String dnPart : dnParts) {
             if (dnPart.startsWith("cn=")) {
@@ -51,12 +57,16 @@ public class SMVerifier implements X509HostnameVerifier
 
         if (cn == null) {
             throw new IOException("COULD NOT EXTRACT INFORMATION FROM CERTIFICATE: " + dn);
-        } else if (cn.equals(cloudflareHost)) {
-            Log.d("VERIFIER", "FOUND A MATCH: " + cn + " = " + cloudflareHost);
-            return;
         } else {
-            throw new IOException("COULD NOT FIND A MATCH FOR " + cloudflareHost + " IN CERTIFICATE: " + dn);
+            for (String compareHost : hosts) {
+                if (cn.equals(compareHost)) {
+                    Log.d("VERIFIER", "FOUND A MATCH: " + cn + " = " + compareHost);
+                    return;
+                }
+            }
         }
+
+        throw new IOException("COULD NOT FIND A MATCH FOR " + Arrays.toString(hosts) + " IN CERTIFICATE: " + dn);
     }
 
     @Override

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sm_domain">ssl2000.cloudflare.com</string>
+    <string name="sm_domains">ssl2000.cloudflare.com,*.s3-us-west-1.amazonaws.com</string>
 </resources>
