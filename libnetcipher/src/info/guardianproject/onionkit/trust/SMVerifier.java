@@ -62,6 +62,11 @@ public class SMVerifier implements X509HostnameVerifier
                 if (cn.equals(compareHost)) {
                     Log.d("VERIFIER", "FOUND A MATCH: " + cn + " = " + compareHost);
                     return;
+                } else if (compareHost.startsWith(".")) {
+                    if (cn.endsWith(compareHost)) {
+                        Log.d("VERIFIER", "FOUND A MATCH: " + cn + " = *" + compareHost);
+                        return;
+                    }
                 }
             }
         }
