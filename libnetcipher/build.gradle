@@ -16,9 +16,9 @@ repositories {
 dependencies {
 	// If you want to fetch these from Maven, uncomment these lines and change
 	// the *.jar depend to exclude these libs:
-	// compile 'com.android.support:support-v4:21.0.3'
-	// compile 'com.madgag.spongycastle:core:1.51.0.0'
-	compile fileTree(dir: 'libs', include: '*.jar')
+	compile 'com.android.support:support-v4:22.1.1'
+	compile 'com.madgag.spongycastle:core:1.51.0.0'
+	compile files('libs/httpclientandroidlib-1.2.1.jar')
 }
 
 android {
