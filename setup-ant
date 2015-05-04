@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+set -x
+
+if [ -z $ANDROID_HOME ]; then
+    if [ -e ~/.android/bashrc ]; then
+        . ~/.android/bashrc
+    else
+        echo "ANDROID_HOME must be set!"
+        exit
+    fi
+fi
+
+# fetch target from project.properties
+eval `grep '^target=' libnetcipher/project.properties`
+
+$ANDROID_HOME/tools/android update lib-project --path libnetcipher --target $target
+
+$ANDROID_HOME/tools/android update project --path sample --subprojects --target $target
