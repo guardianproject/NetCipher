@@ -27,7 +27,6 @@ import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.HttpsURLConnection;
@@ -105,25 +104,13 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
         private TlsOnlySSLSocket(SSLSocket delegate) {
             super(delegate);
 
-        }
-
-        @Override
-        public void setEnabledProtocols(String[] protocols) {
-            if (protocols != null && protocols.length == 1 && "SSLv3".equals(protocols[0])) {
-
-                List<String> enabledProtocols = new ArrayList<String>(Arrays.asList(delegate
-                        .getEnabledProtocols()));
-                if (enabledProtocols.size() > 1) {
-                    enabledProtocols.remove("SSLv3");
-                    System.out.println("Removed SSLv3 from enabled protocols");
-                } else {
-                    System.out.println("SSL stuck with protocol available for "
-                            + String.valueOf(enabledProtocols));
-                }
-                protocols = enabledProtocols.toArray(new String[enabledProtocols.size()]);
-            }
-
-            super.setEnabledProtocols(protocols);
+            // 16-19 support v1.1 and v1.2 but only by default starting in 20+
+            // https://developer.android.com/reference/javax/net/ssl/SSLSocket.html
+            ArrayList<String> protocols = new ArrayList<String>(Arrays.asList(delegate
+                    .getSupportedProtocols()));
+            protocols.remove("SSLv2");
+            protocols.remove("SSLv3");
+            super.setEnabledProtocols(protocols.toArray(new String[protocols.size()]));
         }
     }
 
