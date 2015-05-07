@@ -39,7 +39,7 @@
         </TableRow>
 
         <TableRow
-            android:id="@+id/TableRow01"
+            android:id="@+id/TableRow02"
             android:layout_width="fill_parent"
             android:layout_height="30dp"
             android:orientation="vertical" >
