@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.webkit.WebView;
 
 public class WebkitProxy {
 
@@ -37,16 +38,17 @@ public class WebkitProxy {
 
     private final static String TAG = "OrbotHelpher";
 
-    public static boolean setProxy(String appClass, Context ctx, String host, int port) throws Exception
+    public static boolean setProxy(String appClass, Context ctx, WebView wView, String host, int port) throws Exception
     {
       
-    	//setSystemProperties(host, port);
+    	setSystemProperties(host, port);
 
         boolean worked = false;
 
-        if (Build.VERSION.SDK_INT < 14)
+        if (Build.VERSION.SDK_INT < 13)
         {
-            worked = setWebkitProxyGingerbread(ctx, host, port);
+//            worked = setWebkitProxyGingerbread(ctx, host, port);
+            setProxyUpToHC(wView, host, port);
         }
         else if (Build.VERSION.SDK_INT < 19)
         {
@@ -60,7 +62,7 @@ public class WebkitProxy {
             	worked = setWebkitProxyICS(ctx, host, port);
             
         }
-        else
+        else if (Build.VERSION.SDK_INT >= 21)
         {
         	worked = setWebkitProxyLollipop(ctx, host, port);
             
@@ -128,6 +130,83 @@ public class WebkitProxy {
         return false;
 
     }
+    
+
+/**
+ * Set Proxy for Android 3.2 and below.
+ */
+@SuppressWarnings("all")
+private static boolean setProxyUpToHC(WebView webview, String host, int port) {
+    Log.d(TAG, "Setting proxy with <= 3.2 API.");
+
+    HttpHost proxyServer = new HttpHost(host, port);
+    // Getting network
+    Class networkClass = null;
+    Object network = null;
+    try {
+        networkClass = Class.forName("android.webkit.Network");
+        if (networkClass == null) {
+            Log.e(TAG, "failed to get class for android.webkit.Network");
+            return false;
+        }
+        Method getInstanceMethod = networkClass.getMethod("getInstance", Context.class);
+        if (getInstanceMethod == null) {
+            Log.e(TAG, "failed to get getInstance method");
+        }
+        network = getInstanceMethod.invoke(networkClass, new Object[]{webview.getContext()});
+    } catch (Exception ex) {
+        Log.e(TAG, "error getting network: " + ex);
+        return false;
+    }
+    if (network == null) {
+        Log.e(TAG, "error getting network: network is null");
+        return false;
+    }
+    Object requestQueue = null;
+    try {
+        Field requestQueueField = networkClass
+                .getDeclaredField("mRequestQueue");
+        requestQueue = getFieldValueSafely(requestQueueField, network);
+    } catch (Exception ex) {
+        Log.e(TAG, "error getting field value");
+        return false;
+    }
+    if (requestQueue == null) {
+        Log.e(TAG, "Request queue is null");
+        return false;
+    }
+    Field proxyHostField = null;
+    try {
+        Class requestQueueClass = Class.forName("android.net.http.RequestQueue");
+        proxyHostField = requestQueueClass
+                .getDeclaredField("mProxyHost");
+    } catch (Exception ex) {
+        Log.e(TAG, "error getting proxy host field");
+        return false;
+    }
+
+    boolean temp = proxyHostField.isAccessible();
+    try {
+        proxyHostField.setAccessible(true);
+        proxyHostField.set(requestQueue, proxyServer);
+    } catch (Exception ex) {
+        Log.e(TAG, "error setting proxy host");
+    } finally {
+        proxyHostField.setAccessible(temp);
+    }
+
+    Log.d(TAG, "Setting proxy with <= 3.2 API successful!");
+    return true;
+}
+
+
+private static Object getFieldValueSafely(Field field, Object classInstance) throws IllegalArgumentException, IllegalAccessException {
+    boolean oldAccessibleValue = field.isAccessible();
+    field.setAccessible(true);
+    Object result = field.get(classInstance);
+    field.setAccessible(oldAccessibleValue);
+    return result;
+}
 
     private static boolean setWebkitProxyICS(Context ctx, String host, int port)
     {
