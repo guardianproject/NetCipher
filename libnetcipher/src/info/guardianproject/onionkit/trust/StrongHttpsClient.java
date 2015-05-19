@@ -146,12 +146,14 @@ public class StrongHttpsClient extends DefaultHttpClient {
         {
             this.proxyType = type;
 
-            HttpHost proxyHost = new HttpHost(host, port, type);
-            getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHost);
-            
             if (type.equalsIgnoreCase(TYPE_SOCKS))
+            {                
+                proxyHost = new HttpHost(host, port);
+            }
+            else
             {
-                this.proxyHost = proxyHost;
+            	proxyHost = new HttpHost(host, port, type);
+                getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHost);                
             }
         }
         else
