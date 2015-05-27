@@ -127,6 +127,19 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
                 protocols.remove("SSLv2");
                 protocols.remove("SSLv3");
                 super.setEnabledProtocols(protocols.toArray(new String[protocols.size()]));
+
+                /*
+                 * Exclude extremely weak EXPORT ciphers. NULL ciphers should
+                 * never even have been an option in TLS.
+                 */
+                ArrayList<String> enabled = new ArrayList<String>(10);
+                Pattern exclude = Pattern.compile(".*(EXPORT|NULL).*");
+                for (String cipher : delegate.getEnabledCipherSuites()) {
+                    if (!exclude.matcher(cipher).matches()) {
+                        enabled.add(cipher);
+                    }
+                }
+                super.setEnabledCipherSuites(enabled.toArray(new String[enabled.size()]));
                 return;
             } // else
 
@@ -140,8 +153,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
 
             /*
              * Exclude weak ciphers, like EXPORT, MD5, DES, and DH. NULL ciphers
-             * should never even have been an option in TLS. And SCSV seems to
-             * cause things to barf.
+             * should never even have been an option in TLS.
              */
             ArrayList<String> enabledCiphers = new ArrayList<String>(10);
             Pattern exclude = Pattern.compile(".*(_DES|DH_|DSS|EXPORT|MD5|NULL|RC4).*");
