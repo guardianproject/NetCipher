@@ -1,7 +1,6 @@
 
 package info.guardianproject.onionkit.ui;
 
-import info.guardianproject.onionkit.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -10,11 +9,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 
+import info.guardianproject.onionkit.R;
+
 public class OrbotHelper {
 
     private final static int REQUEST_CODE_STATUS = 100;
 
-    public final static String URI_ORBOT = "org.torproject.android";
+    public final static String ORBOT_PACKAGE_NAME = "org.torproject.android";
     public final static String TOR_BIN_PATH = "/data/data/org.torproject.android/app_bin/tor";
 
     public final static String ACTION_START_TOR = "org.torproject.android.START_TOR";
@@ -37,7 +38,7 @@ public class OrbotHelper {
 
     public boolean isOrbotInstalled()
     {
-        return isAppInstalled(URI_ORBOT);
+        return isAppInstalled(ORBOT_PACKAGE_NAME);
     }
 
     private boolean isAppInstalled(String uri) {
@@ -68,6 +69,7 @@ public class OrbotHelper {
         downloadDialog.setTitle(stringTitle);
         downloadDialog.setMessage(stringMessage);
         downloadDialog.setPositiveButton(stringButtonYes, new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 Uri uri = Uri.parse(uriString);
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -75,6 +77,7 @@ public class OrbotHelper {
             }
         });
         downloadDialog.setNegativeButton(stringButtonNo, new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialogInterface, int i) {
             }
         });
@@ -89,13 +92,15 @@ public class OrbotHelper {
         downloadDialog
                 .setMessage(R.string.orbot_doesn_t_appear_to_be_running_would_you_like_to_start_it_up_and_connect_to_tor_);
         downloadDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = new Intent(URI_ORBOT);
+                Intent intent = new Intent(ORBOT_PACKAGE_NAME);
                 intent.setAction(ACTION_START_TOR);
                 activity.startActivityForResult(intent, 1);
             }
         });
         downloadDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialogInterface, int i) {
             }
         });
@@ -105,7 +110,7 @@ public class OrbotHelper {
 
     public void requestHiddenServiceOnPort(Activity activity, int port)
     {
-        Intent intent = new Intent(URI_ORBOT);
+        Intent intent = new Intent(ORBOT_PACKAGE_NAME);
         intent.setAction(ACTION_REQUEST_HS);
         intent.putExtra("hs_port", port);
 
