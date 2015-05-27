@@ -14,11 +14,11 @@ import java.net.URL;
 import java.security.KeyManagementException;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 
 public class HttpURLConnectionTest extends InstrumentationTestCase {
 
     private static final String HTTP_URL_STRING = "http://127.0.0.1:";
-    private static final String HTTPS_URL_STRING = "https://127.0.0.1:";
 
     public void testConnectHttp() throws MalformedURLException, IOException {
         // include trailing \n in test string, otherwise it gets added anyhow
@@ -80,17 +80,83 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         }
     }
 
-    public void testConnectHttps() throws MalformedURLException, IOException,
-            KeyManagementException {
+    public void testStandardHttpURLConnection()
+            throws MalformedURLException, IOException, KeyManagementException {
         String[] hosts = {
+                "yahoo.com",
+                "www.yandex.ru",
+                "openstreetmap.org",
+                "goo.gl",
+                "mirrors.kernel.org",
+                "www.google.com",
+                "firstlook.org",
+                "glympse.com",
+                //"www.here.com", // this has a broken redirect
+        };
+        for (String host : hosts) {
+            URL url = new URL("https://" + host);
+            System.out.println("default " + url + " =================================");
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            connection.setReadTimeout(20000);
+            connection.getContent();
+            assertEquals(200, connection.getResponseCode());
+            assertEquals("text/html", connection.getContentType().split(";")[0]);
+            System.out.println(host + " " + connection.getCipherSuite());
+            connection.disconnect();
+        }
+    }
+
+    public void testConnectHttps()
+            throws MalformedURLException, IOException, KeyManagementException {
+        String[] hosts = {
+                "yahoo.com",
+                "www.yandex.ru",
+                "openstreetmap.org",
+                "goo.gl",
+                "mirrors.kernel.org",
+                "www.google.com",
+                "firstlook.org",
+                "glympse.com",
+                //"www.here.com", // this has a broken redirect
+        };
+        for (String host : hosts) {
+            URL url = new URL("https://" + host);
+            System.out.println("netcipher " + url + " =================================");
+            HttpsURLConnection connection = NetCipher.getHttpsURLConnection(url);
+            connection.setReadTimeout(20000);
+            SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
+            assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
+            connection.getContent();
+            assertEquals(200, connection.getResponseCode());
+            assertEquals("text/html", connection.getContentType().split(";")[0]);
+            System.out.println(host + " " + connection.getCipherSuite());
+            connection.disconnect();
+        }
+    }
+
+    public void testConnectOutdatedHttps()
+            throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
+        String[] hosts = {
+                // these are here to make sure it works with good servers too
+                "yahoo.com",
+                "www.yandex.ru",
+                "openstreetmap.org",
+                "goo.gl",
                 "www.google.com",
                 "firstlook.org",
         };
         for (String host : hosts) {
             URL url = new URL("https://" + host);
-            HttpsURLConnection https = NetCipher.getHttpsURLConnection(url);
-            https.connect();
-            https.disconnect();
+            System.out.println("outdated " + url + " =================================");
+            HttpsURLConnection connection = NetCipher.getCompatibleHttpsURLConnection(url);
+            connection.setReadTimeout(20000);
+            SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
+            assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
+            connection.getContent();
+            assertEquals(200, connection.getResponseCode());
+            assertEquals("text/html", connection.getContentType().split(";")[0]);
+            System.out.println(host + " " + connection.getCipherSuite());
+            connection.disconnect();
         }
     }
 }

@@ -27,6 +27,7 @@ import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.HttpsURLConnection;
@@ -42,16 +43,31 @@ import javax.net.ssl.SSLSocketFactory;
  * {@link HttpsURLConnection#setDefaultSSLSocketFactory(SSLSocketFactory)}
  *
  * @author Bhavit S. Sengar
+ * @author Hans-Christoph Steiner
  */
 public class TlsOnlySocketFactory extends SSLSocketFactory {
     private final SSLSocketFactory delegate;
+    private final boolean compatible;
 
     public TlsOnlySocketFactory() {
         this.delegate = HttpsURLConnection.getDefaultSSLSocketFactory();
+        this.compatible = false;
     }
 
     public TlsOnlySocketFactory(SSLSocketFactory delegate) {
         this.delegate = delegate;
+        this.compatible = false;
+    }
+
+    /**
+     * Make {@link SSLSocket}s that are compatible with outdated servers.
+     *
+     * @param delegate
+     * @param compatible
+     */
+    public TlsOnlySocketFactory(SSLSocketFactory delegate, boolean compatible) {
+        this.delegate = delegate;
+        this.compatible = compatible;
     }
 
     @Override
@@ -66,7 +82,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
 
     private Socket makeSocketSafe(Socket socket) {
         if (socket instanceof SSLSocket) {
-            socket = new TlsOnlySSLSocket((SSLSocket) socket);
+            socket = new TlsOnlySSLSocket((SSLSocket) socket, compatible);
         }
         return socket;
     }
@@ -101,8 +117,18 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
 
     private class TlsOnlySSLSocket extends DelegateSSLSocket {
 
-        private TlsOnlySSLSocket(SSLSocket delegate) {
+        private TlsOnlySSLSocket(SSLSocket delegate, boolean compatible) {
             super(delegate);
+
+            // badly configured servers can't handle a good config
+            if (compatible) {
+                ArrayList<String> protocols = new ArrayList<String>(Arrays.asList(delegate
+                        .getEnabledProtocols()));
+                protocols.remove("SSLv2");
+                protocols.remove("SSLv3");
+                super.setEnabledProtocols(protocols.toArray(new String[protocols.size()]));
+                return;
+            } // else
 
             // 16-19 support v1.1 and v1.2 but only by default starting in 20+
             // https://developer.android.com/reference/javax/net/ssl/SSLSocket.html
@@ -111,6 +137,20 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
             protocols.remove("SSLv2");
             protocols.remove("SSLv3");
             super.setEnabledProtocols(protocols.toArray(new String[protocols.size()]));
+
+            /*
+             * Exclude weak ciphers, like EXPORT, MD5, DES, and DH. NULL ciphers
+             * should never even have been an option in TLS. And SCSV seems to
+             * cause things to barf.
+             */
+            ArrayList<String> enabledCiphers = new ArrayList<String>(10);
+            Pattern exclude = Pattern.compile(".*(_DES|DH_|DSS|EXPORT|MD5|NULL|RC4).*");
+            for (String cipher : delegate.getSupportedCipherSuites()) {
+                if (!exclude.matcher(cipher).matches()) {
+                    enabledCiphers.add(cipher);
+                }
+            }
+            super.setEnabledCipherSuites(enabledCiphers.toArray(new String[enabledCiphers.size()]));
         }
     }
 

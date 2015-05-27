@@ -62,7 +62,7 @@ public class NetCipher {
     public static HttpsURLConnection getHttpsURLConnection(String urlString)
             throws MalformedURLException, IOException, KeyManagementException {
         urlString.replaceFirst("^[Hh][Tt][Tt][Pp]:", "https:");
-        return getHttpsURLConnection(new URL(urlString));
+        return getHttpsURLConnection(new URL(urlString), false);
     }
 
     public static HttpsURLConnection getHttpsURLConnection(Uri uri)
@@ -73,14 +73,44 @@ public class NetCipher {
     public static HttpsURLConnection getHttpsURLConnection(URI uri)
             throws MalformedURLException, IOException, KeyManagementException {
         if (TextUtils.equals(uri.getScheme(), "https"))
-            return getHttpsURLConnection(uri.toURL());
+            return getHttpsURLConnection(uri.toURL(), false);
         else
             // otherwise force scheme to https
             return getHttpsURLConnection(uri.toString());
     }
 
-    public static HttpsURLConnection getHttpsURLConnection(URL url) throws IOException,
-            KeyManagementException {
+    public static HttpsURLConnection getHttpsURLConnection(URL url)
+            throws IOException, KeyManagementException {
+        return getHttpsURLConnection(url, false);
+    }
+
+    /**
+     * Get a {@link HttpsURLConnection} from a {@link URL} using a more
+     * compatible, but less strong, suite of ciphers.
+     *
+     * @param url
+     * @param compatible
+     * @return
+     * @throws IOException
+     * @throws KeyManagementException
+     */
+    public static HttpsURLConnection getCompatibleHttpsURLConnection(URL url)
+            throws IOException, KeyManagementException {
+        return getHttpsURLConnection(url, true);
+    }
+
+    /**
+     * Get a {@link HttpsURLConnection} from a {@link URL}, and specify whether
+     * it should use a more compatible, but less strong, suite of ciphers.
+     *
+     * @param url
+     * @param compatible
+     * @return
+     * @throws IOException
+     * @throws KeyManagementException
+     */
+    public static HttpsURLConnection getHttpsURLConnection(URL url, boolean compatible)
+            throws IOException, KeyManagementException {
         SSLContext sslcontext;
         try {
             sslcontext = SSLContext.getInstance("TLSv1");
@@ -89,9 +119,9 @@ public class NetCipher {
             return null;
         }
         sslcontext.init(null, null, null); // null means use default
-        SSLSocketFactory NoSSLv3Factory = new TlsOnlySocketFactory(sslcontext.getSocketFactory());
-
-        HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3Factory);
+        SSLSocketFactory tlsOnly = new TlsOnlySocketFactory(sslcontext.getSocketFactory(),
+                compatible);
+        HttpsURLConnection.setDefaultSSLSocketFactory(tlsOnly);
         if (proxy != null) {
             return (HttpsURLConnection) url.openConnection(proxy);
         } else {
