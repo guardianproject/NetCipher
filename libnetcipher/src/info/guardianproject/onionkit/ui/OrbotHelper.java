@@ -94,8 +94,8 @@ public class OrbotHelper {
         downloadDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = new Intent(ORBOT_PACKAGE_NAME);
-                intent.setAction(ACTION_START_TOR);
+                Intent intent = new Intent(ACTION_START_TOR);
+                intent.setPackage(ORBOT_PACKAGE_NAME);
                 activity.startActivityForResult(intent, 1);
             }
         });
@@ -110,8 +110,8 @@ public class OrbotHelper {
 
     public void requestHiddenServiceOnPort(Activity activity, int port)
     {
-        Intent intent = new Intent(ORBOT_PACKAGE_NAME);
-        intent.setAction(ACTION_REQUEST_HS);
+        Intent intent = new Intent(ACTION_REQUEST_HS);
+        intent.setPackage(ORBOT_PACKAGE_NAME);
         intent.putExtra("hs_port", port);
 
         activity.startActivityForResult(intent, HS_REQUEST_CODE);
