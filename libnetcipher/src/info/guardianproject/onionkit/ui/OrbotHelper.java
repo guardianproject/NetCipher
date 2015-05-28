@@ -67,35 +67,21 @@ public class OrbotHelper {
         return installed;
     }
 
+    /**
+     * Ask the user whether to install Orbot or not. Check if installing from
+     * F-Droid or Google Play, otherwise take the user to the Orbot download
+     * page on f-droid.org.
+     */
     public void promptToInstall(final Activity activity)
     {
-        /*
-         * Check if installing from F-Droid or Google Play, otherwise take the
-         * user to the Orbot download page on f-droid.org.
-         */
         String message = activity.getString(R.string.you_must_have_orbot) + "  ";
         activity.getString(R.string.get_orbot_from_google_play);
 
-        PackageManager pm = activity.getPackageManager();
-        final Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(ORBOT_MARKET_URI));
-        List<ResolveInfo> resInfos = pm.queryIntentActivities(intent, 0);
-        String foundPackageName = null;
-        for (ResolveInfo r : resInfos) {
-            Log.i("OrbotHelper", "market: " + r.activityInfo.packageName);
-            if (TextUtils.equals(r.activityInfo.packageName, FDROID_PACKAGE_NAME)
-                    || TextUtils.equals(r.activityInfo.packageName, PLAY_PACKAGE_NAME)) {
-                foundPackageName = r.activityInfo.packageName;
-                break;
-            }
-        }
-
-        if (foundPackageName == null) {
-            intent.setData(Uri.parse(ORBOT_FDROID_URI));
-            message += activity.getString(R.string.get_orbot_from_fdroid);
-        } else {
-            intent.setPackage(foundPackageName);
+        final Intent intent = getOrbotInstallIntent(activity);
+        if (intent.getPackage() == null) {
             message += activity.getString(R.string.download_orbot_from_fdroid);
+        } else {
+            message += activity.getString(R.string.get_orbot_from_fdroid);
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -104,13 +90,13 @@ public class OrbotHelper {
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Log.i("orbothelper", "package ");
                 activity.startActivity(intent);
             }
         });
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                // nothing to do
             }
         });
         builder.show();
@@ -151,6 +137,31 @@ public class OrbotHelper {
         Intent intent = new Intent(ACTION_START_TOR);
         intent.setPackage(ORBOT_PACKAGE_NAME);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
+    }
+
+    public static Intent getOrbotInstallIntent(Context context) {
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(ORBOT_MARKET_URI));
+
+        PackageManager pm = context.getPackageManager();
+        List<ResolveInfo> resInfos = pm.queryIntentActivities(intent, 0);
+
+        String foundPackageName = null;
+        for (ResolveInfo r : resInfos) {
+            Log.i("OrbotHelper", "market: " + r.activityInfo.packageName);
+            if (TextUtils.equals(r.activityInfo.packageName, FDROID_PACKAGE_NAME)
+                    || TextUtils.equals(r.activityInfo.packageName, PLAY_PACKAGE_NAME)) {
+                foundPackageName = r.activityInfo.packageName;
+                break;
+            }
+        }
+
+        if (foundPackageName == null) {
+            intent.setData(Uri.parse(ORBOT_FDROID_URI));
+        } else {
+            intent.setPackage(foundPackageName);
+        }
         return intent;
     }
 }
