@@ -14,9 +14,9 @@ import android.widget.TextView;
 
 import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.methods.HttpGet;
-import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
 import info.guardianproject.onionkit.trust.StrongHttpsClient;
 import info.guardianproject.onionkit.ui.OrbotHelper;
+import sample.onionkit.R;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,8 +28,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-
-import sample.onionkit.R;
 
 public class NetCipherSampleActivity extends Activity {
 
@@ -104,32 +102,27 @@ public class NetCipherSampleActivity extends Activity {
 
     public String checkHTTP(String url, Proxy.Type pType, String proxyHost, int proxyPort)
             throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException,
-            KeyStoreException, CertificateException, IOException
-    {
+            KeyStoreException, CertificateException, IOException {
 
         StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext());
 
-        if (pType == null)
-        {
+        if (pType == null) {
             // do nothing
             httpclient.useProxy(false, null, null, -1);
 
-        }
-        else if (pType == Proxy.Type.SOCKS)
-        {
+        } else if (pType == Proxy.Type.SOCKS) {
 
             httpclient.useProxy(true, StrongHttpsClient.TYPE_SOCKS, proxyHost, proxyPort);
 
+        } else if (pType == Proxy.Type.HTTP) {
 
-        }
-        else if (pType == Proxy.Type.HTTP)
-        {
             httpclient.useProxy(true, StrongHttpsClient.TYPE_HTTP, proxyHost, proxyPort);
 
         }
 
         HttpGet httpget = new HttpGet(url);
         HttpResponse response = httpclient.execute(httpget);
+        httpclient.close();
 
         StringBuffer sb = new StringBuffer();
         sb.append(response.getStatusLine()).append("\n\n");
@@ -144,7 +137,6 @@ public class NetCipherSampleActivity extends Activity {
             sb.append(line);
 
         return sb.toString();
-
     }
 
     Runnable runnableNet = new Runnable()
@@ -195,7 +187,6 @@ public class NetCipherSampleActivity extends Activity {
 
             txtView.setText(msgText);
         }
-
     };
 
 }
