@@ -43,28 +43,28 @@ public class OrbotHelper {
         mContext = context;
     }
 
-    public boolean isOrbotRunning()
-    {
+    public static boolean isOrbotRunning() {
         int procId = TorServiceUtils.findProcessId(TOR_BIN_PATH);
 
         return (procId != -1);
     }
 
-    public boolean isOrbotInstalled()
-    {
-        return isAppInstalled(ORBOT_PACKAGE_NAME);
+    public static boolean isOrbotInstalled(Context context) {
+        return isAppInstalled(context, ORBOT_PACKAGE_NAME);
     }
 
-    private boolean isAppInstalled(String uri) {
-        PackageManager pm = mContext.getPackageManager();
-        boolean installed = false;
+    public boolean isOrbotInstalled() {
+        return isAppInstalled(mContext, ORBOT_PACKAGE_NAME);
+    }
+
+    private static boolean isAppInstalled(Context context, String uri) {
         try {
+            PackageManager pm = context.getPackageManager();
             pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
-            installed = true;
+            return true;
         } catch (PackageManager.NameNotFoundException e) {
-            installed = false;
+            return false;
         }
-        return installed;
     }
 
     /**
@@ -72,8 +72,7 @@ public class OrbotHelper {
      * F-Droid or Google Play, otherwise take the user to the Orbot download
      * page on f-droid.org.
      */
-    public void promptToInstall(final Activity activity)
-    {
+    public static void promptToInstall(final Activity activity) {
         String message = activity.getString(R.string.you_must_have_orbot) + "  ";
         activity.getString(R.string.get_orbot_from_google_play);
 
@@ -102,9 +101,7 @@ public class OrbotHelper {
         builder.show();
     }
 
-    public void requestOrbotStart(final Activity activity)
-    {
-
+    public static void requestOrbotStart(final Activity activity) {
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
         downloadDialog.setTitle(R.string.start_orbot_);
         downloadDialog
@@ -124,8 +121,7 @@ public class OrbotHelper {
 
     }
 
-    public void requestHiddenServiceOnPort(Activity activity, int port)
-    {
+    public static void requestHiddenServiceOnPort(Activity activity, int port) {
         Intent intent = new Intent(ACTION_REQUEST_HS);
         intent.setPackage(ORBOT_PACKAGE_NAME);
         intent.putExtra("hs_port", port);

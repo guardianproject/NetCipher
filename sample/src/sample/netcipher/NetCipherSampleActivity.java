@@ -95,17 +95,11 @@ public class NetCipherSampleActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        OrbotHelper oc = new OrbotHelper(this);
-
-        if (!oc.isOrbotInstalled())
-        {
-            oc.promptToInstall(this);
+        if (!OrbotHelper.isOrbotInstalled(this)) {
+            OrbotHelper.promptToInstall(this);
+        } else if (!OrbotHelper.isOrbotRunning()) {
+            OrbotHelper.requestOrbotStart(this);
         }
-        else if (!oc.isOrbotRunning())
-        {
-            oc.requestOrbotStart(this);
-        }
-
     }
 
     public String checkHTTP(String url, Proxy.Type pType, String proxyHost, int proxyPort)
