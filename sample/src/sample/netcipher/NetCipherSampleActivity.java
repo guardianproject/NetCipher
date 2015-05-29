@@ -2,6 +2,9 @@
 package sample.netcipher;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -94,9 +97,9 @@ public class NetCipherSampleActivity extends Activity {
         super.onResume();
 
         if (!OrbotHelper.isOrbotInstalled(this)) {
-            OrbotHelper.promptToInstall(this);
+            promptToInstall();
         } else if (!OrbotHelper.isOrbotRunning()) {
-            OrbotHelper.requestOrbotStart(this);
+            requestOrbotStart();
         }
     }
 
@@ -188,5 +191,57 @@ public class NetCipherSampleActivity extends Activity {
             txtView.setText(msgText);
         }
     };
+
+    /**
+     * Ask the user whether to install Orbot or not. Check if installing from
+     * F-Droid or Google Play, otherwise take the user to the Orbot download
+     * page on f-droid.org.
+     */
+    void promptToInstall() {
+        String message = getString(R.string.you_must_have_orbot) + "  ";
+
+        final Intent intent = OrbotHelper.getOrbotInstallIntent(this);
+        if (intent.getPackage() == null) {
+            message += getString(R.string.download_orbot_from_fdroid);
+        } else {
+            message += getString(R.string.get_orbot_from_fdroid);
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.install_orbot_);
+        builder.setMessage(message);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                startActivity(intent);
+            }
+        });
+        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // nothing to do
+            }
+        });
+        builder.show();
+    }
+
+    void requestOrbotStart() {
+        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(this);
+        downloadDialog.setTitle(R.string.start_orbot_);
+        downloadDialog
+                .setMessage(R.string.orbot_doesn_t_appear_to_be_running_would_you_like_to_start_it_up_and_connect_to_tor_);
+        downloadDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                startActivityForResult(OrbotHelper.getOrbotStartIntent(), 1);
+            }
+        });
+        downloadDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+            }
+        });
+        downloadDialog.show();
+    }
 
 }
