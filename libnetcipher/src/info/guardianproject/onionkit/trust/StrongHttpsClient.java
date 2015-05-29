@@ -39,7 +39,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
     private final static String TRUSTSTORE_TYPE = "BKS";
     private final static String TRUSTSTORE_PASSWORD = "changeit";
-    
+
     public StrongHttpsClient(Context context) {
         this.context = context;
 
@@ -47,9 +47,9 @@ public class StrongHttpsClient extends DefaultHttpClient {
         mRegistry.register(
                 new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
 
-        
+
         try {
-            
+
             KeyStore keyStore = loadKeyStore();
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(keyStore);
@@ -85,7 +85,6 @@ public class StrongHttpsClient extends DefaultHttpClient {
                 new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
 
         try {
-            //mTrustManager = new StrongTrustManager(context, keystore);
         	TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         	for (TrustManager trustManager : trustManagerFactory.getTrustManagers()) {          	  
         	    if (trustManager instanceof X509TrustManager) {  
@@ -147,7 +146,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
             this.proxyType = type;
 
             if (type.equalsIgnoreCase(TYPE_SOCKS))
-            {                
+            {
                 proxyHost = new HttpHost(host, port);
             }
             else
@@ -163,14 +162,14 @@ public class StrongHttpsClient extends DefaultHttpClient {
         }
 
     }
-  
+
     public void disableProxy ()
     {
     	getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
         proxyHost = null;
     }
-  
+
     public final static String TYPE_SOCKS = "socks";
     public final static String TYPE_HTTP = "http";
-    
+
 }
