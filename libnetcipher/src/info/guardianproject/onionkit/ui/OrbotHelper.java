@@ -30,11 +30,8 @@ public class OrbotHelper {
     private final static String FDROID_PACKAGE_NAME = "org.fdroid.fdroid";
     private final static String PLAY_PACKAGE_NAME = "com.android.vending";
 
-    private Context mContext = null;
-
-    public OrbotHelper(Context context)
-    {
-        mContext = context;
+    private OrbotHelper() {
+        // only static utility methods, do not instantiate
     }
 
     public static boolean isOrbotRunning(Context context) {
@@ -45,10 +42,6 @@ public class OrbotHelper {
 
     public static boolean isOrbotInstalled(Context context) {
         return isAppInstalled(context, ORBOT_PACKAGE_NAME);
-    }
-
-    public boolean isOrbotInstalled() {
-        return isAppInstalled(mContext, ORBOT_PACKAGE_NAME);
     }
 
     private static boolean isAppInstalled(Context context, String uri) {
