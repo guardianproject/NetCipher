@@ -12,8 +12,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
 public class HttpURLConnectionTest extends InstrumentationTestCase {
@@ -81,7 +83,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
     }
 
     public void testStandardHttpURLConnection()
-            throws MalformedURLException, IOException, KeyManagementException {
+            throws MalformedURLException, IOException, KeyManagementException, NoSuchAlgorithmException {
         String[] hosts = {
                 "yahoo.com",
                 "www.yandex.ru",
@@ -93,10 +95,16 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "glympse.com",
                 //"www.here.com", // this has a broken redirect
         };
+        // reset the default SSLSocketFactory, since it is global
+        SSLContext sslcontext = SSLContext.getInstance("TLSv1");
+        sslcontext.init(null, null, null); // null means use default
+        HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());
         for (String host : hosts) {
             URL url = new URL("https://" + host);
             System.out.println("default " + url + " =================================");
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
+            assertFalse(sslSocketFactory instanceof TlsOnlySocketFactory);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
             connection.setReadTimeout(20000);
             connection.getContent();
