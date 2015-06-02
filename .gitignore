@@ -30,3 +30,6 @@ build/
 
 # IntelliJ / Android Studio
 *iml
+
+# release jars
+libnetcipher/netcipher-*.jar*
