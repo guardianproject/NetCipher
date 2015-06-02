@@ -1,0 +1,30 @@
+#!/bin/bash
+# bash is required because we need bash's printf to guarantee a cross-platform
+# timestamp format.
+
+set -e
+set -x
+
+if [ -z $ANDROID_HOME ]; then
+    if [ -e ~/.android/bashrc ]; then
+        . ~/.android/bashrc
+    else
+        echo "ANDROID_HOME must be set!"
+        exit
+    fi
+fi
+
+projectroot=`pwd`
+
+# standardize timezone to reduce build differences
+export TZ=UTC
+# run the clock at 5% speed, ant requires a moving clock
+TIMESTAMP=`printf '@%(%Y-%m-%d %H:%M:%S)T x0.05' \
+    $(git log -n1 --format=format:%at)`
+
+git reset --hard
+git clean -fdx
+
+./setup-ant
+cd libnetcipher
+faketime -f "$TIMESTAMP" ant release-all
