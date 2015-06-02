@@ -133,8 +133,7 @@ public class NetCipher {
      * compatible, but less strong, suite of ciphers.
      *
      * @param url
-     * @param compatible
-     * @return
+     * @return the {@code url} in an instance of {@link HttpsURLConnection}
      * @throws IOException
      * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
      */
@@ -148,7 +147,7 @@ public class NetCipher {
      *
      * @param url
      * @param compatible
-     * @return
+     * @return the {@code url} in an instance of {@link HttpsURLConnection}
      * @throws IOException
      * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
      */
