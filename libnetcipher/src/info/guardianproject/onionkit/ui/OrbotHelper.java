@@ -23,8 +23,6 @@ public class OrbotHelper {
     public final static String ORBOT_PLAY_URI = "https://play.google.com/store/apps/details?id="
             + ORBOT_PACKAGE_NAME;
 
-    public final static String TOR_BIN_PATH = "/data/data/" + ORBOT_PACKAGE_NAME + "/app_bin/tor";
-
     public final static String ACTION_START_TOR = "org.torproject.android.START_TOR";
     public final static String ACTION_REQUEST_HS = "org.torproject.android.REQUEST_HS_PORT";
     public final static int HS_REQUEST_CODE = 9999;
@@ -39,8 +37,8 @@ public class OrbotHelper {
         mContext = context;
     }
 
-    public static boolean isOrbotRunning() {
-        int procId = TorServiceUtils.findProcessId(TOR_BIN_PATH);
+    public static boolean isOrbotRunning(Context context) {
+        int procId = TorServiceUtils.findProcessId(context);
 
         return (procId != -1);
     }

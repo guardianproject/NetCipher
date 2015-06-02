@@ -98,7 +98,7 @@ public class NetCipherSampleActivity extends Activity {
 
         if (!OrbotHelper.isOrbotInstalled(this)) {
             promptToInstall();
-        } else if (!OrbotHelper.isOrbotRunning()) {
+        } else if (!OrbotHelper.isOrbotRunning(this)) {
             requestOrbotStart();
         }
     }
