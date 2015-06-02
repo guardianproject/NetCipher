@@ -58,7 +58,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         try {
             HttpURLConnection http = NetCipher.getHttpURLConnection(new URL(
                     "http://127.0.0.1:63453"));
-            http.setConnectTimeout(1000);
+            http.setConnectTimeout(0); // blocking connect with TCP timeout
             http.connect();
             fail();
         } catch (IOException e) {
@@ -72,7 +72,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         try {
             HttpsURLConnection https = NetCipher.getHttpsURLConnection(new URL(
                     "https://127.0.0.1:63453"));
-            https.setConnectTimeout(1000);
+            https.setConnectTimeout(0); // blocking connect with TCP timeout
             https.connect();
             fail();
         } catch (IOException e) {
@@ -97,6 +97,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             URL url = new URL("https://" + host);
             System.out.println("default " + url + " =================================");
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            connection.setConnectTimeout(0); // blocking connect with TCP timeout
             connection.setReadTimeout(20000);
             connection.getContent();
             assertEquals(200, connection.getResponseCode());
@@ -123,6 +124,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             URL url = new URL("https://" + host);
             System.out.println("netcipher " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getHttpsURLConnection(url);
+            connection.setConnectTimeout(0); // blocking connect with TCP timeout
             connection.setReadTimeout(20000);
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
@@ -149,6 +151,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             URL url = new URL("https://" + host);
             System.out.println("outdated " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getCompatibleHttpsURLConnection(url);
+            connection.setConnectTimeout(0); // blocking connect with TCP timeout
             connection.setReadTimeout(20000);
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
