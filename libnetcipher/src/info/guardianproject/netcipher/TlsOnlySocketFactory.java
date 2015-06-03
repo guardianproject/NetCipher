@@ -17,6 +17,8 @@
 
 package info.guardianproject.netcipher;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,6 +29,7 @@ import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HandshakeCompletedListener;
@@ -46,6 +49,7 @@ import javax.net.ssl.SSLSocketFactory;
  * @author Hans-Christoph Steiner
  */
 public class TlsOnlySocketFactory extends SSLSocketFactory {
+    private static final String TAG = "TlsOnlySocketFactory";
     private final SSLSocketFactory delegate;
     private final boolean compatible;
 
@@ -117,8 +121,11 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
 
     private class TlsOnlySSLSocket extends DelegateSSLSocket {
 
+        final boolean compatible;
+
         private TlsOnlySSLSocket(SSLSocket delegate, boolean compatible) {
             super(delegate);
+            this.compatible = compatible;
 
             // badly configured servers can't handle a good config
             if (compatible) {
@@ -163,6 +170,31 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
                 }
             }
             super.setEnabledCipherSuites(enabledCiphers.toArray(new String[enabledCiphers.size()]));
+        }
+
+        /**
+         * This works around a bug in Android < 19 where SSLv3 is forced
+         */
+        @Override
+        public void setEnabledProtocols(String[] protocols) {
+            if (protocols != null && protocols.length == 1 && "SSLv3".equals(protocols[0])) {
+                List<String> systemProtocols;
+                if (this.compatible) {
+                    systemProtocols = Arrays.asList(delegate.getEnabledProtocols());
+                } else {
+                    systemProtocols = Arrays.asList(delegate.getSupportedProtocols());
+                }
+                List<String> enabledProtocols = new ArrayList<String>(systemProtocols);
+                if (enabledProtocols.size() > 1) {
+                    enabledProtocols.remove("SSLv2");
+                    enabledProtocols.remove("SSLv3");
+                } else {
+                    Log.w(TAG, "SSL stuck with protocol available for "
+                            + String.valueOf(enabledProtocols));
+                }
+                protocols = enabledProtocols.toArray(new String[enabledProtocols.size()]);
+            }
+            super.setEnabledProtocols(protocols);
         }
     }
 
