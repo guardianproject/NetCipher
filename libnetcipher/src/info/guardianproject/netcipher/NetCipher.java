@@ -45,27 +45,42 @@ public class NetCipher {
         return proxy;
     }
 
-    public static HttpURLConnection getHttpURLConnection(String urlString) throws IOException {
-        return getHttpURLConnection(new URL(urlString));
-    }
-
-    public static HttpURLConnection getHttpURLConnection(URL url) throws IOException {
-        if (proxy != null) {
-            return (HttpURLConnection) url.openConnection(proxy);
-        } else {
-            return (HttpURLConnection) url.openConnection();
-        }
-    }
-
+    /**
+     * Get a {@link HttpsURLConnection} from a URL {@link String} using the best
+     * TLS configuration available on the device.
+     *
+     * @param urlString
+     * @return the URL in an instance of {@link HttpsURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
     public static HttpsURLConnection getHttpsURLConnection(String urlString) throws IOException {
         urlString.replaceFirst("^[Hh][Tt][Tt][Pp]:", "https:");
         return getHttpsURLConnection(new URL(urlString), false);
     }
 
+    /**
+     * Get a {@link HttpsURLConnection} from a {@link Uri} using the best TLS
+     * configuration available on the device.
+     *
+     * @param uri
+     * @return the {@code uri} in an instance of {@link HttpsURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
     public static HttpsURLConnection getHttpsURLConnection(Uri uri) throws IOException {
         return getHttpsURLConnection(uri.toString());
     }
 
+    /**
+     * Get a {@link HttpsURLConnection} from a {@link URI} using the best TLS
+     * configuration available on the device.
+     *
+     * @param uri
+     * @return the {@code uri} in an instance of {@link HttpsURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
     public static HttpsURLConnection getHttpsURLConnection(URI uri) throws IOException {
         if (TextUtils.equals(uri.getScheme(), "https"))
             return getHttpsURLConnection(uri.toURL(), false);
@@ -74,6 +89,15 @@ public class NetCipher {
             return getHttpsURLConnection(uri.toString());
     }
 
+    /**
+     * Get a {@link HttpsURLConnection} from a {@link URL} using the best TLS
+     * configuration available on the device.
+     *
+     * @param url
+     * @return the {@code url} in an instance of {@link HttpsURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
     public static HttpsURLConnection getHttpsURLConnection(URL url) throws IOException {
         return getHttpsURLConnection(url, false);
     }
@@ -104,6 +128,96 @@ public class NetCipher {
      */
     public static HttpsURLConnection getHttpsURLConnection(URL url, boolean compatible)
             throws IOException {
+        HttpURLConnection connection = getHttpsURLConnection(url, compatible);
+        if (connection instanceof HttpsURLConnection) {
+            return (HttpsURLConnection) connection;
+        } else {
+            throw new IllegalArgumentException("not an HTTPS connection!");
+        }
+    }
+
+    /**
+     * Get a {@link HttpURLConnection} from a {@link URL}. If the connection is
+     * {@code https://}, it will use a more compatible, but less strong, TLS
+     * configuration.
+     *
+     * @param url
+     * @return the {@code url} in an instance of {@link HttpsURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
+    public static HttpURLConnection getCompatibleHttpURLConnection(URL url) throws IOException {
+        return getHttpURLConnection(url, true);
+    }
+
+    /**
+     * Get a {@link HttpURLConnection} from a URL {@link String}. If it is an
+     * {@code https://} link, then this will use the best TLS configuration
+     * available on the device.
+     *
+     * @param urlString
+     * @return the URL in an instance of {@link HttpURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
+    public static HttpURLConnection getHttpURLConnection(String urlString) throws IOException {
+        return getHttpURLConnection(new URL(urlString));
+    }
+
+    /**
+     * Get a {@link HttpURLConnection} from a {@link Uri}. If it is an
+     * {@code https://} link, then this will use the best TLS configuration
+     * available on the device.
+     *
+     * @param uri
+     * @return the {@code uri} in an instance of {@link HttpURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
+    public static HttpURLConnection getHttpURLConnection(Uri uri) throws IOException {
+        return getHttpURLConnection(uri.toString());
+    }
+
+    /**
+     * Get a {@link HttpURLConnection} from a {@link URI}. If it is an
+     * {@code https://} link, then this will use the best TLS configuration
+     * available on the device.
+     *
+     * @param uri
+     * @return the {@code uri} in an instance of {@link HttpURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
+    public static HttpURLConnection getHttpURLConnection(URI uri) throws IOException {
+        return getHttpURLConnection(uri.toURL());
+    }
+
+    /**
+     * Get a {@link HttpURLConnection} from a {@link URL}. If it is an
+     * {@code https://} link, then this will use the best TLS configuration
+     * available on the device.
+     *
+     * @param url
+     * @return the {@code url} in an instance of {@link HttpURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
+    public static HttpURLConnection getHttpURLConnection(URL url) throws IOException {
+        return (HttpURLConnection) getHttpURLConnection(url, false);
+    }
+
+    /**
+     * Get a {@link HttpURLConnection} from a {@link URL}, and specify whether
+     * it should use a more compatible, but less strong, suite of ciphers.
+     *
+     * @param url
+     * @param compatible
+     * @return the {@code url} in an instance of {@link HttpURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
+    public static HttpURLConnection getHttpURLConnection(URL url, boolean compatible)
+            throws IOException {
         SSLContext sslcontext;
         try {
             sslcontext = SSLContext.getInstance("TLSv1");
@@ -117,9 +231,9 @@ public class NetCipher {
                 compatible);
         HttpsURLConnection.setDefaultSSLSocketFactory(tlsOnly);
         if (proxy != null) {
-            return (HttpsURLConnection) url.openConnection(proxy);
+            return (HttpURLConnection) url.openConnection(proxy);
         } else {
-            return (HttpsURLConnection) url.openConnection();
+            return (HttpURLConnection) url.openConnection();
         }
     }
 }
