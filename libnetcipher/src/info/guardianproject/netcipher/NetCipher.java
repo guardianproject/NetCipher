@@ -59,19 +59,16 @@ public class NetCipher {
         }
     }
 
-    public static HttpsURLConnection getHttpsURLConnection(String urlString)
-            throws MalformedURLException, IOException, KeyManagementException {
+    public static HttpsURLConnection getHttpsURLConnection(String urlString) throws IOException {
         urlString.replaceFirst("^[Hh][Tt][Tt][Pp]:", "https:");
         return getHttpsURLConnection(new URL(urlString), false);
     }
 
-    public static HttpsURLConnection getHttpsURLConnection(Uri uri)
-            throws MalformedURLException, IOException, KeyManagementException {
+    public static HttpsURLConnection getHttpsURLConnection(Uri uri) throws IOException {
         return getHttpsURLConnection(uri.toString());
     }
 
-    public static HttpsURLConnection getHttpsURLConnection(URI uri)
-            throws MalformedURLException, IOException, KeyManagementException {
+    public static HttpsURLConnection getHttpsURLConnection(URI uri) throws IOException {
         if (TextUtils.equals(uri.getScheme(), "https"))
             return getHttpsURLConnection(uri.toURL(), false);
         else
@@ -79,8 +76,7 @@ public class NetCipher {
             return getHttpsURLConnection(uri.toString());
     }
 
-    public static HttpsURLConnection getHttpsURLConnection(URL url)
-            throws IOException, KeyManagementException {
+    public static HttpsURLConnection getHttpsURLConnection(URL url) throws IOException {
         return getHttpsURLConnection(url, false);
     }
 
@@ -107,18 +103,19 @@ public class NetCipher {
      * @param compatible
      * @return
      * @throws IOException
-     * @throws KeyManagementException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
      */
     public static HttpsURLConnection getHttpsURLConnection(URL url, boolean compatible)
-            throws IOException, KeyManagementException {
+            throws IOException {
         SSLContext sslcontext;
         try {
             sslcontext = SSLContext.getInstance("TLSv1");
+            sslcontext.init(null, null, null); // null means use default
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
+            throw new IllegalArgumentException(e);
+        } catch (KeyManagementException e) {
+            throw new IllegalArgumentException(e);
         }
-        sslcontext.init(null, null, null); // null means use default
         SSLSocketFactory tlsOnly = new TlsOnlySocketFactory(sslcontext.getSocketFactory(),
                 compatible);
         HttpsURLConnection.setDefaultSSLSocketFactory(tlsOnly);
