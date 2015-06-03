@@ -25,6 +25,7 @@ public class OrbotHelper {
 
     public final static String ACTION_START_TOR = "org.torproject.android.START_TOR";
     public final static String ACTION_REQUEST_HS = "org.torproject.android.REQUEST_HS_PORT";
+    public final static int START_TOR_RESULT = 0x048079234;
     public final static int HS_REQUEST_CODE = 9999;
 
     private final static String FDROID_PACKAGE_NAME = "org.fdroid.fdroid";
@@ -60,6 +61,28 @@ public class OrbotHelper {
         intent.putExtra("hs_port", port);
 
         activity.startActivityForResult(intent, HS_REQUEST_CODE);
+    }
+
+    /**
+     * First, checks whether Orbot is installed, then checks whether Orbot is
+     * running. If Orbot is installed and not running, then an {@link Intent} is
+     * sent to request Orbot to start. The result will be returned in
+     * {@link Activity#onActivityResult(int requestCode, int resultCode, Intent data)}
+     * with a {@code requestCode} of {@link START_TOR_RESULT}
+     *
+     * @param activity the {@link Activity} that gets the
+     *            {@code START_TOR_RESULT} result
+     * @return whether the start request was sent to Orbot
+     */
+    public static boolean requestStartTor(Activity activity) {
+        if (OrbotHelper.isOrbotInstalled(activity)) {
+            if (!OrbotHelper.isOrbotRunning(activity)) {
+                Intent intent = getOrbotStartIntent();
+                activity.startActivityForResult(intent, START_TOR_RESULT);
+                return true;
+            }
+        }
+        return false;
     }
 
     public static Intent getOrbotStartIntent() {
