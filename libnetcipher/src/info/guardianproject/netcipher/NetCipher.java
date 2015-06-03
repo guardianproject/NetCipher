@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
@@ -46,8 +45,7 @@ public class NetCipher {
         return proxy;
     }
 
-    public static HttpURLConnection getHttpURLConnection(String urlString)
-            throws MalformedURLException, IOException {
+    public static HttpURLConnection getHttpURLConnection(String urlString) throws IOException {
         return getHttpURLConnection(new URL(urlString));
     }
 
@@ -88,10 +86,9 @@ public class NetCipher {
      * @param compatible
      * @return
      * @throws IOException
-     * @throws KeyManagementException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
      */
-    public static HttpsURLConnection getCompatibleHttpsURLConnection(URL url)
-            throws IOException, KeyManagementException {
+    public static HttpsURLConnection getCompatibleHttpsURLConnection(URL url) throws IOException {
         return getHttpsURLConnection(url, true);
     }
 
