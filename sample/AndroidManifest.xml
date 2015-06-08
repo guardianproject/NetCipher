@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="sample.onionkit"
+    package="sample.netcipher"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -15,7 +15,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="sample.netcipher.NetCipherSampleActivity"
+            android:name=".NetCipherSampleActivity"
             android:label="@string/title_activity_onion_kit_sample" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

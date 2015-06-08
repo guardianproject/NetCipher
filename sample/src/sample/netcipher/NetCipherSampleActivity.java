@@ -19,7 +19,6 @@ import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.methods.HttpGet;
 import info.guardianproject.onionkit.trust.StrongHttpsClient;
 import info.guardianproject.onionkit.ui.OrbotHelper;
-import sample.onionkit.R;
 
 import java.io.BufferedReader;
 import java.io.IOException;
