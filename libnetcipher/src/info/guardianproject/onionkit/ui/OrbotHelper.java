@@ -23,6 +23,42 @@ public class OrbotHelper {
     public final static String ORBOT_PLAY_URI = "https://play.google.com/store/apps/details?id="
             + ORBOT_PACKAGE_NAME;
 
+    /**
+     * A request to Orbot to transparently start Tor services
+     */
+    public final static String ACTION_START = "org.torproject.android.intent.action.START";
+    /**
+     * {@link Intent} send by Orbot with {@code ON/OFF/STARTING/STOPPING} status
+     */
+    public final static String ACTION_STATUS = "org.torproject.android.intent.action.STATUS";
+    /**
+     * {@code String} that contains a status constant: {@link #STATUS_ON},
+     * {@link #STATUS_OFF}, {@link #STATUS_STARTING}, or
+     * {@link #STATUS_STOPPING}
+     */
+    public final static String EXTRA_STATUS = "org.torproject.android.intent.extra.STATUS";
+    /**
+     * A {@link String} {@code packageName} for Orbot to direct its status reply
+     * to, used in {@link #ACTION_START} {@link Intent}s sent to Orbot
+     */
+    public final static String EXTRA_PACKAGE_NAME = "org.torproject.android.intent.extra.PACKAGE_NAME";
+
+    /**
+     * All tor-related services and daemons are stopped
+     */
+    public final static String STATUS_OFF = "OFF";
+    /**
+     * All tor-related services and daemons have completed starting
+     */
+    public final static String STATUS_ON = "ON";
+    public final static String STATUS_STARTING = "STARTING";
+    public final static String STATUS_STOPPING = "STOPPING";
+    /**
+     * The user has disabled the ability for background starts triggered by
+     * apps. Fallback to the old Intent that brings up Orbot.
+     */
+    public final static String STATUS_STARTS_DISABLED = "STARTS_DISABLED";
+
     public final static String ACTION_START_TOR = "org.torproject.android.START_TOR";
     public final static String ACTION_REQUEST_HS = "org.torproject.android.REQUEST_HS_PORT";
     public final static int START_TOR_RESULT = 0x048079234;
@@ -64,9 +100,39 @@ public class OrbotHelper {
     }
 
     /**
+     * First, checks whether Orbot is installed. If Orbot is installed, then a
+     * broadcast {@link Intent} is sent to request Orbot to start transparently
+     * in the background. When Orbot receives this {@code Intent}, it will
+     * immediately reply to this all with its status via an
+     * {@link #ACTION_STATUS} {@code Intent} that is broadcast to the
+     * {@code packageName} of the provided {@link Context} (i.e.
+     * {@link Context#getPackageName()}.
+     *
+     * @param context the app {@link Context} will receive the reply
+     * @return whether the start request was sent to Orbot
+     */
+    public static boolean requestStartTor(Context context) {
+        if (OrbotHelper.isOrbotInstalled(context)) {
+            Log.i("OrbotHelper", "requestStartTor " + context.getPackageName());
+            Intent intent = getOrbotStartIntent();
+            intent.putExtra(EXTRA_PACKAGE_NAME, context.getPackageName());
+            context.sendBroadcast(intent);
+            return true;
+        }
+        return false;
+    }
+
+    public static Intent getOrbotStartIntent() {
+        Intent intent = new Intent(ACTION_START);
+        intent.setPackage(ORBOT_PACKAGE_NAME);
+        return intent;
+    }
+
+    /**
      * First, checks whether Orbot is installed, then checks whether Orbot is
      * running. If Orbot is installed and not running, then an {@link Intent} is
-     * sent to request Orbot to start. The result will be returned in
+     * sent to request Orbot to start, which will show the main Orbot screen.
+     * The result will be returned in
      * {@link Activity#onActivityResult(int requestCode, int resultCode, Intent data)}
      * with a {@code requestCode} of {@link START_TOR_RESULT}
      *
@@ -74,10 +140,10 @@ public class OrbotHelper {
      *            {@code START_TOR_RESULT} result
      * @return whether the start request was sent to Orbot
      */
-    public static boolean requestStartTor(Activity activity) {
+    public static boolean requestShowOrbotStart(Activity activity) {
         if (OrbotHelper.isOrbotInstalled(activity)) {
             if (!OrbotHelper.isOrbotRunning(activity)) {
-                Intent intent = getOrbotStartIntent();
+                Intent intent = getShowOrbotStartIntent();
                 activity.startActivityForResult(intent, START_TOR_RESULT);
                 return true;
             }
@@ -85,7 +151,7 @@ public class OrbotHelper {
         return false;
     }
 
-    public static Intent getOrbotStartIntent() {
+    public static Intent getShowOrbotStartIntent() {
         Intent intent = new Intent(ACTION_START_TOR);
         intent.setPackage(ORBOT_PACKAGE_NAME);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
