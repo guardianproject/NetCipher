@@ -3,11 +3,15 @@ package sample.netcipher;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,16 +37,19 @@ import java.security.cert.CertificateException;
 
 public class NetCipherSampleActivity extends Activity {
 
-    private final static String TAG = "OrlibSample";
-    private TextView txtView = null;
-    private EditText txtUrl = null;
+    private final static String TAG = "NetCipherSampleActivity";
+    private TextView txtView;
+    private EditText txtUrl;
+    private Button httpProxyButton;
+    private Button socksProxyButton;
+    private TextView torStatusTextView;
 
     // test the local device proxy provided by Orbot/Tor
     private final static String PROXY_HOST = "127.0.0.1";
     private final static int PROXY_HTTP_PORT = 8118; // default for Orbot/Tor
     private final static int PROXY_SOCKS_PORT = 9050; // default for Orbot/Tor
 
-    private Proxy.Type mProxyType = null;
+    private Proxy.Type mProxyType;
 
     /** Called when the activity is first created. */
     @Override
@@ -52,11 +59,19 @@ public class NetCipherSampleActivity extends Activity {
 
         txtUrl = (EditText) findViewById(R.id.txtUrl);
         txtView = (TextView) findViewById(R.id.WizardTextBody);
+        torStatusTextView = (TextView) findViewById(R.id.torStatus);
 
-        Button btn;
+        Button getStatusButton = (Button) findViewById(R.id.getStatus);
+        getStatusButton.setOnClickListener(new OnClickListener() {
 
-        btn = ((Button) findViewById(R.id.btnWizard1));
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "getStatusButton setOnClickListener onClick");
+                OrbotHelper.requestStartTor(getBaseContext());
+            }
+        });
 
+        Button btn = (Button) findViewById(R.id.btnWizard1);
         btn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,9 +81,8 @@ public class NetCipherSampleActivity extends Activity {
             }
         });
 
-        btn = ((Button) findViewById(R.id.btnWizard2));
-
-        btn.setOnClickListener(new OnClickListener() {
+        httpProxyButton = (Button) findViewById(R.id.btnWizard2);
+        httpProxyButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -77,9 +91,8 @@ public class NetCipherSampleActivity extends Activity {
             }
         });
 
-        btn = ((Button) findViewById(R.id.btnWizard3));
-
-        btn.setOnClickListener(new OnClickListener() {
+        socksProxyButton = (Button) findViewById(R.id.btnWizard3);
+        socksProxyButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -88,18 +101,41 @@ public class NetCipherSampleActivity extends Activity {
                 new Thread(runnableNet).start();
             }
         });
-
     }
+
+    private BroadcastReceiver torStatusReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (TextUtils.equals(intent.getAction(), OrbotHelper.ACTION_STATUS)) {
+                Log.i(TAG, getPackageName() + " received intent : " + intent.getAction() + " " + intent.getPackage());
+                String status = intent.getStringExtra(OrbotHelper.EXTRA_STATUS);
+                torStatusTextView.setText(status);
+
+                boolean enabled = status.equals(OrbotHelper.STATUS_ON);
+                httpProxyButton.setEnabled(enabled);
+                socksProxyButton.setEnabled(enabled);
+            }
+        }
+    };
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        registerReceiver(torStatusReceiver, new IntentFilter(OrbotHelper.ACTION_STATUS));
+
         if (!OrbotHelper.isOrbotInstalled(this)) {
             promptToInstall();
-        } else if (!OrbotHelper.isOrbotRunning(this)) {
-            requestOrbotStart();
+        } else {
+            OrbotHelper.requestStartTor(this);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(torStatusReceiver);
     }
 
     public String checkHTTP(String url, Proxy.Type pType, String proxyHost, int proxyPort)
@@ -232,7 +268,7 @@ public class NetCipherSampleActivity extends Activity {
         downloadDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                startActivityForResult(OrbotHelper.getOrbotStartIntent(), 1);
+                startActivityForResult(OrbotHelper.getShowOrbotStartIntent(), 1);
             }
         });
         downloadDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
