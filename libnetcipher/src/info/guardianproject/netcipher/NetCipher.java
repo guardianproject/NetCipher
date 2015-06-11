@@ -128,7 +128,8 @@ public class NetCipher {
      */
     public static HttpsURLConnection getHttpsURLConnection(URL url, boolean compatible)
             throws IOException {
-        HttpURLConnection connection = getHttpsURLConnection(url, compatible);
+        // use default method, but enforce a HttpsURLConnection
+        HttpURLConnection connection = getHttpURLConnection(url, compatible);
         if (connection instanceof HttpsURLConnection) {
             return (HttpsURLConnection) connection;
         } else {
