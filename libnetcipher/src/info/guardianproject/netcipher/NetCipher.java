@@ -28,6 +28,13 @@ public class NetCipher {
 
     private static Proxy proxy;
 
+    /**
+     * Set the global HTTP proxy for all new {@link HttpURLConnection}s and
+     * {@link HttpsURLConnection}s that are created after this is called.
+     *
+     * @param host the IP address for the HTTP proxy to use globally
+     * @param port the port number for the HTTP proxy to use globally
+     */
     public static void setProxy(String host, int port) {
         if (host != null && port > 0) {
             InetSocketAddress isa = new InetSocketAddress(host, port);
@@ -37,12 +44,31 @@ public class NetCipher {
         }
     }
 
+    /**
+     * Set the global HTTP proxy for all new {@link HttpURLConnection}s and
+     * {@link HttpsURLConnection}s that are created after this is called.
+     *
+     * @param proxy the HTTP proxy to use globally
+     */
     public static void setProxy(Proxy proxy) {
         NetCipher.proxy = proxy;
     }
 
+    /**
+     * Get the currently active global HTTP {@link Proxy}.
+     *
+     * @return the active HTTP {@link Proxy}
+     */
     public static Proxy getProxy() {
         return proxy;
+    }
+
+    /**
+     * Set Orbot as the global HTTP proxy for all new {@link HttpURLConnection}
+     * s and {@link HttpsURLConnection}s that are created after this is called.
+     */
+    public static void useTor() {
+        setProxy(ORBOT_HTTP_PROXY);
     }
 
     /**
@@ -107,8 +133,7 @@ public class NetCipher {
      * compatible, but less strong, suite of ciphers.
      *
      * @param url
-     * @param compatible
-     * @return
+     * @return the {@code url} in an instance of {@link HttpsURLConnection}
      * @throws IOException
      * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
      */
@@ -122,13 +147,14 @@ public class NetCipher {
      *
      * @param url
      * @param compatible
-     * @return
+     * @return the {@code url} in an instance of {@link HttpsURLConnection}
      * @throws IOException
      * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
      */
     public static HttpsURLConnection getHttpsURLConnection(URL url, boolean compatible)
             throws IOException {
-        HttpURLConnection connection = getHttpsURLConnection(url, compatible);
+        // use default method, but enforce a HttpsURLConnection
+        HttpURLConnection connection = getHttpURLConnection(url, compatible);
         if (connection instanceof HttpsURLConnection) {
             return (HttpsURLConnection) connection;
         } else {

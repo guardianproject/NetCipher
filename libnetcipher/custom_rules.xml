@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="custom_rules">
+
+  <target name="-getgitdetails" >
+    <exec executable="git" outputproperty="git.describe">
+      <arg value="describe"/>
+    </exec>
+    <exec executable="git" outputproperty="git.revision">
+      <arg value="rev-parse"/>
+      <arg value="HEAD"/>
+    </exec>
+    <property name="jar.name" value="netcipher-${git.describe}" />
+  </target>
+
+  <target name="-pre-clean" depends="-getgitdetails">
+    <property name="delete.pattern" value="${jar.name}*.jar*" />
+    <echo message="deleting ${delete.pattern}" />
+    <delete failonerror="false">
+      <fileset dir="." includes="${delete.pattern}" />
+    </delete>
+  </target>
+
+  <target name="javadoc" description="Generate Javadocs" depends="-build-setup,-getgitdetails">
+    <property name="javadoc.dir" value="${out.dir}/javadoc" />
+    <property name="javadoc.jar" value="${jar.name}-javadoc.jar" />
+    <javadoc sourcepath="${source.dir}"
+             classpath="${toString:project.all.jars.path}:${toString:project.target.class.path}"
+             destdir="${javadoc.dir}"
+             packagenames="info.guardianproject.*"
+             windowtitle="${ant.project.name}"
+             linkoffline="https://developer.android.com/reference ${sdk.dir}/docs/reference"
+             linksource="true"
+             doctitle="${ant.project.name}" />
+    <jar destfile="${javadoc.jar}"
+         basedir="${javadoc.dir}">
+      <manifest>
+        <attribute name="Implementation-Vendor" value="Guardian Project"/>
+        <attribute name="Implementation-Title" value="NetCipher"/>
+        <attribute name="Implementation-URL" value="https://guardianproject.info/code/netcipher"/>
+        <attribute name="Implementation-Version" value="${git.describe}"/>
+        <attribute name="Git-Revision" value="${git.revision}"/>
+        <attribute name="Android-SDK-Release" value="${Pkg.Revision}"/>
+        <attribute name="Android-SDK-Host-OS" value="${Archive.HostOs}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="source" description="Generate source jar" depends="-build-setup,-getgitdetails">
+    <property name="source.jar" value="${jar.name}-source.jar" />
+    <jar destfile="${source.jar}"
+         includes="info/**"
+         basedir="${source.dir}">
+      <manifest>
+        <attribute name="Implementation-Vendor" value="Guardian Project"/>
+        <attribute name="Implementation-Title" value="NetCipher"/>
+        <attribute name="Implementation-URL" value="https://guardianproject.info/code/netcipher"/>
+        <attribute name="Implementation-Version" value="${git.describe}"/>
+        <attribute name="Git-Revision" value="${git.revision}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="-post-build" depends="-getgitdetails">
+    <condition property="build.is.debug" value="true" else="false">
+      <equals arg1="${build.target}" arg2="debug" />
+    </condition>
+    <if condition="${build.is.debug}">
+      <then>
+        <property name="release.jar" value="${jar.name}-debug.jar" />
+      </then>
+      <else>
+        <property name="release.jar" value="${jar.name}.jar" />
+      </else>
+    </if>
+    <property file="${sdk.dir}/tools/source.properties" />
+    <delete file="${release.jar}"/>
+    <jar destfile="${release.jar}"
+         includes="info/**"
+         basedir="${out.classes.absolute.dir}">
+      <manifest>
+        <attribute name="Implementation-Vendor" value="Guardian Project"/>
+        <attribute name="Implementation-Title" value="NetCipher"/>
+        <attribute name="Implementation-URL" value="https://guardianproject.info/code/netcipher"/>
+        <attribute name="Implementation-Version" value="${git.describe}"/>
+        <attribute name="Git-Revision" value="${git.revision}"/>
+        <attribute name="Android-SDK-Release" value="${Pkg.Revision}"/>
+        <attribute name="Android-SDK-Host-OS" value="${Archive.HostOs}"/>
+      </manifest>
+    </jar>
+    <if condition="${build.is.debug}">
+      <else>
+        <delete file="${release.jar}.asc"/>
+        <exec executable="gpg" failonerror="false">
+          <arg value="--armor" />
+          <arg value="--detach-sign" />
+          <arg value="${release.jar}" />
+        </exec>
+      </else>
+    </if>
+  </target>
+
+  <target name="release-all" depends="clean,release,javadoc,source" />
+  
+</project>

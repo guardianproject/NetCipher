@@ -3,6 +3,9 @@
 
 package info.guardianproject.onionkit.ui;
 
+import android.content.Context;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -10,8 +13,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URLEncoder;
 import java.util.StringTokenizer;
-
-import android.util.Log;
 
 public class TorServiceUtils {
 
@@ -81,23 +82,20 @@ public class TorServiceUtils {
         return false;
     }
 
-    public static int findProcessId(String command)
-    {
+    public static int findProcessId(Context context) {
+        String dataPath = context.getFilesDir().getParentFile().getParentFile().getAbsolutePath();
+        String command = dataPath + "/" + OrbotHelper.ORBOT_PACKAGE_NAME + "/app_bin/tor";
         int procId = -1;
 
-        try
-        {
+        try {
             procId = findProcessIdWithPidOf(command);
 
             if (procId == -1)
                 procId = findProcessIdWithPS(command);
-        } catch (Exception e)
-        {
-            try
-            {
+        } catch (Exception e) {
+            try {
                 procId = findProcessIdWithPS(command);
-            } catch (Exception e2)
-            {
+            } catch (Exception e2) {
                 Log.e(TAG, "Unable to get proc id for command: " + URLEncoder.encode(command), e2);
             }
         }

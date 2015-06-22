@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="sample.onionkit"
+    package="sample.netcipher"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -7,14 +7,15 @@
         android:minSdkVersion="9"
         android:targetSdkVersion="22" />
 
-        <uses-permission android:name="android.permission.INTERNET" />
-    
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
+        android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="sample.netcipher.NetCipherSampleActivity"
+            android:name=".NetCipherSampleActivity"
             android:label="@string/title_activity_onion_kit_sample" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,11 +23,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-         <activity android:name="info.guardianproject.onionkit.ui.CertDisplayActivity"
+        <activity
+            android:name="info.guardianproject.onionkit.ui.CertDisplayActivity"
             android:configChanges="locale|screenSize|orientation"
-         	android:theme="@android:style/Theme.Dialog"
-         	 android:taskAffinity=""
-            />
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Dialog" />
     </application>
 
 </manifest>

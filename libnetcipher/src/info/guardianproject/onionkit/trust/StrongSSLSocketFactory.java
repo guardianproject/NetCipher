@@ -1,5 +1,9 @@
 package info.guardianproject.onionkit.trust;
 
+import android.content.Context;
+
+import ch.boye.httpclientandroidlib.conn.scheme.LayeredSchemeSocketFactory;
+import ch.boye.httpclientandroidlib.params.HttpParams;
 import info.guardianproject.onionkit.OnionKitHelper;
 
 import java.io.IOException;
@@ -20,16 +24,9 @@ import java.util.List;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.os.Build;
-import ch.boye.httpclientandroidlib.conn.scheme.LayeredSchemeSocketFactory;
-import ch.boye.httpclientandroidlib.params.HttpParams;
 
 public class StrongSSLSocketFactory extends
 		ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory implements
@@ -51,26 +48,21 @@ public class StrongSSLSocketFactory extends
 	private boolean mEnableStongerDefaultSSLCipherSuite = true;
 	private boolean mEnableStongerDefaultProtocalVersion = true;
 
-	private TrustManager mTrustManager;
-	
 	private String[] mProtocols;
 	private String[] mCipherSuites;
 
 	public StrongSSLSocketFactory(Context context,
-			TrustManager trustManager, KeyStore keyStore, String keyStorePassword)
+			TrustManager[] trustManagers, KeyStore keyStore, String keyStorePassword)
 			throws KeyManagementException, UnrecoverableKeyException,
 			NoSuchAlgorithmException, KeyStoreException, CertificateException,
 			IOException {
 		super(keyStore);
 
-		mTrustManager = trustManager;
-
 		SSLContext sslContext = SSLContext.getInstance("TLS");
-		TrustManager[] tm = new TrustManager[] { mTrustManager };
 		KeyManager[] km = createKeyManagers(
 				keyStore,
 				keyStorePassword);
-		sslContext.init(km, tm, new SecureRandom());
+		sslContext.init(km, trustManagers, new SecureRandom());
 
 		mFactory = sslContext.getSocketFactory();
 
@@ -85,7 +77,7 @@ public class StrongSSLSocketFactory extends
 			}
 		}
 		this.mProtocols = protocolsToEnable.toArray(new String[protocolsToEnable.size()]);
-		
+
 		List<String> cipherSuitesToEnable = new ArrayList<String>();
 		List<String> supportedCipherSuites = Arrays.asList(sslSocket.getSupportedCipherSuites());
 		for(String enabledCipherSuite : OnionKitHelper.ENABLED_CIPHERS) {
@@ -95,7 +87,7 @@ public class StrongSSLSocketFactory extends
 		}
 		this.mCipherSuites = cipherSuitesToEnable.toArray(new String[cipherSuitesToEnable.size()]);
 	}
-	
+
 	private KeyManager[] createKeyManagers(final KeyStore keystore,
 			final String password) throws KeyStoreException,
 			NoSuchAlgorithmException, UnrecoverableKeyException {
@@ -129,7 +121,7 @@ public class StrongSSLSocketFactory extends
 
 	/**
 	 * Defaults the SSL connection to use a strong cipher suite and TLS version
-	 * 
+	 *
 	 * @param socket
 	 */
 	private void enableStrongerDefaults(Socket socket) {
