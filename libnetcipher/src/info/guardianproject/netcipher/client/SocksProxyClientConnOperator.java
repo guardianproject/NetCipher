@@ -1,5 +1,5 @@
 
-package info.guardianproject.onionkit.proxy;
+package info.guardianproject.netcipher.client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

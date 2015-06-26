@@ -1,10 +1,11 @@
 /* Copyright (c) 2009, Nathan Freitas, Orbot / The Guardian Project - http://openideals.com/guardian */
 /* See LICENSE for licensing information */
 
-package info.guardianproject.onionkit.ui;
+package info.guardianproject.netcipher.proxy;
 
 import android.content.Context;
 import android.util.Log;
+
 
 import java.io.BufferedReader;
 import java.io.File;

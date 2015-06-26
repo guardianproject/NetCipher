@@ -1,5 +1,5 @@
 
-package info.guardianproject.onionkit.web;
+package info.guardianproject.netcipher.web;
 
 import java.io.IOException;
 import java.io.PrintWriter;

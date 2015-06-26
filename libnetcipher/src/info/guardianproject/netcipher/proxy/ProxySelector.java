@@ -1,4 +1,4 @@
-package info.guardianproject.onionkit.web;
+package info.guardianproject.netcipher.proxy;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

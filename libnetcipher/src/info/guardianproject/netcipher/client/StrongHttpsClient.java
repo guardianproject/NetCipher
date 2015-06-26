@@ -1,5 +1,5 @@
 
-package info.guardianproject.onionkit.trust;
+package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 import android.util.Log;
@@ -13,8 +13,6 @@ import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
 import ch.boye.httpclientandroidlib.impl.client.DefaultHttpClient;
 import ch.boye.httpclientandroidlib.impl.conn.tsccm.ThreadSafeClientConnManager;
 import info.guardianproject.onionkit.R;
-import info.guardianproject.onionkit.proxy.MyThreadSafeClientConnManager;
-import info.guardianproject.onionkit.proxy.SocksProxyClientConnOperator;
 
 import java.io.IOException;
 import java.io.InputStream;

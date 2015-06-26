@@ -1,5 +1,5 @@
 
-package info.guardianproject.onionkit.ui;
+package info.guardianproject.netcipher.proxy;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,6 +9,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+
 
 import java.util.List;
 

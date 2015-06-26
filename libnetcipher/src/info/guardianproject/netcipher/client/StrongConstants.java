@@ -1,6 +1,6 @@
-package info.guardianproject.onionkit;
+package info.guardianproject.netcipher.client;
 
-public class OnionKitHelper {
+public class StrongConstants {
 
 	/**
 	 * Ordered to prefer the stronger cipher suites as noted

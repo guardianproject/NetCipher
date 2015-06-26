@@ -1,10 +1,9 @@
-package info.guardianproject.onionkit.trust;
+package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 
 import ch.boye.httpclientandroidlib.conn.scheme.LayeredSchemeSocketFactory;
 import ch.boye.httpclientandroidlib.params.HttpParams;
-import info.guardianproject.onionkit.OnionKitHelper;
 
 import java.io.IOException;
 import java.net.Proxy;
@@ -71,7 +70,7 @@ public class StrongSSLSocketFactory extends
 	private void readSSLParameters(SSLSocket sslSocket) {
 		List<String> protocolsToEnable = new ArrayList<String>();
 		List<String> supportedProtocols = Arrays.asList(sslSocket.getSupportedProtocols());
-		for(String enabledProtocol : OnionKitHelper.ENABLED_PROTOCOLS) {
+		for(String enabledProtocol : StrongConstants.ENABLED_PROTOCOLS) {
 			if(supportedProtocols.contains(enabledProtocol)) {
 				protocolsToEnable.add(enabledProtocol);
 			}
@@ -80,7 +79,7 @@ public class StrongSSLSocketFactory extends
 
 		List<String> cipherSuitesToEnable = new ArrayList<String>();
 		List<String> supportedCipherSuites = Arrays.asList(sslSocket.getSupportedCipherSuites());
-		for(String enabledCipherSuite : OnionKitHelper.ENABLED_CIPHERS) {
+		for(String enabledCipherSuite : StrongConstants.ENABLED_CIPHERS) {
 			if(supportedCipherSuites.contains(enabledCipherSuite)) {
 				cipherSuitesToEnable.add(enabledCipherSuite);
 			}

@@ -1,5 +1,5 @@
 
-package info.guardianproject.onionkit.proxy;
+package info.guardianproject.netcipher.client;
 
 import ch.boye.httpclientandroidlib.conn.ClientConnectionOperator;
 import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;

@@ -1,5 +1,5 @@
 
-package info.guardianproject.onionkit.proxy;
+package info.guardianproject.netcipher.client;
 
 import java.io.IOException;
 import java.net.ConnectException;

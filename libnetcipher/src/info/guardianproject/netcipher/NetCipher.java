@@ -4,6 +4,8 @@ package info.guardianproject.netcipher;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;

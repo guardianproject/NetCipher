@@ -15,7 +15,7 @@
  * From https://stackoverflow.com/a/29946540
  */
 
-package info.guardianproject.netcipher;
+package info.guardianproject.netcipher.client;
 
 import android.util.Log;
 
