@@ -2,7 +2,15 @@
 package info.guardianproject.netcipher.client;
 
 import android.content.Context;
-import android.util.Log;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
+import javax.net.ssl.TrustManagerFactory;
 
 import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.conn.ClientConnectionOperator;
@@ -13,15 +21,6 @@ import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
 import ch.boye.httpclientandroidlib.impl.client.DefaultHttpClient;
 import ch.boye.httpclientandroidlib.impl.conn.tsccm.ThreadSafeClientConnManager;
 import info.guardianproject.onionkit.R;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-
-import javax.net.ssl.TrustManagerFactory;
 
 public class StrongHttpsClient extends DefaultHttpClient {
 
@@ -84,36 +83,15 @@ public class StrongHttpsClient extends DefaultHttpClient {
     @Override
     protected ThreadSafeClientConnManager createClientConnectionManager() {
 
-        if (proxyHost == null && proxyType == null)
+        return new ThreadSafeClientConnManager(getParams(), mRegistry)
         {
-            Log.d("StrongHTTPS", "not proxying");
+            @Override
+            protected ClientConnectionOperator createConnectionOperator(
+                    SchemeRegistry schreg) {
 
-            return new MyThreadSafeClientConnManager(getParams(), mRegistry);
-
-        }
-        else if (proxyHost != null && proxyType.equalsIgnoreCase("socks"))
-        {
-            Log.d("StrongHTTPS", "proxying using: " + proxyType);
-
-            return new MyThreadSafeClientConnManager(getParams(), mRegistry)
-            {
-
-                @Override
-                protected ClientConnectionOperator createConnectionOperator(
-                        SchemeRegistry schreg) {
-
-                    return new SocksProxyClientConnOperator(schreg, proxyHost.getHostName(),
-                            proxyHost.getPort());
-                }
-
-            };
-        }
-        else
-        {
-            Log.d("StrongHTTPS", "proxying with: " + proxyType);
-
-            return new MyThreadSafeClientConnManager(getParams(), mRegistry);
-        }
+                return new SocksAwareClientConnOperator(schreg, proxyHost, proxyType);
+            }
+        };
     }
 
     public void useProxy(boolean enableTor, String type, String host, int port)
