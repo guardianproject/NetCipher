@@ -31,13 +31,17 @@ public class SocksAwareClientConnOperator extends DefaultClientConnectionOperato
 
     private HttpHost mProxyHost;
     private String mProxyType;
+    private SocksAwareProxyRoutePlanner mRoutePlanner;
 
     public SocksAwareClientConnOperator(SchemeRegistry registry,
-                                        HttpHost proxyHost, String proxyType) {
+                                        HttpHost proxyHost,
+                                        String proxyType,
+                                        SocksAwareProxyRoutePlanner proxyRoutePlanner) {
         super(registry);
 
         mProxyHost = proxyHost;
         mProxyType = proxyType;
+        mRoutePlanner = proxyRoutePlanner;
     }
 
     @Override
@@ -50,10 +54,28 @@ public class SocksAwareClientConnOperator extends DefaultClientConnectionOperato
         if (mProxyHost != null) {
             if (mProxyType != null && mProxyType.equalsIgnoreCase("socks")) {
                 Log.d("StrongHTTPS", "proxying using SOCKS");
-                openSocksConnection(conn, target, local, context, params);
+                openSocksConnection(mProxyHost, conn, target, local, context, params);
             } else {
                 Log.d("StrongHTTPS", "proxying with: " + mProxyType);
                 openNonSocksConnection(conn, target, local, context, params);
+            }
+        } else if (mRoutePlanner != null) {
+            if (mRoutePlanner.isProxy(target)) {
+                // HTTP proxy, already handled by the route planner system
+                Log.d("StrongHTTPS", "proxying using non-SOCKS");
+                openNonSocksConnection(conn, target, local, context, params);
+            } else {
+                // Either SOCKS or direct
+                HttpHost proxy = mRoutePlanner.determineRequiredProxy(target, null, context);
+                if (proxy == null) {
+                    Log.d("StrongHTTPS", "not proxying");
+                    openNonSocksConnection(conn, target, local, context, params);
+                } else if (mRoutePlanner.isSocksProxy(proxy)) {
+                    Log.d("StrongHTTPS", "proxying using SOCKS");
+                    openSocksConnection(proxy, conn, target, local, context, params);
+                } else {
+                    throw new IllegalStateException("Non-SOCKS proxy returned");
+                }
             }
         } else {
             Log.d("StrongHTTPS", "not proxying");
@@ -106,6 +128,7 @@ public class SocksAwareClientConnOperator extends DefaultClientConnectionOperato
 
     // Derived from the original DefaultClientConnectionOperator.java in Apache HttpClient 4.2
     private void openSocksConnection(
+            final HttpHost proxy,
             final OperatedClientConnection conn,
             final HttpHost target,
             final InetAddress local,
@@ -150,7 +173,7 @@ public class SocksAwareClientConnOperator extends DefaultClientConnectionOperato
             socket = new Socket();
             conn.opening(socket, target);
             socket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
-            socket.connect(new InetSocketAddress(mProxyHost.getHostName(), mProxyHost.getPort()), CONNECT_TIMEOUT_MILLISECONDS);
+            socket.connect(new InetSocketAddress(proxy.getHostName(), proxy.getPort()), CONNECT_TIMEOUT_MILLISECONDS);
 
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             outputStream.write((byte) 0x04);

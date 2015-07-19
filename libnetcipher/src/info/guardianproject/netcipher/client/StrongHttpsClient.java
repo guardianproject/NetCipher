@@ -27,6 +27,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
     final Context context;
     private HttpHost proxyHost;
     private String proxyType;
+    private SocksAwareProxyRoutePlanner routePlanner;
 
     private StrongSSLSocketFactory sFactory;
     private SchemeRegistry mRegistry;
@@ -89,7 +90,8 @@ public class StrongHttpsClient extends DefaultHttpClient {
             protected ClientConnectionOperator createConnectionOperator(
                     SchemeRegistry schreg) {
 
-                return new SocksAwareClientConnOperator(schreg, proxyHost, proxyType);
+                return new SocksAwareClientConnOperator(schreg, proxyHost, proxyType,
+                        routePlanner);
             }
         };
     }
@@ -122,6 +124,12 @@ public class StrongHttpsClient extends DefaultHttpClient {
     {
     	getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
         proxyHost = null;
+    }
+
+    public void useProxyRoutePlanner(SocksAwareProxyRoutePlanner proxyRoutePlanner)
+    {
+        routePlanner = proxyRoutePlanner;
+        setRoutePlanner(proxyRoutePlanner);
     }
 
     public final static String TYPE_SOCKS = "socks";
