@@ -18,6 +18,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,6 +35,8 @@ import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.methods.HttpGet;
 import info.guardianproject.netcipher.client.StrongHttpsClient;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
+import info.guardianproject.netcipher.proxy.ProxyHelper;
+import info.guardianproject.netcipher.proxy.PsiphonHelper;
 
 public class NetCipherSampleActivity extends Activity {
 
@@ -46,8 +49,8 @@ public class NetCipherSampleActivity extends Activity {
 
     // test the local device proxy provided by Orbot/Tor
     private final static String PROXY_HOST = "127.0.0.1";
-    private final static int PROXY_HTTP_PORT = 8118; // default for Orbot/Tor
-    private final static int PROXY_SOCKS_PORT = 9050; // default for Orbot/Tor
+    private int mProxyHttp = 8118; // default for Orbot/Tor
+    private int mProxySocks = 9050; // default for Orbot/Tor
 
     private Proxy.Type mProxyType;
 
@@ -103,13 +106,14 @@ public class NetCipherSampleActivity extends Activity {
         });
     }
 
+    //Orbot specific receiver
     private BroadcastReceiver torStatusReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             if (TextUtils.equals(intent.getAction(), OrbotHelper.ACTION_STATUS)) {
                 Log.i(TAG, getPackageName() + " received intent : " + intent.getAction() + " " + intent.getPackage());
-                String status = intent.getStringExtra(OrbotHelper.EXTRA_STATUS);
+                String status = intent.getStringExtra(OrbotHelper.EXTRA_STATUS) + " (" + intent.getStringExtra(ProxyHelper.EXTRA_PACKAGE_NAME) + ")";
                 torStatusTextView.setText(status);
 
                 boolean enabled = status.equals(OrbotHelper.STATUS_ON);
@@ -119,16 +123,63 @@ public class NetCipherSampleActivity extends Activity {
         }
     };
 
+    //Generic proxy receiver
+    private BroadcastReceiver proxyStatusReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (TextUtils.equals(intent.getAction(), ProxyHelper.ACTION_STATUS)) {
+            	
+                Log.i(TAG, getPackageName() + " received intent : " + intent.getAction() + " " + intent.getPackage());
+                String status = intent.getStringExtra(ProxyHelper.EXTRA_STATUS) + " (" + intent.getStringExtra(ProxyHelper.EXTRA_PACKAGE_NAME) + ")";
+                torStatusTextView.setText(status);
+
+                boolean enabled = (intent.getStringExtra(ProxyHelper.EXTRA_STATUS).equals(ProxyHelper.STATUS_ON));
+               
+                if(enabled){
+	                if (intent.hasExtra(ProxyHelper.EXTRA_PROXY_PORT_HTTP))
+	                	mProxyHttp = intent.getIntExtra(ProxyHelper.EXTRA_PROXY_PORT_HTTP, -1);
+	                
+	                if (intent.hasExtra(ProxyHelper.EXTRA_PROXY_PORT_SOCKS))
+	                	mProxySocks = intent.getIntExtra(ProxyHelper.EXTRA_PROXY_PORT_SOCKS, -1);
+	          
+                }
+                
+
+                httpProxyButton.setEnabled(enabled);
+                socksProxyButton.setEnabled(enabled);
+            }
+        }
+    };
+    
     @Override
     protected void onResume() {
         super.onResume();
 
         registerReceiver(torStatusReceiver, new IntentFilter(OrbotHelper.ACTION_STATUS));
-
+        registerReceiver(proxyStatusReceiver, new IntentFilter(ProxyHelper.ACTION_STATUS));
+        
+        //this will check if Orbot is installed, and if so, will auto-request it to start in the background
         if (!OrbotHelper.isOrbotInstalled(this)) {
             promptToInstall();
         } else {
-            OrbotHelper.requestStartTor(this);
+        //    OrbotHelper.requestStartTor(this);
+        }
+        
+        
+        ProxyHelper[] proxyHelpers = {new PsiphonHelper()};
+        
+        for (ProxyHelper proxyHelper : proxyHelpers)
+        {        
+	        if (!proxyHelper.isInstalled(this))
+	        {
+	        	Intent intent = proxyHelper.getInstallIntent(this);
+	        	startActivity(intent);
+	        }
+	        else
+	        {
+	        	proxyHelper.requestStatus(this);       
+	        }
         }
     }
 
@@ -195,9 +246,9 @@ public class NetCipherSampleActivity extends Activity {
                 if (mProxyType != null)
                 {
                     if (mProxyType == Proxy.Type.HTTP)
-                        proxyPort = PROXY_HTTP_PORT;
+                        proxyPort = mProxyHttp;
                     else if (mProxyType == Proxy.Type.SOCKS)
-                        proxyPort = PROXY_SOCKS_PORT;
+                        proxyPort = mProxySocks;
                 }
                 String resp = checkHTTP(url, mProxyType, PROXY_HOST, proxyPort);
                 msg = new Message();
