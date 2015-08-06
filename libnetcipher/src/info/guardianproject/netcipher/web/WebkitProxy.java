@@ -106,6 +106,27 @@ public class WebkitProxy {
 
     }
 
+    private static void resetSystemProperties()
+    {
+
+        System.setProperty("proxyHost", "");
+        System.setProperty("proxyPort", "");
+
+        System.setProperty("http.proxyHost", "");
+        System.setProperty("http.proxyPort", "");
+
+        System.setProperty("https.proxyHost", "");
+        System.setProperty("https.proxyPort", "");
+
+
+        System.setProperty("socks.proxyHost", "");
+        System.setProperty("socks.proxyPort", DEFAULT_SOCKS_PORT + "");
+
+        System.setProperty("socksProxyHost", "");
+        System.setProperty("socksProxyPort", DEFAULT_SOCKS_PORT + "");
+
+    }
+
     /**
      * Override WebKit Proxy settings
      * 
@@ -627,15 +648,10 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
     }**/
 
     public static void resetProxy(String appClass, Context ctx) throws Exception {
-    	
 
-        System.clearProperty("http.proxyHost");
-        System.clearProperty("http.proxyPort");
-        System.clearProperty("https.proxyHost");
-        System.clearProperty("https.proxyPort");
-        
-        
-         if (Build.VERSION.SDK_INT < 14)
+        resetSystemProperties();
+
+        if (Build.VERSION.SDK_INT < 14)
         {
             resetProxyForGingerBread(ctx);
         }
@@ -645,7 +661,7 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
         }
         else
         {
-        	resetKitKatProxy(appClass, ctx);
+            resetKitKatProxy(appClass, ctx);
         }
          
     }
