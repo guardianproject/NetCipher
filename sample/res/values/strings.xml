@@ -12,6 +12,6 @@
     <string name="no">No</string>
     <string name="start_orbot_">Start Orbot?</string>
     <string name="orbot_doesn_t_appear_to_be_running_would_you_like_to_start_it_up_and_connect_to_tor_">Orbot doesn\'t appear to be running. Would you like to start it up and connect to Tor?</string>
-    <string name="tor_status">Tor status</string>
+    <string name="proxy_status">Proxy status</string>
 
 </resources>

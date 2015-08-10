@@ -13,7 +13,7 @@ import android.util.Log;
 
 import java.util.List;
 
-public class OrbotHelper {
+public class OrbotHelper implements ProxyHelper {
 
     private final static int REQUEST_CODE_STATUS = 100;
 
@@ -65,8 +65,6 @@ public class OrbotHelper {
     public final static int START_TOR_RESULT = 0x048079234;
     public final static int HS_REQUEST_CODE = 9999;
 
-    private final static String FDROID_PACKAGE_NAME = "org.fdroid.fdroid";
-    private final static String PLAY_PACKAGE_NAME = "com.android.vending";
 
     private OrbotHelper() {
         // only static utility methods, do not instantiate
@@ -183,4 +181,34 @@ public class OrbotHelper {
         }
         return intent;
     }
+
+	@Override
+	public boolean isInstalled(Context context) {
+		return isOrbotInstalled(context);
+	}
+
+	@Override
+	public void requestStatus(Context context) { 
+		isOrbotRunning(context);
+	}
+
+	@Override
+	public boolean requestStart(Context context) {
+		return requestStartTor(context);
+	}
+
+	@Override
+	public Intent getInstallIntent(Context context) {
+		return getOrbotInstallIntent(context);
+	}
+
+	@Override
+	public Intent getStartIntent(Context context) {
+		return getOrbotStartIntent();
+	}
+	
+	@Override
+	public String getName() {
+		return "Orbot";
+	}
 }
