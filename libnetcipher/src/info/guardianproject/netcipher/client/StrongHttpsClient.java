@@ -131,6 +131,16 @@ public class StrongHttpsClient extends DefaultHttpClient {
         routePlanner = proxyRoutePlanner;
         setRoutePlanner(proxyRoutePlanner);
     }
+    
+    /**
+     * NOT ADVISED, but some sites don't yet have latest protocols and ciphers available, and some
+     * apps still need to support them
+     * https://dev.guardianproject.info/issues/5644
+     */
+    public void enableSSLCompatibilityMode() {
+        sFactory.setEnableStongerDefaultProtocalVersion(false);
+        sFactory.setEnableStongerDefaultSSLCipherSuite(false);
+    }
 
     public final static String TYPE_SOCKS = "socks";
     public final static String TYPE_HTTP = "http";
