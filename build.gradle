@@ -1,8 +1,54 @@
 buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
-    }
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'com.android.tools.build:gradle:1.0.0'
+	}
+}
+
+apply plugin: 'com.android.library'
+
+repositories {
+	mavenCentral()
+}
+dependencies {
+	// If you want to fetch these from Maven, uncomment these lines and change
+	// the *.jar depend to exclude these libs:
+	compile fileTree(dir: 'libnetcipher/libs', include: '*.jar')
+}
+
+android {
+	compileSdkVersion 22
+		buildToolsVersion '22.0.1'
+
+		sourceSets {
+			main {
+				manifest.srcFile 'libnetcipher/AndroidManifest.xml'
+					java.srcDirs = ['libnetcipher/src']
+					resources.srcDirs = ['libnetcipher/src']
+					aidl.srcDirs = ['libnetcipher/src']
+					renderscript.srcDirs = ['libnetcipher/src']
+					res.srcDirs = ['libnetcipher/res']
+					assets.srcDirs = ['libnetcipher/assets']
+			}
+		}
+
+	lintOptions {
+		abortOnError false
+	}
+}
+
+apply plugin: 'maven'
+
+uploadArchives {
+	repositories.mavenDeployer {
+		def deployPath = file(getProperty('aar.deployPath'))
+		repository(url: "file://${deployPath.absolutePath}")
+		pom.project {
+			groupId 'info.guardianproject'
+			artifactId 'netcipher'
+			version "1.2.0"
+		}
+	}
 }
