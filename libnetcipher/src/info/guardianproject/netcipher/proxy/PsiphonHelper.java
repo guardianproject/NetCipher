@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,6 +16,9 @@ import android.text.TextUtils;
 public class PsiphonHelper implements ProxyHelper {
 
     public final static String PACKAGE_NAME = "com.psiphon3";
+    public final static String COMPONENT_NAME = "com.psiphon3.StatusActivity";
+    
+    
     public final static String MARKET_URI = "market://details?id=" + PACKAGE_NAME;
     public final static String FDROID_URI = "https://f-droid.org/repository/browse/?fdid="
             + PACKAGE_NAME;
@@ -91,7 +95,9 @@ public class PsiphonHelper implements ProxyHelper {
 	public boolean requestStart(Context context) {
 
 		Intent intent = getStartIntent(context);
+	//	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(intent);
+		
 		return true;
 	}
 
@@ -123,7 +129,8 @@ public class PsiphonHelper implements ProxyHelper {
 	@Override
 	public Intent getStartIntent(Context context) {
 		 Intent intent = new Intent();
-	     intent.setPackage(PACKAGE_NAME);
+		 intent.setComponent(new ComponentName(PACKAGE_NAME, COMPONENT_NAME));
+
 	     return intent;
 	}
 	
@@ -149,7 +156,7 @@ public class PsiphonHelper implements ProxyHelper {
 
 	@Override
 	public String getName() {
-		return "Psiphon3";
+		return PACKAGE_NAME;
 	}
 
 }
