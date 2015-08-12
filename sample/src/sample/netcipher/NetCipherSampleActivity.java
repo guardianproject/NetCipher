@@ -52,6 +52,8 @@ public class NetCipherSampleActivity extends Activity {
     private int mProxyHttp = 8118; // default for Orbot/Tor
     private int mProxySocks = 9050; // default for Orbot/Tor
 
+    private final static String DEFAULT_ONION_URL = "http://3g2upl4pq6kufc4m.onion";
+    
     private Proxy.Type mProxyType;
 
     /** Called when the activity is first created. */
@@ -113,12 +115,21 @@ public class NetCipherSampleActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             if (TextUtils.equals(intent.getAction(), OrbotHelper.ACTION_STATUS)) {
                 Log.i(TAG, getPackageName() + " received intent : " + intent.getAction() + " " + intent.getPackage());
-                String status = intent.getStringExtra(OrbotHelper.EXTRA_STATUS) + " (" + intent.getStringExtra(ProxyHelper.EXTRA_PACKAGE_NAME) + ")";
+                String status = intent.getStringExtra(OrbotHelper.EXTRA_STATUS) + " (" + intent.getStringExtra(OrbotHelper.EXTRA_PACKAGE_NAME) + ")";
                 torStatusTextView.setText(status);
 
-                boolean enabled = status.equals(OrbotHelper.STATUS_ON);
+                boolean enabled = (intent.getStringExtra(OrbotHelper.EXTRA_STATUS).equals(OrbotHelper.STATUS_ON));
                 httpProxyButton.setEnabled(enabled);
                 socksProxyButton.setEnabled(enabled);
+                
+                if(enabled){
+	                if (intent.hasExtra(OrbotHelper.EXTRA_PROXY_PORT_HTTP))
+	                	mProxyHttp = intent.getIntExtra(OrbotHelper.EXTRA_PROXY_PORT_HTTP, -1);
+	                
+	                if (intent.hasExtra(OrbotHelper.EXTRA_PROXY_PORT_SOCKS))
+	                	mProxySocks = intent.getIntExtra(OrbotHelper.EXTRA_PROXY_PORT_SOCKS, -1);
+	          
+                }
             }
         }
     };
@@ -169,26 +180,42 @@ public class NetCipherSampleActivity extends Activity {
         
         //this will check if Orbot is installed, and if so, will auto-request it to start in the background
         if (!OrbotHelper.isOrbotInstalled(this)) {
-            promptToInstall();
+            
+        	//orbot is not installed... check for other proxies
+        	boolean foundProxy = false;
+        	
+        	ProxyHelper[] proxyHelpers = {new PsiphonHelper()};
+            
+            for (ProxyHelper proxyHelper : proxyHelpers)
+            {        
+    	        if (!proxyHelper.isInstalled(this))
+    	        {
+    	        	Intent intent = proxyHelper.getInstallIntent(this);
+    	        	startActivity(intent);
+    	        }
+    	        else
+    	        {
+    	        	proxyHelper.requestStatus(this);  
+    	        	foundProxy = true;
+    	        	break;
+    	        }
+            }
+            
+            if (!foundProxy)
+            	promptToInstall(); //request Orbot install if no other proxy found
+            
         } else {
-        //    OrbotHelper.requestStartTor(this);
+        
+        	//found Orbot, request to start
+            OrbotHelper.requestStartTor(this);
+        
+            //set default url to an onion
+            txtUrl.setText(DEFAULT_ONION_URL);
+        	
         }
         
         
-        ProxyHelper[] proxyHelpers = {new PsiphonHelper()};
         
-        for (ProxyHelper proxyHelper : proxyHelpers)
-        {        
-	        if (!proxyHelper.isInstalled(this))
-	        {
-	        	Intent intent = proxyHelper.getInstallIntent(this);
-	        	startActivity(intent);
-	        }
-	        else
-	        {
-	        	proxyHelper.requestStatus(this);       
-	        }
-        }
     }
 
     @Override
