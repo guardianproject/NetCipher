@@ -57,12 +57,6 @@
          manifest="MANIFEST.MF"
          basedir="${javadoc.dir}">
     </jar>
-    <delete file="${javadoc.jar}.asc"/>
-    <exec executable="gpg" failonerror="false">
-      <arg value="--armor" />
-      <arg value="--detach-sign" />
-      <arg value="${javadoc.jar}" />
-    </exec>
   </target>
 
   <target name="source" description="Generate Javadocs" depends="-build-setup,-getgitdetails">
@@ -72,11 +66,6 @@
          basedir="${source.dir}">
     </jar>
     <delete file="${source.jar}.asc"/>
-    <exec executable="gpg" failonerror="false">
-      <arg value="--armor" />
-      <arg value="--detach-sign" />
-      <arg value="${source.jar}" />
-    </exec>
   </target>
 
   <target name="pom" description="Generate maven .pom" depends="-build-setup,-getgitdetails">
@@ -86,13 +75,6 @@
                    match="&lt;version&gt;.*&lt;/version&gt;"
                    replace="&lt;version&gt;${git.describe}&lt;/version&gt;"
                    byline="true" />
-
-    <delete file="${pom.file}.asc" />
-    <exec executable="gpg" failonerror="false">
-      <arg value="--armor" />
-      <arg value="--detach-sign" />
-      <arg value="${pom.file}" />
-    </exec>
   </target>
 
   <target name="-post-build" depends="-getgitdetails">
@@ -114,16 +96,6 @@
          includes="info/**"
          basedir="${out.classes.absolute.dir}">
     </jar>
-    <if condition="${build.is.debug}">
-      <else>
-        <delete file="${release.jar}.asc"/>
-        <exec executable="gpg" failonerror="false">
-          <arg value="--armor" />
-          <arg value="--detach-sign" />
-          <arg value="${release.jar}" />
-        </exec>
-      </else>
-    </if>
   </target>
 
   <target name="release-all" depends="clean,release,javadoc,source,pom" />
