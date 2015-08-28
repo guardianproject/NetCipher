@@ -85,6 +85,15 @@ public class NetCipher {
     }
 
     /**
+     * Clear the global HTTP proxy for all new {@link HttpURLConnection}s and
+     * {@link HttpsURLConnection}s that are created after this is called. This
+     * returns things to the default, proxy-less state.
+     */
+    public static void clearProxy() {
+        setProxy(null);
+    }
+
+    /**
      * Set Orbot as the global HTTP proxy for all new {@link HttpURLConnection}
      * s and {@link HttpsURLConnection}s that are created after this is called.
      * This overrides all future calls to {@link #setProxy(Proxy)}, except to
