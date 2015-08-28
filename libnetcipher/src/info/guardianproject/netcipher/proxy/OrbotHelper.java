@@ -10,7 +10,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 public class OrbotHelper {
@@ -70,6 +71,40 @@ public class OrbotHelper {
 
     private OrbotHelper() {
         // only static utility methods, do not instantiate
+    }
+
+    /**
+     * Test whether a {@link URL} is a Tor Hidden Service host name, also known
+     * as an ".onion address".
+     *
+     * @return whether the host name is a Tor .onion address
+     */
+    public static boolean isOnionAddress(URL url) {
+        return url.getHost().endsWith(".onion");
+    }
+
+    /**
+     * Test whether a URL {@link String} is a Tor Hidden Service host name, also known
+     * as an ".onion address".
+     *
+     * @return whether the host name is a Tor .onion address
+     */
+    public static boolean isOnionAddress(String urlString) {
+        try {
+            return isOnionAddress(new URL(urlString));
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Test whether a {@link Uri} is a Tor Hidden Service host name, also known
+     * as an ".onion address".
+     *
+     * @return whether the host name is a Tor .onion address
+     */
+    public static boolean isOnionAddress(Uri uri) {
+        return uri.getHost().endsWith(".onion");
     }
 
     public static boolean isOrbotRunning(Context context) {
