@@ -19,6 +19,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
+import info.guardianproject.netcipher.proxy.OrbotHelper;
+
 public class NetCipher {
 
     private NetCipher() {
@@ -97,6 +99,12 @@ public class NetCipher {
         SSLSocketFactory tlsOnly = new TlsOnlySocketFactory(sslcontext.getSocketFactory(),
                 compatible);
         HttpsURLConnection.setDefaultSSLSocketFactory(tlsOnly);
+
+        // .onion addresses only work via Tor, so force Tor for all of them
+        Proxy proxy = NetCipher.proxy;
+        if (OrbotHelper.isOnionAddress(url))
+            proxy = ORBOT_HTTP_PROXY;
+
         if (proxy != null) {
             return (HttpURLConnection) url.openConnection(proxy);
         } else {
