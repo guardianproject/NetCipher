@@ -74,6 +74,37 @@ public class NetCipher {
     }
 
     /**
+     * Get a {@link HttpURLConnection} from a {@link URL}, and specify whether
+     * it should use a more compatible, but less strong, suite of ciphers.
+     *
+     * @param url
+     * @param compatible
+     * @return the {@code url} in an instance of {@link HttpURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
+    public static HttpURLConnection getHttpURLConnection(URL url, boolean compatible)
+            throws IOException {
+        SSLContext sslcontext;
+        try {
+            sslcontext = SSLContext.getInstance("TLSv1");
+            sslcontext.init(null, null, null); // null means use default
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e);
+        } catch (KeyManagementException e) {
+            throw new IllegalArgumentException(e);
+        }
+        SSLSocketFactory tlsOnly = new TlsOnlySocketFactory(sslcontext.getSocketFactory(),
+                compatible);
+        HttpsURLConnection.setDefaultSSLSocketFactory(tlsOnly);
+        if (proxy != null) {
+            return (HttpURLConnection) url.openConnection(proxy);
+        } else {
+            return (HttpURLConnection) url.openConnection();
+        }
+    }
+
+    /**
      * Get a {@link HttpsURLConnection} from a URL {@link String} using the best
      * TLS configuration available on the device.
      *
@@ -232,36 +263,5 @@ public class NetCipher {
      */
     public static HttpURLConnection getHttpURLConnection(URL url) throws IOException {
         return (HttpURLConnection) getHttpURLConnection(url, false);
-    }
-
-    /**
-     * Get a {@link HttpURLConnection} from a {@link URL}, and specify whether
-     * it should use a more compatible, but less strong, suite of ciphers.
-     *
-     * @param url
-     * @param compatible
-     * @return the {@code url} in an instance of {@link HttpURLConnection}
-     * @throws IOException
-     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
-     */
-    public static HttpURLConnection getHttpURLConnection(URL url, boolean compatible)
-            throws IOException {
-        SSLContext sslcontext;
-        try {
-            sslcontext = SSLContext.getInstance("TLSv1");
-            sslcontext.init(null, null, null); // null means use default
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e);
-        } catch (KeyManagementException e) {
-            throw new IllegalArgumentException(e);
-        }
-        SSLSocketFactory tlsOnly = new TlsOnlySocketFactory(sslcontext.getSocketFactory(),
-                compatible);
-        HttpsURLConnection.setDefaultSSLSocketFactory(tlsOnly);
-        if (proxy != null) {
-            return (HttpURLConnection) url.openConnection(proxy);
-        } else {
-            return (HttpURLConnection) url.openConnection();
-        }
     }
 }
