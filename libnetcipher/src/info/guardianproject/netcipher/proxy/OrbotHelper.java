@@ -168,7 +168,7 @@ public class OrbotHelper implements ProxyHelper {
      * sent to request Orbot to start, which will show the main Orbot screen.
      * The result will be returned in
      * {@link Activity#onActivityResult(int requestCode, int resultCode, Intent data)}
-     * with a {@code requestCode} of {@link START_TOR_RESULT}
+     * with a {@code requestCode} of {@link #START_TOR_RESULT}
      *
      * @param activity the {@link Activity} that gets the
      *            {@code START_TOR_RESULT} result
