@@ -1,1 +1,13 @@
 language: android
+android:
+  components:
+    - platform-tools
+    - tools
+    - android-22
+    - build-tools-22.0.1
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y faketime
+script:
+  - gradle build connectedCheck
+  - ./make-release-build
