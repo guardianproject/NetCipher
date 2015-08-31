@@ -135,12 +135,12 @@ public class OrbotHelper implements ProxyHelper {
 
     /**
      * First, checks whether Orbot is installed. If Orbot is installed, then a
-     * broadcast {@link Intent} is sent to request Orbot to start transparently
-     * in the background. When Orbot receives this {@code Intent}, it will
-     * immediately reply to this all with its status via an
-     * {@link #ACTION_STATUS} {@code Intent} that is broadcast to the
-     * {@code packageName} of the provided {@link Context} (i.e.
-     * {@link Context#getPackageName()}.
+     * broadcast {@link Intent} is sent to request Orbot to start
+     * transparently in the background. When Orbot receives this {@code
+     * Intent}, it will immediately reply to the app that called this method
+     * with an {@link #ACTION_STATUS} {@code Intent} that is broadcast to the
+     * {@code packageName} of the provided {@link Context} (i.e.  {@link
+     * Context#getPackageName()}.
      *
      * @param context the app {@link Context} will receive the reply
      * @return whether the start request was sent to Orbot
@@ -148,14 +148,30 @@ public class OrbotHelper implements ProxyHelper {
     public static boolean requestStartTor(Context context) {
         if (OrbotHelper.isOrbotInstalled(context)) {
             Log.i("OrbotHelper", "requestStartTor " + context.getPackageName());
-            Intent intent = getOrbotStartIntent();
-            intent.putExtra(EXTRA_PACKAGE_NAME, context.getPackageName());
+            Intent intent = getOrbotStartIntent(context);
             context.sendBroadcast(intent);
             return true;
         }
         return false;
     }
 
+    /**
+     * Gets an {@link Intent} for starting Orbot.  Orbot will reply with the
+     * current status to the {@code packageName} of the app in the provided
+     * {@link Context} (i.e.  {@link Context#getPackageName()}.
+     */
+    public static Intent getOrbotStartIntent(Context context) {
+        Intent intent = new Intent(ACTION_START);
+        intent.setPackage(ORBOT_PACKAGE_NAME);
+        intent.putExtra(EXTRA_PACKAGE_NAME, context.getPackageName());
+        return intent;
+    }
+
+    /**
+     * Gets a barebones {@link Intent} for starting Orbot.  This is deprecated
+     * in favor of {@link #getOrbotStartIntent(Context)}.
+     */
+    @Deprecated
     public static Intent getOrbotStartIntent() {
         Intent intent = new Intent(ACTION_START);
         intent.setPackage(ORBOT_PACKAGE_NAME);
