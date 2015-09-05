@@ -18,7 +18,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -190,8 +189,9 @@ public class NetCipherSampleActivity extends Activity {
             {        
     	        if (!proxyHelper.isInstalled(this))
     	        {
-    	        	Intent intent = proxyHelper.getInstallIntent(this);
-    	        	startActivity(intent);
+                    // Uncomment below to enable proxy installation prompts
+//    	        	Intent intent = proxyHelper.getInstallIntent(this);
+//    	        	startActivity(intent);
     	        }
     	        else
     	        {
