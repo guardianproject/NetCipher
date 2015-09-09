@@ -10,7 +10,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 public class OrbotHelper implements ProxyHelper {
@@ -70,6 +71,40 @@ public class OrbotHelper implements ProxyHelper {
         // only static utility methods, do not instantiate
     }
 
+    /**
+     * Test whether a {@link URL} is a Tor Hidden Service host name, also known
+     * as an ".onion address".
+     *
+     * @return whether the host name is a Tor .onion address
+     */
+    public static boolean isOnionAddress(URL url) {
+        return url.getHost().endsWith(".onion");
+    }
+
+    /**
+     * Test whether a URL {@link String} is a Tor Hidden Service host name, also known
+     * as an ".onion address".
+     *
+     * @return whether the host name is a Tor .onion address
+     */
+    public static boolean isOnionAddress(String urlString) {
+        try {
+            return isOnionAddress(new URL(urlString));
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Test whether a {@link Uri} is a Tor Hidden Service host name, also known
+     * as an ".onion address".
+     *
+     * @return whether the host name is a Tor .onion address
+     */
+    public static boolean isOnionAddress(Uri uri) {
+        return uri.getHost().endsWith(".onion");
+    }
+
     public static boolean isOrbotRunning(Context context) {
         int procId = TorServiceUtils.findProcessId(context);
 
@@ -100,12 +135,12 @@ public class OrbotHelper implements ProxyHelper {
 
     /**
      * First, checks whether Orbot is installed. If Orbot is installed, then a
-     * broadcast {@link Intent} is sent to request Orbot to start transparently
-     * in the background. When Orbot receives this {@code Intent}, it will
-     * immediately reply to this all with its status via an
-     * {@link #ACTION_STATUS} {@code Intent} that is broadcast to the
-     * {@code packageName} of the provided {@link Context} (i.e.
-     * {@link Context#getPackageName()}.
+     * broadcast {@link Intent} is sent to request Orbot to start
+     * transparently in the background. When Orbot receives this {@code
+     * Intent}, it will immediately reply to the app that called this method
+     * with an {@link #ACTION_STATUS} {@code Intent} that is broadcast to the
+     * {@code packageName} of the provided {@link Context} (i.e.  {@link
+     * Context#getPackageName()}.
      *
      * @param context the app {@link Context} will receive the reply
      * @return whether the start request was sent to Orbot
@@ -113,14 +148,30 @@ public class OrbotHelper implements ProxyHelper {
     public static boolean requestStartTor(Context context) {
         if (OrbotHelper.isOrbotInstalled(context)) {
             Log.i("OrbotHelper", "requestStartTor " + context.getPackageName());
-            Intent intent = getOrbotStartIntent();
-            intent.putExtra(EXTRA_PACKAGE_NAME, context.getPackageName());
+            Intent intent = getOrbotStartIntent(context);
             context.sendBroadcast(intent);
             return true;
         }
         return false;
     }
 
+    /**
+     * Gets an {@link Intent} for starting Orbot.  Orbot will reply with the
+     * current status to the {@code packageName} of the app in the provided
+     * {@link Context} (i.e.  {@link Context#getPackageName()}.
+     */
+    public static Intent getOrbotStartIntent(Context context) {
+        Intent intent = new Intent(ACTION_START);
+        intent.setPackage(ORBOT_PACKAGE_NAME);
+        intent.putExtra(EXTRA_PACKAGE_NAME, context.getPackageName());
+        return intent;
+    }
+
+    /**
+     * Gets a barebones {@link Intent} for starting Orbot.  This is deprecated
+     * in favor of {@link #getOrbotStartIntent(Context)}.
+     */
+    @Deprecated
     public static Intent getOrbotStartIntent() {
         Intent intent = new Intent(ACTION_START);
         intent.setPackage(ORBOT_PACKAGE_NAME);
@@ -133,7 +184,7 @@ public class OrbotHelper implements ProxyHelper {
      * sent to request Orbot to start, which will show the main Orbot screen.
      * The result will be returned in
      * {@link Activity#onActivityResult(int requestCode, int resultCode, Intent data)}
-     * with a {@code requestCode} of {@link START_TOR_RESULT}
+     * with a {@code requestCode} of {@link #START_TOR_RESULT}
      *
      * @param activity the {@link Activity} that gets the
      *            {@code START_TOR_RESULT} result

@@ -3,8 +3,7 @@ package info.guardianproject.netcipher;
 
 import android.net.Uri;
 import android.text.TextUtils;
-
-import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
+import android.util.Log;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -19,7 +18,11 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
+import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
+import info.guardianproject.netcipher.proxy.OrbotHelper;
+
 public class NetCipher {
+    private static final String TAG ="NetCipher";
 
     private NetCipher() {
         // this is a utility class with only static methods
@@ -33,27 +36,43 @@ public class NetCipher {
     /**
      * Set the global HTTP proxy for all new {@link HttpURLConnection}s and
      * {@link HttpsURLConnection}s that are created after this is called.
+     * <p/>
+     * {@link #useTor()} will override this setting.  Traffic must be directed
+     * to Tor using the proxy settings, and Orbot has its own proxy settings
+     * for connections that need proxies to work.  So if "use Tor" is enabled,
+     * as tested by looking for the static instance of Proxy, then no other
+     * proxy settings are allowed to override the current Tor proxy.
      *
      * @param host the IP address for the HTTP proxy to use globally
      * @param port the port number for the HTTP proxy to use globally
      */
     public static void setProxy(String host, int port) {
-        if (host != null && port > 0) {
+        if (!TextUtils.isEmpty(host) && port > 0) {
             InetSocketAddress isa = new InetSocketAddress(host, port);
-            proxy = new Proxy(Proxy.Type.HTTP, isa);
-        } else {
-            proxy = null;
+            setProxy(new Proxy(Proxy.Type.HTTP, isa));
+        } else if (NetCipher.proxy != ORBOT_HTTP_PROXY) {
+            setProxy(null);
         }
     }
 
     /**
      * Set the global HTTP proxy for all new {@link HttpURLConnection}s and
      * {@link HttpsURLConnection}s that are created after this is called.
+     * <p/>
+     * {@link #useTor()} will override this setting.  Traffic must be directed
+     * to Tor using the proxy settings, and Orbot has its own proxy settings
+     * for connections that need proxies to work.  So if "use Tor" is enabled,
+     * as tested by looking for the static instance of Proxy, then no other
+     * proxy settings are allowed to override the current Tor proxy.
      *
      * @param proxy the HTTP proxy to use globally
      */
     public static void setProxy(Proxy proxy) {
-        NetCipher.proxy = proxy;
+        if (proxy != null && NetCipher.proxy == ORBOT_HTTP_PROXY) {
+            Log.w(TAG, "useTor is enabled, ignoring new proxy settings!");
+        } else {
+            NetCipher.proxy = proxy;
+        }
     }
 
     /**
@@ -66,11 +85,64 @@ public class NetCipher {
     }
 
     /**
+     * Clear the global HTTP proxy for all new {@link HttpURLConnection}s and
+     * {@link HttpsURLConnection}s that are created after this is called. This
+     * returns things to the default, proxy-less state.
+     */
+    public static void clearProxy() {
+        setProxy(null);
+    }
+
+    /**
      * Set Orbot as the global HTTP proxy for all new {@link HttpURLConnection}
      * s and {@link HttpsURLConnection}s that are created after this is called.
+     * This overrides all future calls to {@link #setProxy(Proxy)}, except to
+     * clear the proxy, e.g. {@code #setProxy(null)} or {@link #clearProxy()}.
+     * <p/>
+     * Traffic must be directed to Tor using the proxy settings, and Orbot has its
+     * own proxy settings for connections that need proxies to work.  So if "use
+     * Tor" is enabled, as tested by looking for the static instance of Proxy,
+     * then no other proxy settings are allowed to override the current Tor proxy.
      */
     public static void useTor() {
         setProxy(ORBOT_HTTP_PROXY);
+    }
+
+    /**
+     * Get a {@link HttpURLConnection} from a {@link URL}, and specify whether
+     * it should use a more compatible, but less strong, suite of ciphers.
+     *
+     * @param url
+     * @param compatible
+     * @return the {@code url} in an instance of {@link HttpURLConnection}
+     * @throws IOException
+     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
+     */
+    public static HttpURLConnection getHttpURLConnection(URL url, boolean compatible)
+            throws IOException {
+        SSLContext sslcontext;
+        try {
+            sslcontext = SSLContext.getInstance("TLSv1");
+            sslcontext.init(null, null, null); // null means use default
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e);
+        } catch (KeyManagementException e) {
+            throw new IllegalArgumentException(e);
+        }
+        SSLSocketFactory tlsOnly = new TlsOnlySocketFactory(sslcontext.getSocketFactory(),
+                compatible);
+        HttpsURLConnection.setDefaultSSLSocketFactory(tlsOnly);
+
+        // .onion addresses only work via Tor, so force Tor for all of them
+        Proxy proxy = NetCipher.proxy;
+        if (OrbotHelper.isOnionAddress(url))
+            proxy = ORBOT_HTTP_PROXY;
+
+        if (proxy != null) {
+            return (HttpURLConnection) url.openConnection(proxy);
+        } else {
+            return (HttpURLConnection) url.openConnection();
+        }
     }
 
     /**
@@ -232,36 +304,5 @@ public class NetCipher {
      */
     public static HttpURLConnection getHttpURLConnection(URL url) throws IOException {
         return (HttpURLConnection) getHttpURLConnection(url, false);
-    }
-
-    /**
-     * Get a {@link HttpURLConnection} from a {@link URL}, and specify whether
-     * it should use a more compatible, but less strong, suite of ciphers.
-     *
-     * @param url
-     * @param compatible
-     * @return the {@code url} in an instance of {@link HttpURLConnection}
-     * @throws IOException
-     * @throws IllegalArgumentException if the proxy or TLS setup is incorrect
-     */
-    public static HttpURLConnection getHttpURLConnection(URL url, boolean compatible)
-            throws IOException {
-        SSLContext sslcontext;
-        try {
-            sslcontext = SSLContext.getInstance("TLSv1");
-            sslcontext.init(null, null, null); // null means use default
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e);
-        } catch (KeyManagementException e) {
-            throw new IllegalArgumentException(e);
-        }
-        SSLSocketFactory tlsOnly = new TlsOnlySocketFactory(sslcontext.getSocketFactory(),
-                compatible);
-        HttpsURLConnection.setDefaultSSLSocketFactory(tlsOnly);
-        if (proxy != null) {
-            return (HttpURLConnection) url.openConnection(proxy);
-        } else {
-            return (HttpURLConnection) url.openConnection();
-        }
     }
 }
