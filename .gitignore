@@ -31,3 +31,6 @@ build/
 
 # release jars
 libnetcipher/netcipher-*.jar*
+
+# Android Studio
+.idea/
