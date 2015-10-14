@@ -1,13 +1,44 @@
 language: android
+
+env:
+  global:
+    # switch glibc to a memory conserving mode
+    - MALLOC_ARENA_MAX=2
+    # wait up to 10 minutes for adb to connect to emulator
+    - ADB_INSTALL_TIMEOUT=10
+
+jdk:
+  # the release build infrastructure uses OpenJDK from Debian
+  - openjdk7
+  # many developers use the Oracle JDK
+  # (disabled because Travis cannot reliably start the emulator with these)
+  #- oraclejdk8
+  #- oraclejdk7
+
 android:
   components:
-    - platform-tools
     - tools
-    - android-22
+    - platform-tools
     - build-tools-22.0.1
+    - android-22
+    - sys-img-armeabi-v7a-android-22
+
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y faketime
+
 script:
-  - gradle build connectedCheck
+  # 'assemble' everything and run all checks that do not require a device/emulator
+  - gradle build
+  # start the emulator after the build to conserve memory
+  - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
+  - emulator -avd test -no-skin -no-audio -no-window &
+  - android-wait-for-emulator
+  - adb shell input keyevent 82 &
+  # now run the tests that require a device/emulator
+  - gradle connectedCheck
+  # now run release build script
   - ./make-release-build
+
+after_failure:
+  - find * -name lint-results.xml | xargs cat
