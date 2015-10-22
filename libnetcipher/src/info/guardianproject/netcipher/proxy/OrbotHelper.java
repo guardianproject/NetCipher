@@ -63,7 +63,7 @@ public class OrbotHelper implements ProxyHelper {
 
     public final static String ACTION_START_TOR = "org.torproject.android.START_TOR";
     public final static String ACTION_REQUEST_HS = "org.torproject.android.REQUEST_HS_PORT";
-    public final static int START_TOR_RESULT = 0x048079234;
+    public final static int START_TOR_RESULT = 0x9234;
     public final static int HS_REQUEST_CODE = 9999;
 
 
@@ -186,8 +186,8 @@ public class OrbotHelper implements ProxyHelper {
      * {@link Activity#onActivityResult(int requestCode, int resultCode, Intent data)}
      * with a {@code requestCode} of {@link #START_TOR_RESULT}
      *
-     * @param activity the {@link Activity} that gets the
-     *            {@code START_TOR_RESULT} result
+     * @param activity the {@link Activity} that gets the result of the
+     *            {@code START_TOR_RESULT} request
      * @return whether the start request was sent to Orbot
      */
     public static boolean requestShowOrbotStart(Activity activity) {
