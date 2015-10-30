@@ -469,13 +469,9 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
             Log.v(TAG, e.getMessage());
             Log.v(TAG, exceptionAsString);
         }
-        return false;    }
-    
-    @TargetApi(21)
-	public static boolean resetLollipopProxy(String appClass, Context appContext) {
-    
-    	return setWebkitProxyLollipop(appContext,null,0);
+        return false;    
     }
+    
     
  // http://stackanswers.com/questions/25272393/android-webview-set-proxy-programmatically-on-android-l
     @TargetApi(21) // for android.util.ArrayMap methods

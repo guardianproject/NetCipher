@@ -1,4 +1,4 @@
-package info.guardianproject.onionkit.trust;
+package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 import android.util.Log;
