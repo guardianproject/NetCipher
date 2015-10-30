@@ -49,9 +49,14 @@ public class StrongHttpsClient extends DefaultHttpClient {
             trustManagerFactory.init(keyStore);
             sFactory = new StrongSSLSocketFactory(context, trustManagerFactory.getTrustManagers(), keyStore, TRUSTSTORE_PASSWORD);
 
-            // TRYING SOMETHING
-            SMVerifier verifier = new SMVerifier(context);
-            sFactory.setHostnameVerifier(verifier);
+	    //if there is a host string value, use that for the verifier
+	     String hostsString = context.getString(R.string.sm_domains);
+
+	    if (hostsString != null && hostsString.length() > 0)
+	    {
+            	SMVerifier verifier = new SMVerifier(context);
+            	sFactory.setHostnameVerifier(verifier);
+	    }
 
             mRegistry.register(new Scheme("https", 443, sFactory));
         } catch (Exception e) {
