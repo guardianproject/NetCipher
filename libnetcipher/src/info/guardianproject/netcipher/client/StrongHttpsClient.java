@@ -43,7 +43,6 @@ public class StrongHttpsClient extends DefaultHttpClient {
         mRegistry.register(
                 new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
 
-
         try {
             KeyStore keyStore = loadKeyStore();
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -84,8 +83,20 @@ public class StrongHttpsClient extends DefaultHttpClient {
                 new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
 
         try {
-        	TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(keystore);
+
             sFactory = new StrongSSLSocketFactory(context, trustManagerFactory.getTrustManagers(), keystore, TRUSTSTORE_PASSWORD);
+
+	    //if there is a host string value, use that for the verifier
+	     String hostsString = context.getString(R.string.sm_domains);
+
+	    if (hostsString != null && hostsString.length() > 0)
+	    {
+            	SMVerifier verifier = new SMVerifier(context);
+            	sFactory.setHostnameVerifier(verifier);
+	    }
+
             mRegistry.register(new Scheme("https", 443, sFactory));
         } catch (Exception e) {
             throw new AssertionError(e);

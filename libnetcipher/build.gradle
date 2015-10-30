@@ -38,3 +38,14 @@ android {
 		abortOnError false
 	}
 }
+
+task clearJar(type: Delete) {
+    delete 'build/outputs/netcipher.jar'
+}
+
+task makeJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('build/outputs/')
+    include('classes.jar')
+    rename ('classes.jar', 'netcipher.jar')
+}
