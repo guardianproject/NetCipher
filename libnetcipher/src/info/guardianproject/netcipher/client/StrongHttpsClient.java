@@ -48,6 +48,11 @@ public class StrongHttpsClient extends DefaultHttpClient {
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(keyStore);
             sFactory = new StrongSSLSocketFactory(context, trustManagerFactory.getTrustManagers(), keyStore, TRUSTSTORE_PASSWORD);
+
+            // TRYING SOMETHING
+            SMVerifier verifier = new SMVerifier(context);
+            sFactory.setHostnameVerifier(verifier);
+
             mRegistry.register(new Scheme("https", 443, sFactory));
         } catch (Exception e) {
             throw new AssertionError(e);

@@ -24,6 +24,7 @@ import android.net.Proxy;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
+// import android.support.v4.util.ArrayMap; <- ArrayMap is only used in methods called if API > 19
 import android.util.ArrayMap;
 import android.util.Log;
 import android.webkit.WebView;
@@ -62,10 +63,13 @@ public class WebkitProxy {
             	worked = setWebkitProxyICS(ctx, host, port);
             
         }
-        else if (Build.VERSION.SDK_INT >= 21)
+        else
         {
-        	worked = setWebkitProxyLollipop(ctx, host, port);
-            
+            worked = setLollipopProxy(appClass, ctx, host, port);
+
+            if (!worked) //some kitkat's still use ICS browser component (like Cyanogen 11)
+                worked = setWebkitProxyICS(ctx, host, port);
+
         }
         
         return worked;
@@ -281,6 +285,12 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
     
     	return setKitKatProxy(appClass, appContext,null,0);
     }
+
+    @TargetApi(21)
+    public static boolean resetLollipopProxy(String appClass, Context appContext) {
+
+        return setKitKatProxy(appClass, appContext,null,0);
+    }
     
     @TargetApi(19)
 	private static boolean setKitKatProxy(String appClass, Context appContext, String host, int port) {
@@ -320,6 +330,95 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
 	                        Object proxyProperties = constructor.newInstance(host, port, null);
 	                        intent.putExtra("proxy", (Parcelable) proxyProperties);
 	                        /*********** optional, may be need in future *************/
+                        }
+
+                        onReceiveMethod.invoke(rec, appContext, intent);
+                    }
+                }
+            }
+            return true;
+        } catch (ClassNotFoundException e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            Log.v(TAG, e.getMessage());
+            Log.v(TAG, exceptionAsString);
+        } catch (NoSuchFieldException e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            Log.v(TAG, e.getMessage());
+            Log.v(TAG, exceptionAsString);
+        } catch (IllegalAccessException e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            Log.v(TAG, e.getMessage());
+            Log.v(TAG, exceptionAsString);
+        } catch (IllegalArgumentException e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            Log.v(TAG, e.getMessage());
+            Log.v(TAG, exceptionAsString);
+        } catch (NoSuchMethodException e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            Log.v(TAG, e.getMessage());
+            Log.v(TAG, exceptionAsString);
+        } catch (InvocationTargetException e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            Log.v(TAG, e.getMessage());
+            Log.v(TAG, exceptionAsString);
+        } catch (InstantiationException e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            Log.v(TAG, e.getMessage());
+            Log.v(TAG, exceptionAsString);
+        }
+        return false;    }
+    @TargetApi(21)
+    private static boolean setLollipopProxy(String appClass, Context appContext, String host, int port) {
+        //Context appContext = webView.getContext().getApplicationContext();
+
+        if (host != null)
+        {
+            System.setProperty("http.proxyHost", host);
+            System.setProperty("http.proxyPort", port + "");
+            System.setProperty("https.proxyHost", host);
+            System.setProperty("https.proxyPort", port + "");
+        }
+
+        try {
+            Class applictionCls = Class.forName(appClass);
+            Field loadedApkField = applictionCls.getField("mLoadedApk");
+            loadedApkField.setAccessible(true);
+            Object loadedApk = loadedApkField.get(appContext);
+            Class loadedApkCls = Class.forName("android.app.LoadedApk");
+            Field receiversField = loadedApkCls.getDeclaredField("mReceivers");
+            receiversField.setAccessible(true);
+            ArrayMap receivers = (ArrayMap) receiversField.get(loadedApk);
+            for (Object receiverMap : receivers.values()) {
+                for (Object rec : ((ArrayMap) receiverMap).keySet()) {
+                    Class clazz = rec.getClass();
+                    if (clazz.getName().contains("ProxyChangeListener")) {
+                        Method onReceiveMethod = clazz.getDeclaredMethod("onReceive", Context.class, Intent.class);
+                        Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
+
+                        if (host != null)
+                        {
+                            /*********** optional, may be need in future *************/
+                            final String CLASS_NAME = "android.net.ProxyInfo";
+                            Class cls = Class.forName(CLASS_NAME);
+                            Constructor constructor = cls.getConstructor(String.class, Integer.TYPE, String.class);
+                            constructor.setAccessible(true);
+                            Object proxyProperties = constructor.newInstance(host, port, null);
+                            intent.putExtra("proxy", (Parcelable) proxyProperties);
+                            /*********** optional, may be need in future *************/
                         }
 
                         onReceiveMethod.invoke(rec, appContext, intent);
@@ -659,10 +758,14 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
         {
             resetProxyForICS();
         }
-        else
+        else if (Build.VERSION.SDK_INT < 21)
         {
             resetKitKatProxy(appClass, ctx);
         }
+         else
+         {
+             resetLollipopProxy(appClass, ctx);
+         }
          
     }
 
