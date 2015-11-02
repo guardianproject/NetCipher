@@ -23,9 +23,8 @@ public class SMVerifier implements X509HostnameVerifier
 
     private String[] hosts;
 
-    public SMVerifier(Context context) {
+    public SMVerifier(Context context, String hostsString) {
         super();
-        String hostsString = context.getString(R.string.sm_domains);
         if ((hostsString != null) && (hostsString.length() > 0)) {
             hosts = hostsString.split(",");
         } else {
@@ -35,7 +34,6 @@ public class SMVerifier implements X509HostnameVerifier
 
     @Override
     public boolean verify(String host, SSLSession session) {
-
         Log.d("VERIFIER", "METHOD verify(String host, SSLSession session) NOT IMPLEMENTED");
         return false;
     }
@@ -60,11 +58,11 @@ public class SMVerifier implements X509HostnameVerifier
         } else {
             for (String compareHost : hosts) {
                 if (cn.equals(compareHost)) {
-                    Log.d("VERIFIER", "FOUND A MATCH: " + cn + " = " + compareHost);
+                   // Log.d("VERIFIER", "FOUND A MATCH: " + cn + " = " + compareHost);
                     return;
                 } else if (compareHost.startsWith(".")) {
                     if (cn.endsWith(compareHost)) {
-                        Log.d("VERIFIER", "FOUND A MATCH: " + cn + " = *" + compareHost);
+                      //  Log.d("VERIFIER", "FOUND A MATCH: " + cn + " = *" + compareHost);
                         return;
                     }
                 }
