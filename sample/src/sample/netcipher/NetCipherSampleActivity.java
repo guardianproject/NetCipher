@@ -233,9 +233,10 @@ public class NetCipherSampleActivity extends Activity {
         //String specialHostnames = ".cloudflare.com,.cloudflaressl.com,.s3-us-west-1.amazonaws.com";
         String specialHostnames = null;
 
-        KeyStore keyStore = null; //can load your own keystore for CA certs, or just use the default
+        //KeyStore keyStore = null; //can load your own keystore for CA certs, or just use the default
+        int keyStoreRawId = R.raw.debiancacerts;
 
-        StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext(),keyStore,specialHostnames);
+        StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext(), keyStoreRawId, specialHostnames);
         httpclient.enableSSLCompatibilityMode();
 
         if (pType == null) {
