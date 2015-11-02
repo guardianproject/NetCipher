@@ -13,7 +13,6 @@ import javax.net.ssl.SSLSocket;
 import javax.security.auth.x500.X500Principal;
 
 import ch.boye.httpclientandroidlib.conn.ssl.X509HostnameVerifier;
-import info.guardianproject.onionkit.R;
 
 /**
  * Created by mnbogner on 3/23/15.
