@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-	<string name="sm_domains"></string>
-    <!--<string name="sm_domains">.storymaker.org,.cloudflare.com,.cloudflaressl.com,.s3-us-west-1.amazonaws.com</string>-->
-</resources>
