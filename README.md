@@ -9,6 +9,12 @@ settings using the standard Android HTTP methods, [HttpURLConnection] and
 [Apache HTTP Client], provides simple Tor integration, makes it easy to
 configure proxies for HTTP connections and `WebView` instances.
 
+READ THIS! NEW REQUIREMENTS:
+To resolve an issue with SSL certificates on hosting sites such as cloudflare (javax.net.ssl.SSLException: hostname in certificate didn't match), the StrongHttpsClient class now uses a custom verifier (SMVerifier) which matches the domain in the certificate against the domain specified in the new file libnetcipher/res/values/domain.xml
+
+This is an Android Library Project that provides multiple means to improve
+network security in mobile applications.
+
 More specifically this library provides:
 
 - Hardening of TLS protocol support and cipher suites, especially on older

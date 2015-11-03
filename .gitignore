@@ -1,3 +1,6 @@
+# IntelliJ
+*.iml
+
 # built application files
 *.apk
 *.ap_
@@ -12,6 +15,9 @@ build.xml
 # generated files
 bin/
 gen/
+
+# gradle
+libnetcipher/build/
 
 # eclipse
 .settings/

@@ -2,6 +2,7 @@
 package info.guardianproject.netcipher.client;
 
 import android.content.Context;
+import android.os.Build;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,9 +19,9 @@ import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
 import ch.boye.httpclientandroidlib.conn.scheme.PlainSocketFactory;
 import ch.boye.httpclientandroidlib.conn.scheme.Scheme;
 import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
+import ch.boye.httpclientandroidlib.conn.ssl.BrowserCompatHostnameVerifier;
 import ch.boye.httpclientandroidlib.impl.client.DefaultHttpClient;
 import ch.boye.httpclientandroidlib.impl.conn.tsccm.ThreadSafeClientConnManager;
-import info.guardianproject.onionkit.R;
 
 public class StrongHttpsClient extends DefaultHttpClient {
 
@@ -35,51 +36,81 @@ public class StrongHttpsClient extends DefaultHttpClient {
     private final static String TRUSTSTORE_TYPE = "BKS";
     private final static String TRUSTSTORE_PASSWORD = "changeit";
 
-    public StrongHttpsClient(Context context) {
+    private KeyStore mKeyStore;
+    private String mTrustHosts;
+
+
+
+
+    public StrongHttpsClient(Context context, KeyStore keystore) {
+
+        this (context, keystore, null);
+
+    }
+
+    public StrongHttpsClient(Context context, KeyStore keystore, String trustHosts) {
+
         this.context = context;
+
+        mKeyStore = keystore;
+        mTrustHosts = trustHosts;
+
+        init();
+
+    }
+
+    public StrongHttpsClient(Context context, int keystoreRawId, String trustHosts) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+
+        this.context = context;
+
+        mKeyStore = loadKeyStoreRawResource(keystoreRawId);
+        mTrustHosts = trustHosts;
+
+        init();
+
+    }
+
+
+    private void init ()
+    {
 
         mRegistry = new SchemeRegistry();
         mRegistry.register(
                 new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
 
-
         try {
-            KeyStore keyStore = loadKeyStore();
+
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(keyStore);
-            sFactory = new StrongSSLSocketFactory(context, trustManagerFactory.getTrustManagers(), keyStore, TRUSTSTORE_PASSWORD);
+            trustManagerFactory.init(mKeyStore);
+            sFactory = new StrongSSLSocketFactory(context, trustManagerFactory.getTrustManagers(), mKeyStore, TRUSTSTORE_PASSWORD);
+
+            if (mTrustHosts != null)
+            {
+                    SMVerifier verifier = new SMVerifier(context,mTrustHosts);
+                    sFactory.setHostnameVerifier(verifier);
+            }
+            else
+            {
+                sFactory.setHostnameVerifier(new BrowserCompatHostnameVerifier());
+            }
+
             mRegistry.register(new Scheme("https", 443, sFactory));
         } catch (Exception e) {
             throw new AssertionError(e);
         }
     }
 
-    private KeyStore loadKeyStore () throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException
+    private KeyStore loadKeyStoreRawResource (int rawId) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException
     {
 
         KeyStore trustStore = KeyStore.getInstance(TRUSTSTORE_TYPE);
-        // load our bundled cacerts from raw assets
-        InputStream in = context.getResources().openRawResource(R.raw.debiancacerts);
+
+        InputStream in = context.getResources().openRawResource(rawId);
         trustStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
 
         return trustStore;
     }
 
-    public StrongHttpsClient(Context context, KeyStore keystore) {
-        this.context = context;
-
-        mRegistry = new SchemeRegistry();
-        mRegistry.register(
-                new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
-
-        try {
-        	TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            sFactory = new StrongSSLSocketFactory(context, trustManagerFactory.getTrustManagers(), keystore, TRUSTSTORE_PASSWORD);
-            mRegistry.register(new Scheme("https", 443, sFactory));
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
-    }
 
     @Override
     protected ThreadSafeClientConnManager createClientConnectionManager() {

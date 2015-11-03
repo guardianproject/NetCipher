@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Proxy;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -228,7 +229,15 @@ public class NetCipherSampleActivity extends Activity {
             throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException,
             KeyStoreException, CertificateException, IOException {
 
-        StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext());
+        //can set a specific list of allowed hostnames
+        //String specialHostnames = ".cloudflare.com,.cloudflaressl.com,.s3-us-west-1.amazonaws.com";
+        String specialHostnames = null;
+
+        //KeyStore keyStore = null; //can load your own keystore for CA certs, or just use the default
+        int keyStoreRawId = R.raw.debiancacerts;
+
+        StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext(), keyStoreRawId, specialHostnames);
+        httpclient.enableSSLCompatibilityMode();
 
         if (pType == null) {
             // do nothing

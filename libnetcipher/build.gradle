@@ -3,7 +3,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:1.0.0'
+		classpath 'com.android.tools.build:gradle:1.3.0'
 	}
 }
 
@@ -15,7 +15,8 @@ repositories {
 dependencies {
 	// If you want to fetch these from Maven, uncomment these lines and change
 	// the *.jar depend to exclude these libs:
-	compile fileTree(dir: 'libs', include: '*.jar')
+	//compile fileTree(dir: 'libs', include: '*.jar')
+	compile files('libs/httpclientandroidlib-1.2.1.jar')
 }
 
 android {
@@ -37,4 +38,15 @@ android {
 	lintOptions {
 		abortOnError false
 	}
+}
+
+task clearJar(type: Delete) {
+    delete 'build/outputs/netcipher.jar'
+}
+
+task makeJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('build/outputs/')
+    include('classes.jar')
+    rename ('classes.jar', 'netcipher.jar')
 }
