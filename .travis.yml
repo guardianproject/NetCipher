@@ -28,6 +28,11 @@ before_install:
   - sudo apt-get install -y faketime
 
 script:
+  # run release build script
+  - ./make-release-build
+  # clean up to start the gradle build from fresh git
+  - git clean -fdx
+  - git reset --hard
   # 'assemble' everything and run all checks that do not require a device/emulator
   - gradle build
   # start the emulator after the build to conserve memory
@@ -37,8 +42,6 @@ script:
   - adb shell input keyevent 82 &
   # now run the tests that require a device/emulator
   - gradle connectedCheck
-  # now run release build script
-  - ./make-release-build
 
 after_failure:
   - find * -name lint-results.xml | xargs cat
