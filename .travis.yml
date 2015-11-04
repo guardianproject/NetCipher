@@ -23,6 +23,9 @@ android:
     - platform-tools
     - build-tools-23.0.1
     - android-22
+  licenses:
+    - 'android-sdk-preview-license-52d11cd2'
+    - 'android-sdk-license-.+'
 
 before_install:
   - sudo apt-get update -qq
