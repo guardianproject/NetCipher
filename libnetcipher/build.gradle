@@ -1,17 +1,6 @@
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'com.android.tools.build:gradle:1.0.0'
-	}
-}
 
 apply plugin: 'com.android.library'
 
-repositories {
-	mavenCentral()
-}
 dependencies {
 	// If you want to fetch these from Maven, uncomment these lines and change
 	// the *.jar depend to exclude these libs:
@@ -22,17 +11,17 @@ android {
 	compileSdkVersion 22
 		buildToolsVersion '22.0.1'
 
-		sourceSets {
-			main {
-				manifest.srcFile 'AndroidManifest.xml'
-					java.srcDirs = ['src']
-					resources.srcDirs = ['src']
-					aidl.srcDirs = ['src']
-					renderscript.srcDirs = ['src']
-					res.srcDirs = ['res']
-					assets.srcDirs = ['assets']
-			}
-		}
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+    }
 
 	lintOptions {
 		abortOnError false
