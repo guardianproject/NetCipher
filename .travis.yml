@@ -1,3 +1,5 @@
+sudo: false
+
 language: android
 
 env:
@@ -27,10 +29,6 @@ android:
     # only approve the free software licenses
     - 'android-sdk-preview-license-52d11cd2'
     - 'android-sdk-license-.+'
-
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y faketime
 
 script:
   # run release build script
