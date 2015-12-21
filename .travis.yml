@@ -21,9 +21,10 @@ android:
   components:
     - tools
     - platform-tools
-    - build-tools-23.0.1
+    - build-tools-23.0.2
     - android-22
   licenses:
+    # only approve the free software licenses
     - 'android-sdk-preview-license-52d11cd2'
     - 'android-sdk-license-.+'
 
