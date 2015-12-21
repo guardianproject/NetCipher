@@ -1,22 +1,17 @@
-#!/bin/bash
-# bash is required because we need bash's printf to guarantee a cross-platform
-# timestamp format.
+#!/bin/sh
 
 set -e
 set -x
 
 # standardize timezone to reduce build differences
 export TZ=UTC
-# run the clock at 5% speed, ant requires a moving clock
-TIMESTAMP=`printf '@%(%Y-%m-%d %H:%M:%S)T x0.05' \
-    $(git log -n1 --format=format:%at)`
 
 git reset --hard
 git clean -fdx
 
 ./setup-ant
 cd libnetcipher
-faketime -f "$TIMESTAMP" ant release-all
+ant release-all
 
 if which gpg > /dev/null; then
     if [ -z "`gpg --list-secret-keys`" ]; then

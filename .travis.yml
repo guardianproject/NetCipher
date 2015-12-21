@@ -1,3 +1,5 @@
+sudo: false
+
 language: android
 
 env:
@@ -21,13 +23,12 @@ android:
   components:
     - tools
     - platform-tools
-    - build-tools-23.0.1
+    - build-tools-23.0.2
     - android-22
-    - sys-img-armeabi-v7a-android-22
-
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y faketime
+  licenses:
+    # only approve the free software licenses
+    - 'android-sdk-preview-license-52d11cd2'
+    - 'android-sdk-license-.+'
 
 script:
   # run release build script
@@ -38,7 +39,7 @@ script:
   # 'assemble' everything and run all checks that do not require a device/emulator
   - gradle build
   # start the emulator after the build to conserve memory
-  - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
+  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
