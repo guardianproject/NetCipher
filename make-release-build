@@ -1,30 +1,28 @@
-#!/bin/bash
-# bash is required because we need bash's printf to guarantee a cross-platform
-# timestamp format.
+#!/bin/sh
 
 set -e
 set -x
 
-if [ -z $ANDROID_HOME ]; then
-    if [ -e ~/.android/bashrc ]; then
-        . ~/.android/bashrc
-    else
-        echo "ANDROID_HOME must be set!"
-        exit
-    fi
-fi
-
-projectroot=`pwd`
-
 # standardize timezone to reduce build differences
 export TZ=UTC
-# run the clock at 5% speed, ant requires a moving clock
-TIMESTAMP=`printf '@%(%Y-%m-%d %H:%M:%S)T x0.05' \
-    $(git log -n1 --format=format:%at)`
 
 git reset --hard
 git clean -fdx
 
 ./setup-ant
 cd libnetcipher
-faketime -f "$TIMESTAMP" ant release-all
+ant release-all
+
+if which gpg > /dev/null; then
+    if [ -z "`gpg --list-secret-keys`" ]; then
+        echo "No GPG secret keys found, not signing APK"
+    else
+        jarname=netcipher-$(git describe)
+        rm -f ${jarname}*.asc
+        for f in ${jarname}*.*; do
+            gpg --armor --detach-sign $f
+        done
+    fi
+else
+    echo "gpg not found, not signing APK"
+fi
