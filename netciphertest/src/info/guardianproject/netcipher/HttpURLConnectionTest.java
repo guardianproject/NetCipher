@@ -3,6 +3,8 @@ package info.guardianproject.netcipher;
 
 import android.test.InstrumentationTestCase;
 
+import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

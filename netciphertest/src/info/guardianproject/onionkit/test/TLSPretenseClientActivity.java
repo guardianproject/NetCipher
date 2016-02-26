@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.methods.HttpGet;
-import info.guardianproject.onionkit.trust.StrongHttpsClient;
+import info.guardianproject.netcipher.client.StrongHttpsClient;
 
 import java.io.IOException;
 import java.io.InputStream;
