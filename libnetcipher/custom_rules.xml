@@ -49,6 +49,7 @@
              classpath="${toString:project.all.jars.path}:${toString:project.target.class.path}"
              destdir="${javadoc.dir}"
              packagenames="info.guardianproject.*"
+             excludepackagenames="info.guardianproject.netcipher.client"
              windowtitle="${ant.project.name}"
              linkoffline="https://developer.android.com/reference ${sdk.dir}/docs/reference"
              linksource="true"
