@@ -188,4 +188,30 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             connection.disconnect();
         }
     }
+
+    public void testConnectBadSslCom()
+            throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
+        String[] hosts = {
+                "wrong.host.badssl.com",
+        };
+        for (String host : hosts) {
+            URL url = new URL("https://" + host);
+            System.out.println("badssl " + url + " =================================");
+            HttpsURLConnection connection = NetCipher.getHttpsURLConnection(url);
+            connection.setConnectTimeout(0); // blocking connect with TCP timeout
+            connection.setReadTimeout(20000);
+            SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
+            assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
+            try {
+                connection.getContent();
+                System.out.println("This should not have connected, it has BAD SSL!");
+                assertTrue(false);
+            } catch (IOException e) {
+                e.printStackTrace();
+                // success! these should fail!
+            } finally {
+                connection.disconnect();
+            }
+        }
+    }
 }
