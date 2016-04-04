@@ -4,6 +4,7 @@ language: android
 
 env:
   global:
+    - EMULATOR_API_LEVEL=21
     # switch glibc to a memory conserving mode
     - MALLOC_ARENA_MAX=2
     # wait 5 minutes for adb to connect to emulator. Travis-ci cancels a
@@ -25,6 +26,8 @@ android:
     - platform-tools
     - build-tools-23.0.2
     - android-22
+    - android-$EMULATOR_API_LEVEL
+    - sys-img-armeabi-v7a-android-$EMULATOR_API_LEVEL
   licenses:
     # only approve the free software licenses
     - 'android-sdk-preview-license-52d11cd2'
@@ -37,14 +40,14 @@ script:
   - git clean -fdx
   - git reset --hard
   # 'assemble' everything and run all checks that do not require a device/emulator
-  - gradle build
+  - gradle build -PdisablePreDex
   # start the emulator after the build to conserve memory
-  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
+  - echo no | android create avd --force -n test -t android-$EMULATOR_API_LEVEL
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
   # now run the tests that require a device/emulator
-  - gradle connectedCheck
+  - gradle connectedCheck -PdisablePreDex
 
 after_failure:
   - find * -name lint-results.xml | xargs cat
