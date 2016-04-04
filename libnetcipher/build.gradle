@@ -21,6 +21,16 @@ android {
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
+
+        androidTest {
+            manifest.srcFile '../netciphertest/AndroidManifest.xml'
+            java.srcDirs = ['../netciphertest/src']
+            resources.srcDirs = ['../netciphertest/src']
+            aidl.srcDirs = ['../netciphertest/src']
+            renderscript.srcDirs = ['../netciphertest/src']
+            res.srcDirs = ['../netciphertest/res']
+            assets.srcDirs = ['../netciphertest/assets']
+        }
     }
 
 	lintOptions {

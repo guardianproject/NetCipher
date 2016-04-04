@@ -32,6 +32,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
 
 public class HttpURLConnectionTest extends InstrumentationTestCase {
 
