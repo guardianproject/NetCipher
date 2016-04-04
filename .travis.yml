@@ -16,9 +16,8 @@ jdk:
   # the release build infrastructure uses OpenJDK from Debian
   - openjdk7
   # many developers use the Oracle JDK
-  # (disabled because Travis cannot reliably start the emulator with these)
-  #- oraclejdk8
-  #- oraclejdk7
+  - oraclejdk8
+  - oraclejdk7
 
 #
 before_cache:
@@ -37,7 +36,7 @@ android:
     - android-$EMULATOR_API_LEVEL
     - sys-img-armeabi-v7a-android-$EMULATOR_API_LEVEL
   licenses:
-    # only approve the free software licenses
+    # only approve the non-Google licenses
     - 'android-sdk-preview-license-52d11cd2'
     - 'android-sdk-license-.+'
 
