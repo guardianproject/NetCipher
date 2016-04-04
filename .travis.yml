@@ -20,6 +20,7 @@ jdk:
   #- oraclejdk8
   #- oraclejdk7
 
+#
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
@@ -47,14 +48,14 @@ script:
   - git clean -fdx
   - git reset --hard
   # 'assemble' everything and run all checks that do not require a device/emulator
-  - gradle build -PdisablePreDex
+  - ./gradlew build -PdisablePreDex
   # start the emulator after the build to conserve memory
   - echo no | android create avd --force -n test -t android-$EMULATOR_API_LEVEL
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
   # now run the tests that require a device/emulator
-  - gradle connectedCheck -PdisablePreDex
+  - ./gradlew connectedCheck -PdisablePreDex
 
 after_failure:
   - find * -name lint-results.xml | xargs cat
