@@ -109,9 +109,10 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "goo.gl",
                 "mirrors.kernel.org",
                 "www.google.com",
-                "firstlook.org",
                 "glympse.com",
-                //"www.here.com", // this has a broken redirect
+                // uses SNI
+                //"firstlook.org",
+                //"guardianproject.info",
         };
         // reset the default SSLSocketFactory, since it is global
         SSLContext sslcontext = SSLContext.getInstance("TLSv1");
@@ -142,9 +143,10 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "goo.gl",
                 "mirrors.kernel.org",
                 "www.google.com",
-                "firstlook.org",
                 "glympse.com",
-                //"www.here.com", // this has a broken redirect
+                // uses SNI
+                //"firstlook.org",
+                //"guardianproject.info",
         };
         for (String host : hosts) {
             URL url = new URL("https://" + host);
@@ -171,7 +173,9 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "openstreetmap.org",
                 "goo.gl",
                 "www.google.com",
-                "firstlook.org",
+                // uses SNI
+                //"firstlook.org",
+                //"guardianproject.info",
         };
         for (String host : hosts) {
             URL url = new URL("https://" + host);
