@@ -52,6 +52,7 @@
              windowtitle="${ant.project.name}"
              linkoffline="https://developer.android.com/reference ${sdk.dir}/docs/reference"
              linksource="true"
+             additionalparam="-notimestamp"
              doctitle="${ant.project.name}" />
     <jar destfile="${javadoc.jar}"
          manifest="MANIFEST.MF"

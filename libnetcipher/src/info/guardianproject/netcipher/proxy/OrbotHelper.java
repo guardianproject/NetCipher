@@ -121,6 +121,14 @@ public class OrbotHelper implements ProxyHelper {
         return uri.getHost().endsWith(".onion");
     }
 
+
+    /**
+     * Check if the tor process is running.  This method is very
+     * brittle, and is therefore deprecated in favor of using the
+     * {@link #ACTION_STATUS} {@code Intent} along with the {@link
+     * #requestStartTor(Context)} method.
+     */
+    @Deprecated
     public static boolean isOrbotRunning(Context context) {
         int procId = TorServiceUtils.findProcessId(context);
 

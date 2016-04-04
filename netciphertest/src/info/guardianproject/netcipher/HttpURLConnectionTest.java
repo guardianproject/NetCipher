@@ -18,6 +18,8 @@ package info.guardianproject.netcipher;
 
 import android.test.InstrumentationTestCase;
 
+import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -107,9 +109,10 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "goo.gl",
                 "mirrors.kernel.org",
                 "www.google.com",
-                "firstlook.org",
                 "glympse.com",
-                //"www.here.com", // this has a broken redirect
+                // uses SNI
+                //"firstlook.org",
+                //"guardianproject.info",
         };
         // reset the default SSLSocketFactory, since it is global
         SSLContext sslcontext = SSLContext.getInstance("TLSv1");
@@ -140,9 +143,10 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "goo.gl",
                 "mirrors.kernel.org",
                 "www.google.com",
-                "firstlook.org",
                 "glympse.com",
-                //"www.here.com", // this has a broken redirect
+                // uses SNI
+                //"firstlook.org",
+                //"guardianproject.info",
         };
         for (String host : hosts) {
             URL url = new URL("https://" + host);
@@ -169,7 +173,9 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "openstreetmap.org",
                 "goo.gl",
                 "www.google.com",
-                "firstlook.org",
+                // uses SNI
+                //"firstlook.org",
+                //"guardianproject.info",
         };
         for (String host : hosts) {
             URL url = new URL("https://" + host);
@@ -184,6 +190,32 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             assertEquals("text/html", connection.getContentType().split(";")[0]);
             System.out.println(host + " " + connection.getCipherSuite());
             connection.disconnect();
+        }
+    }
+
+    public void testConnectBadSslCom()
+            throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
+        String[] hosts = {
+                "wrong.host.badssl.com",
+        };
+        for (String host : hosts) {
+            URL url = new URL("https://" + host);
+            System.out.println("badssl " + url + " =================================");
+            HttpsURLConnection connection = NetCipher.getHttpsURLConnection(url);
+            connection.setConnectTimeout(0); // blocking connect with TCP timeout
+            connection.setReadTimeout(20000);
+            SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
+            assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
+            try {
+                connection.getContent();
+                System.out.println("This should not have connected, it has BAD SSL!");
+                assertTrue(false);
+            } catch (IOException e) {
+                e.printStackTrace();
+                // success! these should fail!
+            } finally {
+                connection.disconnect();
+            }
         }
     }
 }

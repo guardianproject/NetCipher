@@ -16,8 +16,7 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name" >
+        android:label="NetCipherTest" >
         <uses-library android:name="android.test.runner" />
     </application>
 
