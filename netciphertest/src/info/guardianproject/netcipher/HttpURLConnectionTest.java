@@ -111,7 +111,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "www.google.com",
                 "glympse.com",
                 // uses SNI
-                //"firstlook.org",
+                "firstlook.org",
                 //"guardianproject.info",
         };
         // reset the default SSLSocketFactory, since it is global
@@ -145,7 +145,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "www.google.com",
                 "glympse.com",
                 // uses SNI
-                //"firstlook.org",
+                "firstlook.org",
                 //"guardianproject.info",
         };
         for (String host : hosts) {
@@ -174,7 +174,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "goo.gl",
                 "www.google.com",
                 // uses SNI
-                //"firstlook.org",
+                "firstlook.org",
                 //"guardianproject.info",
         };
         for (String host : hosts) {
