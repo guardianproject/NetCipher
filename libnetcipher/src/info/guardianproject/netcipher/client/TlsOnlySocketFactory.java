@@ -19,6 +19,7 @@
 
 package info.guardianproject.netcipher.client;
 
+import android.net.SSLCertificateSocketFactory;
 import android.util.Log;
 
 import java.io.IOException;
@@ -51,12 +52,13 @@ import javax.net.ssl.SSLSocketFactory;
  * @author Hans-Christoph Steiner
  */
 public class TlsOnlySocketFactory extends SSLSocketFactory {
+    private static final int HANDSHAKE_TIMEOUT=0;
     private static final String TAG = "TlsOnlySocketFactory";
     private final SSLSocketFactory delegate;
     private final boolean compatible;
 
     public TlsOnlySocketFactory() {
-        this.delegate = HttpsURLConnection.getDefaultSSLSocketFactory();
+        this.delegate =SSLCertificateSocketFactory.getDefault(HANDSHAKE_TIMEOUT, null);
         this.compatible = false;
     }
 
