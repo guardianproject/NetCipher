@@ -20,6 +20,7 @@
 package info.guardianproject.netcipher.client;
 
 import android.net.SSLCertificateSocketFactory;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.IOException;
@@ -90,7 +91,19 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
 
     private Socket makeSocketSafe(Socket socket, String host) {
         if (socket instanceof SSLSocket) {
-            socket = new TlsOnlySSLSocket((SSLSocket) socket, compatible).setHostname(host);
+            TlsOnlySSLSocket tempSocket=
+              new TlsOnlySSLSocket((SSLSocket) socket, compatible);
+
+            if (delegate instanceof SSLCertificateSocketFactory &&
+              Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                ((android.net.SSLCertificateSocketFactory)delegate)
+                  .setHostname(socket, host);
+            }
+            else {
+                tempSocket.setHostname(host);
+            }
+
+            socket = tempSocket;
         }
         return socket;
     }
