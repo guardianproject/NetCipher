@@ -24,10 +24,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
@@ -39,6 +41,23 @@ import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
 public class HttpURLConnectionTest extends InstrumentationTestCase {
 
     private static final String HTTP_URL_STRING = "http://127.0.0.1:";
+
+    /**
+     * Prime the DNS cache with the hosts that are used in these tests.
+     */
+    private void prefetchDns(String[] hosts) {
+        for (final String host : hosts) {
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        InetAddress.getByName(host);
+                    } catch (UnknownHostException e) {
+                    }
+                }
+            }.start();
+        }
+    }
 
     public void testConnectHttp() throws MalformedURLException, IOException {
         // include trailing \n in test string, otherwise it gets added anyhow
@@ -114,6 +133,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "firstlook.org",
                 //"guardianproject.info",
         };
+        prefetchDns(hosts);
         // reset the default SSLSocketFactory, since it is global
         SSLContext sslcontext = SSLContext.getInstance("TLSv1");
         sslcontext.init(null, null, null); // null means use default
@@ -148,6 +168,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "firstlook.org",
                 //"guardianproject.info",
         };
+        prefetchDns(hosts);
         for (String host : hosts) {
             URL url = new URL("https://" + host);
             System.out.println("netcipher " + url + " =================================");
@@ -177,6 +198,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "firstlook.org",
                 //"guardianproject.info",
         };
+        prefetchDns(hosts);
         for (String host : hosts) {
             URL url = new URL("https://" + host);
             System.out.println("outdated " + url + " =================================");
@@ -198,6 +220,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         String[] hosts = {
                 "wrong.host.badssl.com",
         };
+        prefetchDns(hosts);
         for (String host : hosts) {
             URL url = new URL("https://" + host);
             System.out.println("badssl " + url + " =================================");
