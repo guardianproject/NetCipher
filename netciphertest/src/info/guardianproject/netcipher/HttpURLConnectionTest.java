@@ -18,8 +18,6 @@ package info.guardianproject.netcipher;
 
 import android.test.InstrumentationTestCase;
 
-import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -36,6 +34,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+
 import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
 
 public class HttpURLConnectionTest extends InstrumentationTestCase {
@@ -131,7 +130,8 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "glympse.com",
                 // uses SNI
                 "firstlook.org",
-                //"guardianproject.info",
+                "guardianproject.info",
+                "microg.org",
         };
         prefetchDns(hosts);
         // reset the default SSLSocketFactory, since it is global
@@ -166,7 +166,8 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "glympse.com",
                 // uses SNI
                 "firstlook.org",
-                //"guardianproject.info",
+                "guardianproject.info",
+                "microg.org",
         };
         prefetchDns(hosts);
         for (String host : hosts) {
@@ -196,7 +197,8 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "www.google.com",
                 // uses SNI
                 "firstlook.org",
-                //"guardianproject.info",
+                "guardianproject.info",
+                "microg.org",
         };
         prefetchDns(hosts);
         for (String host : hosts) {
