@@ -322,6 +322,7 @@ public class OrbotHelper implements ProxyHelper {
       newSetFromMap(new WeakHashMap<InstallCallback, Boolean>());
     private long statusTimeoutMs=30000L;
     private long installTimeoutMs=60000L;
+    private boolean validateOrbot=true;
 
     abstract public static class SimpleStatusCallback
       implements StatusCallback {
@@ -479,6 +480,21 @@ public class OrbotHelper implements ProxyHelper {
     }
 
     /**
+     * By default, NetCipher ensures that the Orbot on the
+     * device is one of the official builds. Call this method
+     * to skip that validation. Mostly, this is for developers
+     * who have their own custom Orbot builds (e.g., for
+     * dedicated hardware).
+     *
+     * @return the singleton, for chaining
+     */
+    public OrbotHelper skipOrbotValidation() {
+        validateOrbot=false;
+
+        return(this);
+    }
+
+    /**
      * @return true if Orbot is installed (the last time we checked),
      * false otherwise
      */
@@ -495,14 +511,17 @@ public class OrbotHelper implements ProxyHelper {
      */
     public boolean init() {
         Intent orbot=OrbotHelper.getOrbotStartIntent(ctxt);
-        ArrayList<String> hashes=new ArrayList<String>();
 
-        hashes.add("A4:54:B8:7A:18:47:A8:9E:D7:F5:E7:0F:BA:6B:BA:96:F3:EF:29:C2:6E:09:81:20:4F:E3:47:BF:23:1D:FD:5B");
-        hashes.add("A7:02:07:92:4F:61:FF:09:37:1D:54:84:14:5C:4B:EE:77:2C:55:C1:9E:EE:23:2F:57:70:E1:82:71:F7:CB:AE");
+        if (validateOrbot) {
+            ArrayList<String> hashes=new ArrayList<String>();
 
-        orbot=
-          SignatureUtils.validateBroadcastIntent(ctxt, orbot,
-            hashes, false);
+            hashes.add("A4:54:B8:7A:18:47:A8:9E:D7:F5:E7:0F:BA:6B:BA:96:F3:EF:29:C2:6E:09:81:20:4F:E3:47:BF:23:1D:FD:5B");
+            hashes.add("A7:02:07:92:4F:61:FF:09:37:1D:54:84:14:5C:4B:EE:77:2C:55:C1:9E:EE:23:2F:57:70:E1:82:71:F7:CB:AE");
+
+            orbot=
+              SignatureUtils.validateBroadcastIntent(ctxt, orbot,
+                hashes, false);
+        }
 
         if (orbot!=null) {
             isInstalled=true;
