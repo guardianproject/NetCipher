@@ -49,6 +49,7 @@ public class OrbotHelper implements ProxyHelper {
      * {@link Intent} send by Orbot with {@code ON/OFF/STARTING/STOPPING} status
      */
     public final static String ACTION_STATUS = "org.torproject.android.intent.action.STATUS";
+
     /**
      * {@code String} that contains a status constant: {@link #STATUS_ON},
      * {@link #STATUS_OFF}, {@link #STATUS_STARTING}, or
@@ -60,6 +61,10 @@ public class OrbotHelper implements ProxyHelper {
      * to, used in {@link #ACTION_START} {@link Intent}s sent to Orbot
      */
     public final static String EXTRA_PACKAGE_NAME = "org.torproject.android.intent.extra.PACKAGE_NAME";
+
+    public final static String EXTRA_PROXY_PORT_HTTP = "org.torproject.android.intent.extra.HTTP_PROXY_PORT";
+    public final static String EXTRA_PROXY_PORT_SOCKS = "org.torproject.android.intent.extra.SOCKS_PROXY_PORT";
+
 
     /**
      * All tor-related services and daemons are stopped
