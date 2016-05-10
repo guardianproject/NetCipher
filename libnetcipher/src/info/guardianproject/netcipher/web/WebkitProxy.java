@@ -156,7 +156,7 @@ public class WebkitProxy {
             throws Exception
             {
     	
-        boolean ret = false;
+        boolean ret;
 
         Object requestQueueObject = getRequestQueue(ctx);
         if (requestQueueObject != null) {
@@ -758,7 +758,7 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
 
     private static Object invokeMethod(Object object, String methodName, Object[] params,
             Class... types) throws Exception {
-        Object out = null;
+        Object out;
         Class c = object instanceof Class ? (Class) object : object.getClass();
         if (types != null) {
             Method method = c.getMethod(methodName, types);

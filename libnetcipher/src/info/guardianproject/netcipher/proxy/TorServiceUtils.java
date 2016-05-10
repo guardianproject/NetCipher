@@ -125,7 +125,7 @@ public class TorServiceUtils {
 
         Runtime r = Runtime.getRuntime();
 
-        Process procPs = null;
+        Process procPs;
 
         String baseName = new File(command).getName();
         // fix contributed my mikos on 2010.12.10
@@ -135,7 +135,7 @@ public class TorServiceUtils {
         // procPs = r.exec(SHELL_CMD_PIDOF);
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(procPs.getInputStream()));
-        String line = null;
+        String line;
 
         while ((line = reader.readLine()) != null)
         {
@@ -163,12 +163,12 @@ public class TorServiceUtils {
 
         Runtime r = Runtime.getRuntime();
 
-        Process procPs = null;
+        Process procPs;
 
         procPs = r.exec(SHELL_CMD_PS);
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(procPs.getInputStream()));
-        String line = null;
+        String line;
 
         while ((line = reader.readLine()) != null)
         {
@@ -192,7 +192,7 @@ public class TorServiceUtils {
             boolean waitFor) throws Exception
     {
 
-        Process proc = null;
+        Process proc;
         int exitCode = -1;
 
         if (runAsRoot)
@@ -222,7 +222,7 @@ public class TorServiceUtils {
 
             // Consume the "stdout"
             InputStreamReader reader = new InputStreamReader(proc.getInputStream());
-            int read = 0;
+            int read;
             while ((read = reader.read(buf)) != -1) {
                 if (log != null)
                     log.append(buf, 0, read);
@@ -230,7 +230,6 @@ public class TorServiceUtils {
 
             // Consume the "stderr"
             reader = new InputStreamReader(proc.getErrorStream());
-            read = 0;
             while ((read = reader.read(buf)) != -1) {
                 if (log != null)
                     log.append(buf, 0, read);
