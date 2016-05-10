@@ -108,7 +108,7 @@ public class StrongConnectionBuilderTest extends
     testResult=null;
     builder.build(callback);
 
-    assertTrue(responseLatch.await(30, TimeUnit.SECONDS));
+    assertTrue(responseLatch.await(120, TimeUnit.SECONDS));
 
     if (innerException!=null) {
       throw innerException;
