@@ -44,8 +44,6 @@ abstract public class
   StrongBuilderBase<T extends StrongBuilderBase, C>
   implements StrongBuilder<T, C> {
   private final static String PROXY_HOST="127.0.0.1";
-  private final static String TRUSTSTORE_TYPE="BKS";
-  private final static String TRUSTSTORE_PASSWORD="changeit";
   protected final Context ctxt;
   protected Proxy.Type proxyType;
   protected SSLContext sslContext=null;
