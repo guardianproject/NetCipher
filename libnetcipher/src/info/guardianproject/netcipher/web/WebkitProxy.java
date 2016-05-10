@@ -27,6 +27,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpHost;
 
@@ -46,7 +48,6 @@ import android.util.Log;
 import android.webkit.WebView;
 
 public class WebkitProxy {
-
     private final static String DEFAULT_HOST = "localhost";//"127.0.0.1";
     private final static int DEFAULT_PORT = 8118;
     private final static int DEFAULT_SOCKS_PORT = 9050;

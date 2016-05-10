@@ -19,6 +19,8 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,8 +31,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 public class PsiphonHelper implements ProxyHelper {
-
-    public final static String PACKAGE_NAME = "com.psiphon3";
+    private static final Logger LOGGER= Logger.getLogger(PsiphonHelper.class.getName());
+	public final static String PACKAGE_NAME = "com.psiphon3";
     public final static String COMPONENT_NAME = "com.psiphon3.StatusActivity";
     
     
@@ -158,12 +160,12 @@ public class PsiphonHelper implements ProxyHelper {
         } 
 
         catch(ConnectException ce){
-            ce.printStackTrace();
+			LOGGER.log(Level.INFO,ce.getMessage());
             return false;
         }
 
         catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.INFO,ex.getMessage());
             return false;
         }
     }

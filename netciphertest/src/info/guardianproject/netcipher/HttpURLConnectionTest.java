@@ -30,6 +30,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -39,7 +41,7 @@ import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
 public class HttpURLConnectionTest extends InstrumentationTestCase {
 
     private static final String HTTP_URL_STRING = "http://127.0.0.1:";
-
+    private static final Logger LOGGER= Logger.getLogger(HttpURLConnectionTest.class.getName());
     public void testConnectHttp() throws MalformedURLException, IOException {
         // include trailing \n in test string, otherwise it gets added anyhow
         final String content = "content!";
@@ -57,7 +59,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                     os.close();
                     serverSocket.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.INFO,e.getMessage());
                     fail();
                 }
             }
@@ -83,6 +85,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             fail();
         } catch (IOException e) {
             // this should not connect
+            LOGGER.log(Level.INFO,e.getMessage());
         }
     }
 
@@ -97,6 +100,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             fail();
         } catch (IOException e) {
             // this should not connect
+            LOGGER.log(Level.INFO,e.getMessage());
         }
     }
 
@@ -213,6 +217,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             } catch (IOException e) {
                 e.printStackTrace();
                 // success! these should fail!
+                LOGGER.log(Level.INFO,e.getMessage());
             } finally {
                 connection.disconnect();
             }
