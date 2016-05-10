@@ -43,7 +43,8 @@ public class SocksAwareClientConnOperator extends DefaultClientConnectionOperato
 
     private static final int CONNECT_TIMEOUT_MILLISECONDS = 60000;
     private static final int READ_TIMEOUT_MILLISECONDS = 60000;
-
+    private static final String SOCKS="socks";
+    private static final String STRONG_HTTPS="strongHTPPS";
     private HttpHost mProxyHost;
     private String mProxyType;
     private SocksAwareProxyRoutePlanner mRoutePlanner;
@@ -67,23 +68,23 @@ public class SocksAwareClientConnOperator extends DefaultClientConnectionOperato
             final HttpContext context,
             final HttpParams params) throws IOException {
         if (mProxyHost != null) {
-            if (mProxyType != null && mProxyType.equalsIgnoreCase("socks")) {
-                Log.d("StrongHTTPS", "proxying using SOCKS");
+            if (mProxyType != null && mProxyType.equalsIgnoreCase(SOCKS)) {
+                Log.d(STRONG_HTTPS, "proxying using SOCKS");
                 openSocksConnection(mProxyHost, conn, target, local, context, params);
             } else {
-                Log.d("StrongHTTPS", "proxying with: " + mProxyType);
+                Log.d(STRONG_HTTPS, "proxying with: " + mProxyType);
                 openNonSocksConnection(conn, target, local, context, params);
             }
         } else if (mRoutePlanner != null) {
             if (mRoutePlanner.isProxy(target)) {
                 // HTTP proxy, already handled by the route planner system
-                Log.d("StrongHTTPS", "proxying using non-SOCKS");
+                Log.d(STRONG_HTTPS, "proxying using non-SOCKS");
                 openNonSocksConnection(conn, target, local, context, params);
             } else {
                 // Either SOCKS or direct
                 HttpHost proxy = mRoutePlanner.determineRequiredProxy(target, null, context);
                 if (proxy == null) {
-                    Log.d("StrongHTTPS", "not proxying");
+                    Log.d(STRONG_HTTPS, "not proxying");
                     openNonSocksConnection(conn, target, local, context, params);
                 } else if (mRoutePlanner.isSocksProxy(proxy)) {
                     Log.d("StrongHTTPS", "proxying using SOCKS");
@@ -93,7 +94,7 @@ public class SocksAwareClientConnOperator extends DefaultClientConnectionOperato
                 }
             }
         } else {
-            Log.d("StrongHTTPS", "not proxying");
+            Log.d(STRONG_HTTPS, "not proxying");
             openNonSocksConnection(conn, target, local, context, params);
         }
     }
@@ -239,7 +240,7 @@ public class SocksAwareClientConnOperator extends DefaultClientConnectionOperato
             final HttpHost target,
             final HttpContext context,
             final HttpParams params) throws IOException {
-        if (mProxyHost != null && mProxyType.equalsIgnoreCase("socks"))
+        if (mProxyHost != null && mProxyType.equalsIgnoreCase(SOCKS))
             throw new RuntimeException("operation not supported");
         else
             super.updateSecureConnection(conn, target, context, params);
@@ -247,7 +248,7 @@ public class SocksAwareClientConnOperator extends DefaultClientConnectionOperato
 
     @Override
     protected InetAddress[] resolveHostname(final String host) throws UnknownHostException {
-        if (mProxyHost != null && mProxyType.equalsIgnoreCase("socks"))
+        if (mProxyHost != null && mProxyType.equalsIgnoreCase(SOCKS))
             throw new RuntimeException("operation not supported");
         else
             return super.resolveHostname(host);

@@ -59,6 +59,7 @@ import info.guardianproject.netcipher.proxy.PsiphonHelper;
 public class NetCipherSampleActivity extends Activity {
 
     private final static String TAG = "NetCipherSampleActivity";
+    private final static String STATUS = "status";
     private TextView txtView;
     private EditText txtUrl;
     private Button httpProxyButton;
@@ -292,7 +293,7 @@ public class NetCipherSampleActivity extends Activity {
             try
             {
                 Message msg = new Message();
-                msg.getData().putString("status", "connecting to: " + url);
+                msg.getData().putString(STATUS, "connecting to: " + url);
                 handler.sendMessage(msg);
 
                 int proxyPort = -1;
@@ -305,7 +306,7 @@ public class NetCipherSampleActivity extends Activity {
                 }
                 String resp = checkHTTP(url, mProxyType, PROXY_HOST, proxyPort);
                 msg = new Message();
-                msg.getData().putString("status", resp);
+                msg.getData().putString(STATUS, resp);
                 handler.sendMessage(msg);
             }
             catch (Exception e)
@@ -313,7 +314,7 @@ public class NetCipherSampleActivity extends Activity {
                 String err = "error connecting to: " + url + "=" + e.toString();
                 Log.e(TAG, err, e);
                 Message msg = new Message();
-                msg.getData().putString("status", err);
+                msg.getData().putString(STATUS, err);
                 handler.sendMessage(msg);
             }
         }
@@ -325,7 +326,7 @@ public class NetCipherSampleActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
 
-            String msgText = msg.getData().getString("status");
+            String msgText = msg.getData().getString(STATUS);
 
             txtView.setText(msgText);
         }

@@ -54,6 +54,10 @@ public class WebkitProxy {
     private final static int REQUEST_CODE = 0;
 
     private final static String TAG = "OrbotHelpher";
+    private final static String HTTP_PROXY_HOST = "http.proxyHost";
+    private final static String HTTP_PROXY_PORT = "http.proxyPort";
+    private final static String HTTPS_PROXY_HOST = "https.proxyHost";
+    private final static String HTTPS_PROXY_PORT = "https.proxyPort";
 
     public static boolean setProxy(String appClass, Context ctx, WebView wView, String host, int port) throws Exception
     {
@@ -94,11 +98,11 @@ public class WebkitProxy {
     	System.setProperty("proxyHost", host);
         System.setProperty("proxyPort", port + "");
 
-        System.setProperty("http.proxyHost", host);
-        System.setProperty("http.proxyPort", port + "");
+        System.setProperty(HTTP_PROXY_HOST, host);
+        System.setProperty(HTTP_PROXY_PORT, port + "");
 
-        System.setProperty("https.proxyHost", host);
-        System.setProperty("https.proxyPort", port + "");
+        System.setProperty(HTTPS_PROXY_HOST, host);
+        System.setProperty(HTTPS_PROXY_PORT, port + "");
 
         
         System.setProperty("socks.proxyHost", host);
@@ -129,11 +133,11 @@ public class WebkitProxy {
         System.setProperty("proxyHost", "");
         System.setProperty("proxyPort", "");
 
-        System.setProperty("http.proxyHost", "");
-        System.setProperty("http.proxyPort", "");
+        System.setProperty(HTTP_PROXY_HOST, "");
+        System.setProperty(HTTP_PROXY_PORT, "");
 
-        System.setProperty("https.proxyHost", "");
-        System.setProperty("https.proxyPort", "");
+        System.setProperty(HTTPS_PROXY_HOST, "");
+        System.setProperty(HTTPS_PROXY_PORT, "");
 
 
         System.setProperty("socks.proxyHost", "");
@@ -305,10 +309,10 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
     	
     	if (host != null)
     	{
-	        System.setProperty("http.proxyHost", host);
-	        System.setProperty("http.proxyPort", port + "");
-	        System.setProperty("https.proxyHost", host);
-	        System.setProperty("https.proxyPort", port + "");
+	        System.setProperty(HTTP_PROXY_HOST, host);
+	        System.setProperty(HTTP_PROXY_PORT, port + "");
+	        System.setProperty(HTTPS_PROXY_HOST, host);
+	        System.setProperty(HTTPS_PROXY_PORT, port + "");
     	}
         
         try {
@@ -400,10 +404,10 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
     @SuppressWarnings("rawtypes")
     private static boolean setWebkitProxyLollipop(Context appContext, String host, int port)
     {
-        System.setProperty("http.proxyHost", host);
-        System.setProperty("http.proxyPort", port + "");
-        System.setProperty("https.proxyHost", host);
-        System.setProperty("https.proxyPort", port + "");
+        System.setProperty(HTTP_PROXY_HOST, host);
+        System.setProperty(HTTP_PROXY_PORT, port + "");
+        System.setProperty(HTTPS_PROXY_HOST, host);
+        System.setProperty(HTTPS_PROXY_PORT, port + "");
         try {
             Class applictionClass = Class.forName("android.app.Application");
             Field mLoadedApkField = applictionClass.getDeclaredField("mLoadedApk");
