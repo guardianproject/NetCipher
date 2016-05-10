@@ -18,27 +18,45 @@ package info.guardianproject.netcipher;
 
 import android.test.InstrumentationTestCase;
 
-import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+
 import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
 
 public class HttpURLConnectionTest extends InstrumentationTestCase {
 
     private static final String HTTP_URL_STRING = "http://127.0.0.1:";
+
+    /**
+     * Prime the DNS cache with the hosts that are used in these tests.
+     */
+    private void prefetchDns(String[] hosts) {
+        for (final String host : hosts) {
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        InetAddress.getByName(host);
+                    } catch (UnknownHostException e) {
+                    }
+                }
+            }.start();
+        }
+    }
 
     public void testConnectHttp() throws MalformedURLException, IOException {
         // include trailing \n in test string, otherwise it gets added anyhow
@@ -112,8 +130,10 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "glympse.com",
                 // uses SNI
                 "firstlook.org",
-                //"guardianproject.info",
+                "guardianproject.info",
+                "microg.org",
         };
+        prefetchDns(hosts);
         // reset the default SSLSocketFactory, since it is global
         SSLContext sslcontext = SSLContext.getInstance("TLSv1");
         sslcontext.init(null, null, null); // null means use default
@@ -146,8 +166,10 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "glympse.com",
                 // uses SNI
                 "firstlook.org",
-                //"guardianproject.info",
+                "guardianproject.info",
+                "microg.org",
         };
+        prefetchDns(hosts);
         for (String host : hosts) {
             URL url = new URL("https://" + host);
             System.out.println("netcipher " + url + " =================================");
@@ -175,8 +197,10 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 "www.google.com",
                 // uses SNI
                 "firstlook.org",
-                //"guardianproject.info",
+                "guardianproject.info",
+                "microg.org",
         };
+        prefetchDns(hosts);
         for (String host : hosts) {
             URL url = new URL("https://" + host);
             System.out.println("outdated " + url + " =================================");
@@ -198,6 +222,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         String[] hosts = {
                 "wrong.host.badssl.com",
         };
+        prefetchDns(hosts);
         for (String host : hosts) {
             URL url = new URL("https://" + host);
             System.out.println("badssl " + url + " =================================");
