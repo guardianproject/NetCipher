@@ -33,7 +33,7 @@ public class ProxySelector extends java.net.ProxySelector {
 	{
 		super ();
 		
-		listProxies = new ArrayList<Proxy>();
+		listProxies = new ArrayList<>();
 		
 		
 	}

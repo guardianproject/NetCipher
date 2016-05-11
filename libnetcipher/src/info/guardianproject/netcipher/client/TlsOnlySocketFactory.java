@@ -90,6 +90,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
     }
 
     private Socket makeSocketSafe(Socket socket, String host) {
+        Socket mySocket=null;
         if (socket instanceof SSLSocket) {
             TlsOnlySSLSocket tempSocket=
               new TlsOnlySSLSocket((SSLSocket) socket, compatible);
@@ -103,9 +104,9 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
                 tempSocket.setHostname(host);
             }
 
-            socket = tempSocket;
+            mySocket = tempSocket;
         }
-        return socket;
+        return mySocket;
     }
 
     @Override
@@ -147,7 +148,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
 
             // badly configured servers can't handle a good config
             if (compatible) {
-                ArrayList<String> protocols = new ArrayList<String>(Arrays.asList(delegate
+                ArrayList<String> protocols = new ArrayList<>(Arrays.asList(delegate
                         .getEnabledProtocols()));
                 protocols.remove("SSLv2");
                 protocols.remove("SSLv3");
@@ -157,7 +158,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
                  * Exclude extremely weak EXPORT ciphers. NULL ciphers should
                  * never even have been an option in TLS.
                  */
-                ArrayList<String> enabled = new ArrayList<String>(10);
+                ArrayList<String> enabled = new ArrayList<>(10);
                 Pattern exclude = Pattern.compile(".*(EXPORT|NULL).*");
                 for (String cipher : delegate.getEnabledCipherSuites()) {
                     if (!exclude.matcher(cipher).matches()) {
@@ -170,7 +171,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
 
             // 16-19 support v1.1 and v1.2 but only by default starting in 20+
             // https://developer.android.com/reference/javax/net/ssl/SSLSocket.html
-            ArrayList<String> protocols = new ArrayList<String>(Arrays.asList(delegate
+            ArrayList<String> protocols = new ArrayList<>(Arrays.asList(delegate
                     .getSupportedProtocols()));
             protocols.remove("SSLv2");
             protocols.remove("SSLv3");
@@ -180,7 +181,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
              * Exclude weak ciphers, like EXPORT, MD5, DES, and DH. NULL ciphers
              * should never even have been an option in TLS.
              */
-            ArrayList<String> enabledCiphers = new ArrayList<String>(10);
+            ArrayList<String> enabledCiphers = new ArrayList<>(10);
             Pattern exclude = Pattern.compile(".*(_DES|DH_|DSS|EXPORT|MD5|NULL|RC4).*");
             for (String cipher : delegate.getSupportedCipherSuites()) {
                 if (!exclude.matcher(cipher).matches()) {
@@ -195,6 +196,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
          */
         @Override
         public void setEnabledProtocols(String[] protocols) {
+            String[] myProtocols=null;
             if (protocols != null && protocols.length == 1 && "SSLv3".equals(protocols[0])) {
                 List<String> systemProtocols;
                 if (this.compatible) {
@@ -202,18 +204,19 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
                 } else {
                     systemProtocols = Arrays.asList(delegate.getSupportedProtocols());
                 }
-                List<String> enabledProtocols = new ArrayList<String>(systemProtocols);
+                List<String> enabledProtocols = new ArrayList<>(systemProtocols);
                 if (enabledProtocols.size() > 1) {
                     enabledProtocols.remove("SSLv2");
                     enabledProtocols.remove("SSLv3");
                 } else {
                     Log.w(TAG, "SSL stuck with protocol available for "
-                            + String.valueOf(enabledProtocols));
+                            + enabledProtocols);
                 }
-                protocols = enabledProtocols.toArray(new String[enabledProtocols.size()]);
+                myProtocols = enabledProtocols.toArray(new String[enabledProtocols.size()]);
             }
-            super.setEnabledProtocols(protocols);
+            super.setEnabledProtocols(myProtocols);
         }
+
     }
 
     public class DelegateSSLSocket extends SSLSocket {
