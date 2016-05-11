@@ -39,15 +39,13 @@ import info.guardianproject.netcipher.proxy.OrbotHelper;
 
 public class NetCipher {
     private static final String TAG ="NetCipher";
+    private static Proxy proxy;
+    public final static Proxy ORBOT_HTTP_PROXY = new Proxy(Proxy.Type.HTTP,
+            new InetSocketAddress("127.0.0.1", 8118));
 
     private NetCipher() {
         // this is a utility class with only static methods
     }
-
-    public final static Proxy ORBOT_HTTP_PROXY = new Proxy(Proxy.Type.HTTP,
-            new InetSocketAddress("127.0.0.1", 8118));
-
-    private static Proxy proxy;
 
     /**
      * Set the global HTTP proxy for all new {@link HttpURLConnection}s and

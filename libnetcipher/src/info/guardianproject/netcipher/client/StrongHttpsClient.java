@@ -44,12 +44,12 @@ public class StrongHttpsClient extends DefaultHttpClient {
     private HttpHost proxyHost;
     private String proxyType;
     private SocksAwareProxyRoutePlanner routePlanner;
-
     private StrongSSLSocketFactory sFactory;
     private SchemeRegistry mRegistry;
-
     private final static String TRUSTSTORE_TYPE = "BKS";
     private final static String TRUSTSTORE_PASSWORD = "changeit";
+    public final static String TYPE_SOCKS = "socks";
+    public final static String TYPE_HTTP = "http";
 
     public StrongHttpsClient(Context context) {
         this.context = context;
@@ -69,7 +69,21 @@ public class StrongHttpsClient extends DefaultHttpClient {
             throw new AssertionError(e);
         }
     }
+    public StrongHttpsClient(Context context, KeyStore keystore) {
+        this.context = context;
 
+        mRegistry = new SchemeRegistry();
+        mRegistry.register(
+                new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
+
+        try {
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            sFactory = new StrongSSLSocketFactory(context, trustManagerFactory.getTrustManagers(), keystore, TRUSTSTORE_PASSWORD);
+            mRegistry.register(new Scheme("https", 443, sFactory));
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+    }
     private KeyStore loadKeyStore () throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException
     {
 
@@ -79,22 +93,6 @@ public class StrongHttpsClient extends DefaultHttpClient {
         trustStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
 
         return trustStore;
-    }
-
-    public StrongHttpsClient(Context context, KeyStore keystore) {
-        this.context = context;
-
-        mRegistry = new SchemeRegistry();
-        mRegistry.register(
-                new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
-
-        try {
-        	TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            sFactory = new StrongSSLSocketFactory(context, trustManagerFactory.getTrustManagers(), keystore, TRUSTSTORE_PASSWORD);
-            mRegistry.register(new Scheme("https", 443, sFactory));
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
     }
 
     @Override
@@ -158,7 +156,6 @@ public class StrongHttpsClient extends DefaultHttpClient {
         sFactory.setEnableStongerDefaultSSLCipherSuite(false);
     }
 
-    public final static String TYPE_SOCKS = "socks";
-    public final static String TYPE_HTTP = "http";
+
 
 }
