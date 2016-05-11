@@ -21,7 +21,7 @@ public class StrongConstants {
 	 * Ordered to prefer the stronger cipher suites as noted
 	 * http://op-co.de/blog/posts/android_ssl_downgrade/
 	 */
-	public static final String ENABLED_CIPHERS[] = {
+	public static final String[] ENABLED_CIPHERS = {
 			"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
 			"TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
 			"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
@@ -38,7 +38,7 @@ public class StrongConstants {
 	 * Ordered to prefer the stronger/newer TLS versions as noted
 	 * http://op-co.de/blog/posts/android_ssl_downgrade/
 	 */
-	public static final String ENABLED_PROTOCOLS[] = { "TLSv1.2", "TLSv1.1",
+	public static final String[] ENABLED_PROTOCOLS = { "TLSv1.2", "TLSv1.1",
 			"TLSv1" };
 
 }

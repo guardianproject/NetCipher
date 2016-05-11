@@ -83,7 +83,7 @@ public class StrongSSLSocketFactory extends
 	}
 
 	private void readSSLParameters(SSLSocket sslSocket) {
-		List<String> protocolsToEnable = new ArrayList<String>();
+		List<String> protocolsToEnable = new ArrayList<>();
 		List<String> supportedProtocols = Arrays.asList(sslSocket.getSupportedProtocols());
 		for(String enabledProtocol : StrongConstants.ENABLED_PROTOCOLS) {
 			if(supportedProtocols.contains(enabledProtocol)) {
@@ -92,7 +92,7 @@ public class StrongSSLSocketFactory extends
 		}
 		this.mProtocols = protocolsToEnable.toArray(new String[protocolsToEnable.size()]);
 
-		List<String> cipherSuitesToEnable = new ArrayList<String>();
+		List<String> cipherSuitesToEnable = new ArrayList<>();
 		List<String> supportedCipherSuites = Arrays.asList(sslSocket.getSupportedCipherSuites());
 		for(String enabledCipherSuite : StrongConstants.ENABLED_CIPHERS) {
 			if(supportedCipherSuites.contains(enabledCipherSuite)) {

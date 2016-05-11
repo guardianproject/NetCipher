@@ -243,13 +243,12 @@ public class OrbotHelper implements ProxyHelper {
      * @return whether the start request was sent to Orbot
      */
     public static boolean requestShowOrbotStart(Activity activity) {
-        if (OrbotHelper.isOrbotInstalled(activity)) {
-            if (!OrbotHelper.isOrbotRunning(activity)) {
+        if (OrbotHelper.isOrbotInstalled(activity)&&!OrbotHelper.isOrbotRunning(activity)) {
                 Intent intent = getShowOrbotStartIntent();
                 activity.startActivityForResult(intent, START_TOR_RESULT);
                 return true;
             }
-        }
+
         return false;
     }
 
