@@ -214,6 +214,14 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
             }
             super.setEnabledProtocols(protocols);
         }
+        public boolean equals(Object obj) {
+            if (!super.equals(obj)) {
+                return false;
+            }
+            TlsOnlySSLSocket myObj=(TlsOnlySSLSocket)obj;
+            if(this.compatible==myObj.compatible){return true;}
+            return false;
+        }
     }
 
     public class DelegateSSLSocket extends SSLSocket {
