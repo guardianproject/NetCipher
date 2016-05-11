@@ -92,20 +92,20 @@ public class WebkitProxy {
     {
 
     	System.setProperty("proxyHost", host);
-        System.setProperty("proxyPort", port + "");
+        System.setProperty("proxyPort", Integer.toString(port));
 
         System.setProperty("http.proxyHost", host);
-        System.setProperty("http.proxyPort", port + "");
+        System.setProperty("http.proxyPort", Integer.toString(port));
 
         System.setProperty("https.proxyHost", host);
-        System.setProperty("https.proxyPort", port + "");
+        System.setProperty("https.proxyPort", Integer.toString(port));
 
         
         System.setProperty("socks.proxyHost", host);
-        System.setProperty("socks.proxyPort", DEFAULT_SOCKS_PORT + "");
+        System.setProperty("socks.proxyPort", Integer.toString(DEFAULT_SOCKS_PORT));
 
         System.setProperty("socksProxyHost", host);
-        System.setProperty("socksProxyPort", DEFAULT_SOCKS_PORT + "");
+        System.setProperty("socksProxyPort", Integer.toString(DEFAULT_SOCKS_PORT));
         
         
         /*
@@ -137,10 +137,10 @@ public class WebkitProxy {
 
 
         System.setProperty("socks.proxyHost", "");
-        System.setProperty("socks.proxyPort", DEFAULT_SOCKS_PORT + "");
+        System.setProperty("socks.proxyPort", Integer.toString(DEFAULT_SOCKS_PORT));
 
         System.setProperty("socksProxyHost", "");
-        System.setProperty("socksProxyPort", DEFAULT_SOCKS_PORT + "");
+        System.setProperty("socksProxyPort", Integer.toString(DEFAULT_SOCKS_PORT));
 
     }
 
@@ -306,9 +306,9 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
     	if (host != null)
     	{
 	        System.setProperty("http.proxyHost", host);
-	        System.setProperty("http.proxyPort", port + "");
+	        System.setProperty("http.proxyPort", Integer.toString(port));
 	        System.setProperty("https.proxyHost", host);
-	        System.setProperty("https.proxyPort", port + "");
+	        System.setProperty("https.proxyPort", Integer.toString(port));
     	}
         
         try {
@@ -401,9 +401,9 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
     private static boolean setWebkitProxyLollipop(Context appContext, String host, int port)
     {
         System.setProperty("http.proxyHost", host);
-        System.setProperty("http.proxyPort", port + "");
+        System.setProperty("http.proxyPort", Integer.toString(port));
         System.setProperty("https.proxyHost", host);
-        System.setProperty("https.proxyPort", port + "");
+        System.setProperty("https.proxyPort", Integer.toString(port));
         try {
             Class applictionClass = Class.forName("android.app.Application");
             Field mLoadedApkField = applictionClass.getDeclaredField("mLoadedApk");
