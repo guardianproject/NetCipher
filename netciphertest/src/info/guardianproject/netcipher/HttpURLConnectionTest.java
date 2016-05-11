@@ -40,7 +40,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
 
     private static final String HTTP_URL_STRING = "http://127.0.0.1:";
 
-    public void testConnectHttp() throws MalformedURLException, IOException {
+    public void testConnectHttp() throws  IOException {
         // include trailing \n in test string, otherwise it gets added anyhow
         final String content = "content!";
         final String httpResponse = "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n" + content;
@@ -101,7 +101,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
     }
 
     public void testStandardHttpURLConnection()
-            throws MalformedURLException, IOException, KeyManagementException, NoSuchAlgorithmException {
+            throws  IOException, KeyManagementException, NoSuchAlgorithmException {
         String[] hosts = {
                 "yahoo.com",
                 "www.yandex.ru",
@@ -135,7 +135,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
     }
 
     public void testConnectHttps()
-            throws MalformedURLException, IOException, KeyManagementException {
+            throws  IOException, KeyManagementException {
         String[] hosts = {
                 "yahoo.com",
                 "www.yandex.ru",
@@ -165,7 +165,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
     }
 
     public void testConnectOutdatedHttps()
-            throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
+            throws  IOException, KeyManagementException, InterruptedException {
         String[] hosts = {
                 // these are here to make sure it works with good servers too
                 "yahoo.com",
@@ -194,7 +194,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
     }
 
     public void testConnectBadSslCom()
-            throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
+            throws  IOException, KeyManagementException, InterruptedException {
         String[] hosts = {
                 "wrong.host.badssl.com",
         };
