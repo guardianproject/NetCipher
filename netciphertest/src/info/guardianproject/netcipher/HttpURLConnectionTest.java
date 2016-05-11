@@ -65,7 +65,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         HttpURLConnection connection = NetCipher.getHttpURLConnection(new URL(HTTP_URL_STRING
                 + port));
         InputStream is = (InputStream) connection.getContent();
-        byte buffer[] = new byte[256];
+        byte[] buffer = new byte[256];
         int read = is.read(buffer);
         String msg = new String(buffer, 0, read);
         assertEquals(content, msg);
