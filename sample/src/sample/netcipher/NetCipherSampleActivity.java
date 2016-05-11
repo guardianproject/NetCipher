@@ -265,7 +265,7 @@ public class NetCipherSampleActivity extends Activity {
         HttpGet httpget = new HttpGet(url);
         HttpResponse response = httpclient.execute(httpget);
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(response.getStatusLine()).append("\n\n");
 
         InputStream is = response.getEntity().getContent();
