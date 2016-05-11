@@ -30,6 +30,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -39,7 +40,7 @@ import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
 public class HttpURLConnectionTest extends InstrumentationTestCase {
 
     private static final String HTTP_URL_STRING = "http://127.0.0.1:";
-
+    private static final Logger LOGGER=Logger.getLogger(HttpURLConnectionTest.class.getName());
     public void testConnectHttp() throws MalformedURLException, IOException {
         // include trailing \n in test string, otherwise it gets added anyhow
         final String content = "content!";
@@ -120,7 +121,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());
         for (String host : hosts) {
             URL url = new URL("https://" + host);
-            System.out.println("default " + url + " =================================");
+            LOGGER.info("default " + url + " =================================");
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertFalse(sslSocketFactory instanceof TlsOnlySocketFactory);
@@ -129,7 +130,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             connection.getContent();
             assertEquals(200, connection.getResponseCode());
             assertEquals("text/html", connection.getContentType().split(";")[0]);
-            System.out.println(host + " " + connection.getCipherSuite());
+            LOGGER.info(host + " " + connection.getCipherSuite());
             connection.disconnect();
         }
     }
@@ -150,7 +151,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         };
         for (String host : hosts) {
             URL url = new URL("https://" + host);
-            System.out.println("netcipher " + url + " =================================");
+            LOGGER.info("netcipher " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getHttpsURLConnection(url);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
             connection.setReadTimeout(20000);
@@ -159,7 +160,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             connection.getContent();
             assertEquals(200, connection.getResponseCode());
             assertEquals("text/html", connection.getContentType().split(";")[0]);
-            System.out.println(host + " " + connection.getCipherSuite());
+            LOGGER.info(host + " " + connection.getCipherSuite());
             connection.disconnect();
         }
     }
@@ -179,7 +180,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         };
         for (String host : hosts) {
             URL url = new URL("https://" + host);
-            System.out.println("outdated " + url + " =================================");
+            LOGGER.info("outdated " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getCompatibleHttpsURLConnection(url);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
             connection.setReadTimeout(20000);
@@ -188,7 +189,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             connection.getContent();
             assertEquals(200, connection.getResponseCode());
             assertEquals("text/html", connection.getContentType().split(";")[0]);
-            System.out.println(host + " " + connection.getCipherSuite());
+            LOGGER.info(host + " " + connection.getCipherSuite());
             connection.disconnect();
         }
     }
@@ -200,7 +201,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         };
         for (String host : hosts) {
             URL url = new URL("https://" + host);
-            System.out.println("badssl " + url + " =================================");
+            LOGGER.info("badssl " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getHttpsURLConnection(url);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
             connection.setReadTimeout(20000);
@@ -208,7 +209,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
             try {
                 connection.getContent();
-                System.out.println("This should not have connected, it has BAD SSL!");
+                LOGGER.info("This should not have connected, it has BAD SSL!");
                 assertTrue(false);
             } catch (IOException e) {
                 e.printStackTrace();
