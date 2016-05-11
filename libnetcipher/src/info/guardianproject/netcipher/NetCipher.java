@@ -140,11 +140,9 @@ public class NetCipher {
         try {
             sslcontext = SSLContext.getInstance("TLSv1");
             sslcontext.init(null, null, null); // null means use default
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException|KeyManagementException e) {
             throw new IllegalArgumentException(e);
-        } catch (KeyManagementException e) {
-            throw new IllegalArgumentException(e);
-        }
+        }  
         SSLSocketFactory tlsOnly = new TlsOnlySocketFactory(sslcontext.getSocketFactory(),
                 compatible);
         HttpsURLConnection.setDefaultSSLSocketFactory(tlsOnly);

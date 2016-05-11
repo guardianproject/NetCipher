@@ -344,43 +344,8 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
                 }
             }
             return true;
-        } catch (ClassNotFoundException e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            String exceptionAsString = sw.toString();
-            Log.v(TAG, e.getMessage());
-            Log.v(TAG, exceptionAsString);
-        } catch (NoSuchFieldException e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            String exceptionAsString = sw.toString();
-            Log.v(TAG, e.getMessage());
-            Log.v(TAG, exceptionAsString);
-        } catch (IllegalAccessException e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            String exceptionAsString = sw.toString();
-            Log.v(TAG, e.getMessage());
-            Log.v(TAG, exceptionAsString);
-        } catch (IllegalArgumentException e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            String exceptionAsString = sw.toString();
-            Log.v(TAG, e.getMessage());
-            Log.v(TAG, exceptionAsString);
-        } catch (NoSuchMethodException e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            String exceptionAsString = sw.toString();
-            Log.v(TAG, e.getMessage());
-            Log.v(TAG, exceptionAsString);
-        } catch (InvocationTargetException e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            String exceptionAsString = sw.toString();
-            Log.v(TAG, e.getMessage());
-            Log.v(TAG, exceptionAsString);
-        } catch (InstantiationException e) {
+        } catch (ClassNotFoundException|NoSuchFieldException|IllegalAccessException|
+                IllegalArgumentException|NoSuchMethodException|InvocationTargetException|InstantiationException e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             String exceptionAsString = sw.toString();
@@ -428,23 +393,7 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
             }
             return true;
         }
-        catch (ClassNotFoundException e)
-        {
-            Log.d("ProxySettings","Exception setting WebKit proxy on Lollipop through ProxyChangeListener: " + e.toString());
-        }
-        catch (NoSuchFieldException e)
-        {
-            Log.d("ProxySettings","Exception setting WebKit proxy on Lollipop through ProxyChangeListener: " + e.toString());
-        }
-        catch (IllegalAccessException e)
-        {
-            Log.d("ProxySettings","Exception setting WebKit proxy on Lollipop through ProxyChangeListener: " + e.toString());
-        }
-        catch (NoSuchMethodException e)
-        {
-            Log.d("ProxySettings","Exception setting WebKit proxy on Lollipop through ProxyChangeListener: " + e.toString());
-        }
-        catch (InvocationTargetException e)
+        catch (ClassNotFoundException|NoSuchFieldException|IllegalAccessException|NoSuchMethodException|InvocationTargetException e)
         {
             Log.d("ProxySettings","Exception setting WebKit proxy on Lollipop through ProxyChangeListener: " + e.toString());
         }
@@ -474,11 +423,7 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
                 }
                                 
            }
-        } catch (Exception e)
-        {
-            Log.e("ProxySettings",
-                    "Exception sending Intent ",e);
-        } catch (Error e)
+        } catch (Exception|Error  e)
         {
             Log.e("ProxySettings",
                     "Exception sending Intent ",e);
@@ -701,19 +646,13 @@ private static Object getFieldValueSafely(Field field, Object classInstance) thr
                     m.invoke(null, 193, null);
                 }
             }
-        } catch (Exception e)
+        } catch (Exception|Error e)
         {
             Log.e("ProxySettings",
                     "Exception setting WebKit proxy through android.net.ProxyProperties: "
                             + e.toString());
             throw e;
-        } catch (Error e)
-        {
-            Log.e("ProxySettings",
-                    "Exception setting WebKit proxy through android.webkit.Network: "
-                            + e.toString());
-            throw e;
-        }
+        } 
     }
 
     private static void resetProxyForGingerBread(Context ctx) throws Exception {
