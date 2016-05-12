@@ -16,6 +16,7 @@
 
 package info.guardianproject.netcipher;
 
+import android.content.Intent;
 import android.test.AndroidTestCase;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongConnectionBuilder;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
+import info.guardianproject.netcipher.proxy.StatusCallback;
 
 public class StrongConnectionBuilderTest extends
   AndroidTestCase {
@@ -41,7 +43,38 @@ public class StrongConnectionBuilderTest extends
 
   public void setUp() {
     if (!initialized) {
-      OrbotHelper.get(getContext()).init();
+      OrbotHelper.get(getContext()).addStatusCallback(
+        new StatusCallback() {
+          @Override
+          public void onEnabled(Intent statusIntent) {
+
+          }
+
+          @Override
+          public void onStarting() {
+
+          }
+
+          @Override
+          public void onStopping() {
+
+          }
+
+          @Override
+          public void onDisabled() {
+            throw new RuntimeException("Orbot seems disabled");
+          }
+
+          @Override
+          public void onStatusTimeout() {
+            throw new RuntimeException("Orbot status request timed out");
+          }
+
+          @Override
+          public void onNotYetInstalled() {
+            throw new RuntimeException("Orbot is not installed");
+          }
+        }).init();
       initialized=true;
     }
 
