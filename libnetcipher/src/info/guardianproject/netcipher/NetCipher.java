@@ -125,6 +125,34 @@ public class NetCipher {
     }
 
     /**
+     * Get a {@link TlsOnlySocketFactory} from NetCipher.
+     *
+     * @see HttpsURLConnection#setDefaultSSLSocketFactory(SSLSocketFactory)
+     */
+    public static TlsOnlySocketFactory getTlsOnlySocketFactory() {
+        return getTlsOnlySocketFactory(false);
+    }
+
+    /**
+     * Get a {@link TlsOnlySocketFactory} from NetCipher, and specify whether
+     * it should use a more compatible, but less strong, suite of ciphers.
+     *
+     * @see HttpsURLConnection#setDefaultSSLSocketFactory(SSLSocketFactory)
+     */
+    public static TlsOnlySocketFactory getTlsOnlySocketFactory(boolean compatible) {
+        SSLContext sslcontext;
+        try {
+            sslcontext = SSLContext.getInstance("TLSv1");
+            sslcontext.init(null, null, null);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e);
+        } catch (KeyManagementException e) {
+            throw new IllegalArgumentException(e);
+        }
+        return new TlsOnlySocketFactory(sslcontext.getSocketFactory(), compatible);
+    }
+
+    /**
      * Get a {@link HttpURLConnection} from a {@link URL}, and specify whether
      * it should use a more compatible, but less strong, suite of ciphers.
      *
@@ -149,17 +177,7 @@ public class NetCipher {
         }
 
         if (connection instanceof HttpsURLConnection) {
-            SSLContext sslcontext;
-            try {
-                sslcontext = SSLContext.getInstance("TLSv1");
-                sslcontext.init(null, null, null); // null means use default
-            } catch (NoSuchAlgorithmException e) {
-                throw new IllegalArgumentException(e);
-            } catch (KeyManagementException e) {
-                throw new IllegalArgumentException(e);
-            }
-            SSLSocketFactory tlsOnly = new TlsOnlySocketFactory(sslcontext.getSocketFactory(),
-                    compatible);
+            SSLSocketFactory tlsOnly = getTlsOnlySocketFactory(compatible);
             ((HttpsURLConnection) connection).setSSLSocketFactory(tlsOnly);
         }
         return connection;
