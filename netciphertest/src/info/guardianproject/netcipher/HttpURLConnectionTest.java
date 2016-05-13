@@ -243,4 +243,19 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
             }
         }
     }
+
+    public void testDefaultSSLSocketFactory() throws IOException {
+        SSLSocketFactory sslSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
+        assertFalse(sslSocketFactory instanceof TlsOnlySocketFactory);
+        URL url = new URL("https://guardianproject.info");
+        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        assertFalse(connection.getSSLSocketFactory() instanceof TlsOnlySocketFactory);
+        connection.disconnect();
+
+        HttpsURLConnection.setDefaultSSLSocketFactory(NetCipher.getTlsOnlySocketFactory());
+        assertTrue(HttpsURLConnection.getDefaultSSLSocketFactory() instanceof TlsOnlySocketFactory);
+        connection = (HttpsURLConnection) url.openConnection();
+        assertTrue(connection.getSSLSocketFactory() instanceof TlsOnlySocketFactory);
+        connection.disconnect();
+    }
 }
