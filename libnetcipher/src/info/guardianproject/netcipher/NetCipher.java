@@ -38,7 +38,7 @@ import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 
 public class NetCipher {
-    private static final String TAG ="NetCipher";
+    private static final String TAG = "NetCipher";
 
     private NetCipher() {
         // this is a utility class with only static methods
@@ -125,6 +125,34 @@ public class NetCipher {
     }
 
     /**
+     * Get a {@link TlsOnlySocketFactory} from NetCipher.
+     *
+     * @see HttpsURLConnection#setDefaultSSLSocketFactory(SSLSocketFactory)
+     */
+    public static TlsOnlySocketFactory getTlsOnlySocketFactory() {
+        return getTlsOnlySocketFactory(false);
+    }
+
+    /**
+     * Get a {@link TlsOnlySocketFactory} from NetCipher, and specify whether
+     * it should use a more compatible, but less strong, suite of ciphers.
+     *
+     * @see HttpsURLConnection#setDefaultSSLSocketFactory(SSLSocketFactory)
+     */
+    public static TlsOnlySocketFactory getTlsOnlySocketFactory(boolean compatible) {
+        SSLContext sslcontext;
+        try {
+            sslcontext = SSLContext.getInstance("TLSv1");
+            sslcontext.init(null, null, null);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e);
+        } catch (KeyManagementException e) {
+            throw new IllegalArgumentException(e);
+        }
+        return new TlsOnlySocketFactory(sslcontext.getSocketFactory(), compatible);
+    }
+
+    /**
      * Get a {@link HttpURLConnection} from a {@link URL}, and specify whether
      * it should use a more compatible, but less strong, suite of ciphers.
      *
@@ -136,29 +164,23 @@ public class NetCipher {
      */
     public static HttpURLConnection getHttpURLConnection(URL url, boolean compatible)
             throws IOException {
-        SSLContext sslcontext;
-        try {
-            sslcontext = SSLContext.getInstance("TLSv1");
-            sslcontext.init(null, null, null); // null means use default
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e);
-        } catch (KeyManagementException e) {
-            throw new IllegalArgumentException(e);
-        }
-        SSLSocketFactory tlsOnly = new TlsOnlySocketFactory(sslcontext.getSocketFactory(),
-                compatible);
-        HttpsURLConnection.setDefaultSSLSocketFactory(tlsOnly);
-
         // .onion addresses only work via Tor, so force Tor for all of them
         Proxy proxy = NetCipher.proxy;
         if (OrbotHelper.isOnionAddress(url))
             proxy = ORBOT_HTTP_PROXY;
 
+        HttpURLConnection connection;
         if (proxy != null) {
-            return (HttpURLConnection) url.openConnection(proxy);
+            connection = (HttpURLConnection) url.openConnection(proxy);
         } else {
-            return (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
         }
+
+        if (connection instanceof HttpsURLConnection) {
+            SSLSocketFactory tlsOnly = getTlsOnlySocketFactory(compatible);
+            ((HttpsURLConnection) connection).setSSLSocketFactory(tlsOnly);
+        }
+        return connection;
     }
 
     /**
