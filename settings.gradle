@@ -1,1 +1,1 @@
-include ':libnetcipher', ':sample'
+include ':libnetcipher', ':libnetcipher-okhttp3', ':sample'
