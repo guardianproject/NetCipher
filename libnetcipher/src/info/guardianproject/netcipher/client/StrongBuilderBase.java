@@ -168,6 +168,10 @@ abstract public class
   }
 
   protected SSLSocketFactory buildSocketFactory() {
+    if (sslContext==null) {
+      return(null);
+    }
+
     SSLSocketFactory result=
       new TlsOnlySocketFactory(sslContext.getSocketFactory(),
         useWeakCiphers);
