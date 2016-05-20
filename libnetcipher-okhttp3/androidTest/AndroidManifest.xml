@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="info.guardianproject.onionkit.okhttp3.test"
+    package="info.guardianproject.netcipher.okhttp3.test"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -10,7 +10,7 @@
 
     <instrumentation
         android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="info.guardianproject.onionkit.okhttp3.test" />
+        android:targetPackage="info.guardianproject.netcipher.okhttp3.test" />
 
     <uses-permission android:name="android.permission.INTERNET" />
 
