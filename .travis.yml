@@ -32,6 +32,7 @@ android:
     - tools
     - platform-tools
     - build-tools-23.0.2
+    - extra-android-m2repository
     - android-22
     - android-$EMULATOR_API_LEVEL
     - sys-img-armeabi-v7a-android-$EMULATOR_API_LEVEL
