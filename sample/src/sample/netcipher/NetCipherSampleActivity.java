@@ -173,14 +173,11 @@ public class NetCipherSampleActivity extends Activity {
 	                	mProxySocks = intent.getIntExtra(ProxyHelper.EXTRA_PROXY_PORT_SOCKS, -1);
 	          
                 }
-                else if (intent.hasExtra(ProxyHelper.EXTRA_PACKAGE_NAME))
+                else if (intent.hasExtra(ProxyHelper.EXTRA_PACKAGE_NAME)&&intent.getStringExtra(ProxyHelper.EXTRA_PACKAGE_NAME).equals(PsiphonHelper.PACKAGE_NAME))
                 {
-                
-                	if (intent.getStringExtra(ProxyHelper.EXTRA_PACKAGE_NAME).equals(PsiphonHelper.PACKAGE_NAME))
-                	{
-                		PsiphonHelper pHelper = new PsiphonHelper();
-                		pHelper.requestStart(NetCipherSampleActivity.this);
-                	}
+                    PsiphonHelper pHelper = new PsiphonHelper();
+                    pHelper.requestStart(NetCipherSampleActivity.this);
+
                 }
 
                 httpProxyButton.setEnabled(enabled);
