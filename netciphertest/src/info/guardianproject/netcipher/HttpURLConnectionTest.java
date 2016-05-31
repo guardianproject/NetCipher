@@ -164,6 +164,7 @@ public class HttpURLConnectionTest {
             assertEquals(200, connection.getResponseCode());
             assertEquals("text/html", connection.getContentType().split(";")[0]);
             System.out.println(host + " " + connection.getCipherSuite());
+            assertTrue(connection.getCipherSuite().startsWith("TLS"));
             connection.disconnect();
         }
     }
@@ -197,6 +198,7 @@ public class HttpURLConnectionTest {
             assertEquals(200, connection.getResponseCode());
             assertEquals("text/html", connection.getContentType().split(";")[0]);
             System.out.println(host + " " + connection.getCipherSuite());
+            assertTrue(connection.getCipherSuite().startsWith("TLS"));
             connection.disconnect();
         }
     }
@@ -229,6 +231,7 @@ public class HttpURLConnectionTest {
             assertEquals(200, connection.getResponseCode());
             assertEquals("text/html", connection.getContentType().split(";")[0]);
             System.out.println(host + " " + connection.getCipherSuite());
+            assertTrue(connection.getCipherSuite().startsWith("TLS"));
             connection.disconnect();
         }
     }
