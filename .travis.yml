@@ -15,9 +15,10 @@ env:
 jdk:
   # the release build infrastructure uses OpenJDK from Debian
   - openjdk7
+  # build against only one JDK for now, to get stable builds
   # many developers use the Oracle JDK
-  - oraclejdk8
-  - oraclejdk7
+  #- oraclejdk8
+  #- oraclejdk7
 
 #
 before_cache:
@@ -32,6 +33,7 @@ android:
     - tools
     - platform-tools
     - build-tools-23.0.2
+    - extra-android-m2repository
     - android-22
     - android-$EMULATOR_API_LEVEL
     - sys-img-armeabi-v7a-android-$EMULATOR_API_LEVEL
@@ -56,6 +58,9 @@ script:
   # install Orbot to test against
   - curl --silent https://guardianproject.info/fdroid/repo/Orbot-v15.1.2.apk > orbot.apk
   - adb -e install -r orbot.apk
+  # temp workaround: start Orbot manually, it has a bug that is preventing auto-start
+  - adb shell am broadcast -a org.torproject.android.intent.action.START -n org.torproject.android/.service.StartTorReceiver
+  - sleep 5
   # now run the tests that require a device/emulator
   - ./gradlew connectedCheck -PdisablePreDex
 

@@ -16,7 +16,11 @@
 
 package info.guardianproject.netcipher;
 
-import android.test.InstrumentationTestCase;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.AndroidTestCase;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,7 +41,13 @@ import javax.net.ssl.SSLSocketFactory;
 
 import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
 
-public class HttpURLConnectionTest extends InstrumentationTestCase {
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+
+@RunWith(AndroidJUnit4.class)
+public class HttpURLConnectionTest {
 
     private static final String HTTP_URL_STRING = "http://127.0.0.1:";
 
@@ -58,6 +68,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testConnectHttp() throws MalformedURLException, IOException {
         // include trailing \n in test string, otherwise it gets added anyhow
         final String content = "content!";
@@ -92,6 +103,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         connection.disconnect();
     }
 
+    @Test
     public void testCannotConnectHttp() throws MalformedURLException {
         try {
             HttpURLConnection http = NetCipher.getHttpURLConnection(new URL(
@@ -104,6 +116,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testCannotConnectHttps() throws MalformedURLException, KeyManagementException {
         // TODO test connecting to http://
         // TODO test connecting to non-HTTPS port
@@ -118,6 +131,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testStandardHttpURLConnection()
             throws MalformedURLException, IOException, KeyManagementException, NoSuchAlgorithmException {
         String[] hosts = {
@@ -154,6 +168,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testConnectHttps()
             throws MalformedURLException, IOException, KeyManagementException {
         String[] hosts = {
@@ -186,6 +201,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testConnectOutdatedHttps()
             throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
         String[] hosts = {
@@ -217,6 +233,7 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testConnectBadSslCom()
             throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
         String[] hosts = {
@@ -242,5 +259,21 @@ public class HttpURLConnectionTest extends InstrumentationTestCase {
                 connection.disconnect();
             }
         }
+    }
+
+    @Test
+    public void testDefaultSSLSocketFactory() throws IOException {
+        SSLSocketFactory sslSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
+        assertFalse(sslSocketFactory instanceof TlsOnlySocketFactory);
+        URL url = new URL("https://guardianproject.info");
+        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        assertFalse(connection.getSSLSocketFactory() instanceof TlsOnlySocketFactory);
+        connection.disconnect();
+
+        HttpsURLConnection.setDefaultSSLSocketFactory(NetCipher.getTlsOnlySocketFactory());
+        assertTrue(HttpsURLConnection.getDefaultSSLSocketFactory() instanceof TlsOnlySocketFactory);
+        connection = (HttpsURLConnection) url.openConnection();
+        assertTrue(connection.getSSLSocketFactory() instanceof TlsOnlySocketFactory);
+        connection.disconnect();
     }
 }
