@@ -138,14 +138,14 @@ public class HttpURLConnectionTest {
                 "yahoo.com",
                 "www.yandex.ru",
                 "openstreetmap.org",
-                "goo.gl",
+                "f-droid.org",
+                "web.wechat.com",
                 "mirrors.kernel.org",
                 "www.google.com",
                 "glympse.com",
                 // uses SNI
                 "firstlook.org",
                 "guardianproject.info",
-                "microg.org",
         };
         prefetchDns(hosts);
         // reset the default SSLSocketFactory, since it is global
@@ -175,14 +175,14 @@ public class HttpURLConnectionTest {
                 "yahoo.com",
                 "www.yandex.ru",
                 "openstreetmap.org",
-                "goo.gl",
+                "f-droid.org",
+                "web.wechat.com",
                 "mirrors.kernel.org",
                 "www.google.com",
                 "glympse.com",
                 // uses SNI
                 "firstlook.org",
                 "guardianproject.info",
-                "microg.org",
         };
         prefetchDns(hosts);
         for (String host : hosts) {
@@ -209,12 +209,12 @@ public class HttpURLConnectionTest {
                 "yahoo.com",
                 "www.yandex.ru",
                 "openstreetmap.org",
-                "goo.gl",
+                "f-droid.org",
+                "web.wechat.com",
                 "www.google.com",
                 // uses SNI
                 "firstlook.org",
                 "guardianproject.info",
-                "microg.org",
         };
         prefetchDns(hosts);
         for (String host : hosts) {
@@ -251,7 +251,7 @@ public class HttpURLConnectionTest {
             try {
                 connection.getContent();
                 System.out.println("This should not have connected, it has BAD SSL!");
-                assertTrue(false);
+                fail();
             } catch (IOException e) {
                 e.printStackTrace();
                 // success! these should fail!
