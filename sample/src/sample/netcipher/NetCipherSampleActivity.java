@@ -272,7 +272,7 @@ public class NetCipherSampleActivity extends Activity {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
-        String line = null;
+        String line;
 
         while ((line = br.readLine()) != null)
             sb.append(line);
