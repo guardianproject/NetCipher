@@ -238,6 +238,9 @@ public class HttpURLConnectionTest {
             throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
         String[] hosts = {
                 "wrong.host.badssl.com",
+                "self-signed.badssl.com",
+                "expired.badssl.com",
+                "rc4.badssl.com",
         };
         prefetchDns(hosts);
         for (String host : hosts) {
