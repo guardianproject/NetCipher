@@ -18,6 +18,7 @@
 package info.guardianproject.netcipher;
 
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -177,8 +178,12 @@ public class NetCipher {
         }
 
         if (connection instanceof HttpsURLConnection) {
+            HttpsURLConnection httpsConnection = ((HttpsURLConnection) connection);
             SSLSocketFactory tlsOnly = getTlsOnlySocketFactory(compatible);
-            ((HttpsURLConnection) connection).setSSLSocketFactory(tlsOnly);
+            httpsConnection.setSSLSocketFactory(tlsOnly);
+            if (Build.VERSION.SDK_INT < 16) {
+                httpsConnection.setHostnameVerifier(org.apache.http.conn.ssl.SSLSocketFactory.STRICT_HOSTNAME_VERIFIER);
+            }
         }
         return connection;
     }
