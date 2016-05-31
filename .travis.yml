@@ -4,7 +4,8 @@ language: android
 
 env:
   global:
-    - EMULATOR_API_LEVEL=21
+    - FIRST_EMULATOR_API_LEVEL=10
+    - SECOND_EMULATOR_API_LEVEL=21
     # switch glibc to a memory conserving mode
     - MALLOC_ARENA_MAX=2
     # wait 5 minutes for adb to connect to emulator. Travis-ci cancels a
@@ -35,8 +36,10 @@ android:
     - build-tools-23.0.2
     - extra-android-m2repository
     - android-22
-    - android-$EMULATOR_API_LEVEL
-    - sys-img-armeabi-v7a-android-$EMULATOR_API_LEVEL
+    - android-$FIRST_EMULATOR_API_LEVEL
+    - sys-img-armeabi-v7a-android-$FIRST_EMULATOR_API_LEVEL
+    - android-$SECOND_EMULATOR_API_LEVEL
+    - sys-img-armeabi-v7a-android-$SECOND_EMULATOR_API_LEVEL
   licenses:
     # only approve the non-Google licenses
     - 'android-sdk-preview-license-52d11cd2'
@@ -51,7 +54,19 @@ script:
   # 'assemble' everything and run all checks that do not require a device/emulator
   - ./gradlew build -PdisablePreDex
   # start the emulator after the build to conserve memory
-  - echo no | android create avd --force -n test -t android-$EMULATOR_API_LEVEL
+  - echo no | android create avd --force -n test -t android-$FIRST_EMULATOR_API_LEVEL
+  - emulator -avd test -no-skin -no-audio -no-window &
+  - android-wait-for-emulator
+  - adb shell input keyevent 82 &
+  # now run the tests that require a device/emulator
+  - ./gradlew connectedCheck -PdisablePreDex
+
+  # kill any running emulator
+  - ps -ef | grep '[e]mulator'
+  - kill `ps -ef | grep '[e]mulator' | awk {'print$2'}`
+
+  # now run the second emulator
+  - echo no | android create avd --force -n test -t android-$SECOND_EMULATOR_API_LEVEL
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
