@@ -208,7 +208,7 @@ abstract public class
           try {
             callback.onConnected(build(statusIntent));
           }
-          catch (IOException e) {
+          catch (Exception e) {
             callback.onConnectionException(e);
           }
         }

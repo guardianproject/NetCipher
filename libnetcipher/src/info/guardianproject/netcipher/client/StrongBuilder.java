@@ -48,7 +48,7 @@ public interface StrongBuilder<T extends StrongBuilder, C> {
      *
      * @param e the reason
      */
-    void onConnectionException(IOException e);
+    void onConnectionException(Exception e);
 
     /**
      * Called if our attempt to get a status from Orbot failed
@@ -124,7 +124,7 @@ public interface StrongBuilder<T extends StrongBuilder, C> {
    * @return the connection
    * @throws IOException
    */
-  C build(Intent status) throws IOException;
+  C build(Intent status) throws Exception;
 
   /**
    * Asynchronous version of build(), one that uses OrbotInitializer

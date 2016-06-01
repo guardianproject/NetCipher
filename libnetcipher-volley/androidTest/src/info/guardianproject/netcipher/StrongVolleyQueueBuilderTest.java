@@ -19,23 +19,19 @@ package info.guardianproject.netcipher;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import info.guardianproject.netcipher.client.StrongBuilder;
-import info.guardianproject.netcipher.client.StrongConnectionBuilder;
-import info.guardianproject.netcipher.client.StrongOkHttpClientBuilder;
+import info.guardianproject.netcipher.client.StrongVolleyQueueBuilder;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import info.guardianproject.netcipher.proxy.StatusCallback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
-public class StrongOkHttpClientBuilderTest extends
+public class StrongVolleyQueueBuilderTest extends
   AndroidTestCase {
   private static final String TEST_URL=
     "https://wares.commonsware.com/test.json";
@@ -118,82 +114,51 @@ public class StrongOkHttpClientBuilderTest extends
     assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
     if (isOrbotInstalled.get()) {
-      StrongOkHttpClientBuilder builder=
-        StrongOkHttpClientBuilder.forMaxSecurity(getContext());
+      StrongVolleyQueueBuilder builder=
+        StrongVolleyQueueBuilder.forMaxSecurity(getContext());
 
-      testStrongBuilder(builder,
-        new TestBuilderCallback<OkHttpClient>() {
-          @Override
-          protected void loadResult(OkHttpClient client)
-            throws Exception {
-            Request request=new Request.Builder().url(TEST_URL).build();
-
-            testResult=client.newCall(request).execute().body().string();
-          }
+      final StringRequest stringRequest=
+        new StringRequest(StringRequest.Method.GET, TEST_URL,
+          new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+              testResult=response;
+              responseLatch.countDown();
+            }
+          },
+          new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+              innerException=error;
+              responseLatch.countDown();
+            }
         });
-    }
-  }
 
-  // based on http://stackoverflow.com/a/309718/115145
+      builder.build(new StrongBuilder.Callback<RequestQueue>() {
+        @Override
+        public void onConnected(RequestQueue connection) {
+          connection.add(stringRequest);
+        }
 
-  public static String slurp(final InputStream is)
-    throws IOException {
-    final char[] buffer = new char[128];
-    final StringBuilder out = new StringBuilder();
-    final Reader in = new InputStreamReader(is, "UTF-8");
+        @Override
+        public void onConnectionException(Exception e) {
+          innerException=e;
+          responseLatch.countDown();
+        }
 
-    for (;;) {
-      int rsz = in.read(buffer, 0, buffer.length);
-      if (rsz < 0)
-        break;
-      out.append(buffer, 0, rsz);
-    }
+        @Override
+        public void onTimeout() {
+          responseLatch.countDown();
+        }
+      });
 
-    return out.toString();
-  }
+      assertTrue(responseLatch.await(120, TimeUnit.SECONDS));
 
-  private void testStrongBuilder(StrongBuilder builder,
-                                 TestBuilderCallback callback)
-    throws Exception {
-    testResult=null;
-    builder.build(callback);
-
-    assertTrue(responseLatch.await(120, TimeUnit.SECONDS));
-
-    if (innerException!=null) {
-      throw innerException;
-    }
-
-    assertEquals(EXPECTED, testResult);
-  }
-
-  private abstract class TestBuilderCallback<C>
-    implements StrongBuilder.Callback<C> {
-
-    abstract protected void loadResult(C connection)
-      throws Exception;
-
-    @Override
-    public void onConnected(C connection) {
-      try {
-        loadResult(connection);
-        responseLatch.countDown();
+      if (innerException!=null) {
+        throw innerException;
       }
-      catch (Exception e) {
-        innerException=e;
-        responseLatch.countDown();
-      }
-    }
 
-    @Override
-    public void onConnectionException(Exception e) {
-      innerException=e;
-      responseLatch.countDown();
-    }
-
-    @Override
-    public void onTimeout() {
-      responseLatch.countDown();
+      assertEquals(EXPECTED, testResult);
     }
   }
 }

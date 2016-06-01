@@ -186,7 +186,7 @@ public class StrongConnectionBuilderTest extends
     }
 
     @Override
-    public void onConnectionException(IOException e) {
+    public void onConnectionException(Exception e) {
       innerException=e;
       responseLatch.countDown();
     }
