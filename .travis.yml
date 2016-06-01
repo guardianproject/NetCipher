@@ -60,6 +60,8 @@ script:
   - adb shell input keyevent 82 &
   # now run the tests that require a device/emulator
   - ./gradlew connectedCheck -PdisablePreDex
+  - echo "get the full logcat here:";
+  - adb -e logcat -d | curl --silent -F 'clbin=<-' https://clbin.com;
 
   # kill any running emulator
   - ps -ef | grep '[e]mulator'
@@ -81,3 +83,6 @@ script:
 
 after_failure:
   - find * -name lint-results.xml | xargs cat
+  - adb -e logcat -d '*:E';
+  - echo "get the full logcat here:";
+  - adb -e logcat -d | curl --silent -F 'clbin=<-' https://clbin.com;
