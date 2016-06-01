@@ -23,19 +23,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.HttpURLConnection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import cz.msebera.android.httpclient.client.HttpClient;
+import cz.msebera.android.httpclient.client.methods.HttpGet;
+import cz.msebera.android.httpclient.impl.client.BasicResponseHandler;
 import info.guardianproject.netcipher.client.StrongBuilder;
-import info.guardianproject.netcipher.client.StrongConnectionBuilder;
-import info.guardianproject.netcipher.client.StrongOkHttpClientBuilder;
+import info.guardianproject.netcipher.client.StrongHttpClientBuilder;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import info.guardianproject.netcipher.proxy.StatusCallback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
-public class StrongOkHttpClientBuilderTest extends
+public class StrongHttpClientBuilderTest extends
   AndroidTestCase {
   private static final String TEST_URL=
     "https://wares.commonsware.com/test.json";
@@ -118,17 +117,17 @@ public class StrongOkHttpClientBuilderTest extends
     assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
     if (isOrbotInstalled.get()) {
-      StrongOkHttpClientBuilder builder=
-        StrongOkHttpClientBuilder.forMaxSecurity(getContext());
+      StrongHttpClientBuilder builder=
+        StrongHttpClientBuilder.forMaxSecurity(getContext());
 
       testStrongBuilder(builder,
-        new TestBuilderCallback<OkHttpClient>() {
+        new TestBuilderCallback<HttpClient>() {
           @Override
-          protected void loadResult(OkHttpClient client)
+          protected void loadResult(HttpClient client)
             throws Exception {
-            Request request=new Request.Builder().url(TEST_URL).build();
+            HttpGet get=new HttpGet(TEST_URL);
 
-            testResult=client.newCall(request).execute().body().string();
+            testResult=client.execute(get, new BasicResponseHandler());
           }
         });
     }
