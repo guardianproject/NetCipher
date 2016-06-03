@@ -66,8 +66,13 @@ public class OrbotHelper implements ProxyHelper {
      * A request to Orbot to transparently start Tor services
      */
     public final static String ACTION_START = "org.torproject.android.intent.action.START";
+
     /**
      * {@link Intent} send by Orbot with {@code ON/OFF/STARTING/STOPPING} status
+     * included as an {@link #EXTRA_STATUS} {@code String}.  Your app should
+     * always receive {@code ACTION_STATUS Intent}s since any other app could
+     * start Orbot.  Also, user-triggered starts and stops will also cause
+     * {@code ACTION_STATUS Intent}s to be broadcast.
      */
     public final static String ACTION_STATUS = "org.torproject.android.intent.action.STATUS";
 
@@ -149,12 +154,11 @@ public class OrbotHelper implements ProxyHelper {
         return uri.getHost().endsWith(".onion");
     }
 
-
     /**
      * Check if the tor process is running.  This method is very
      * brittle, and is therefore deprecated in favor of using the
-     * {@link #ACTION_STATUS} {@code Intent} along with the {@link
-     * #requestStartTor(Context)} method.
+     * {@link #ACTION_STATUS} {@code Intent} along with the
+     * {@link #requestStartTor(Context)} method.
      */
     @Deprecated
     public static boolean isOrbotRunning(Context context) {
@@ -193,9 +197,19 @@ public class OrbotHelper implements ProxyHelper {
      * with an {@link #ACTION_STATUS} {@code Intent} that is broadcast to the
      * {@code packageName} of the provided {@link Context} (i.e.  {@link
      * Context#getPackageName()}.
+     * <p>
+     * That reply {@link #ACTION_STATUS} {@code Intent} could say that the user
+     * has disabled background starts with the status
+     * {@link #STATUS_STARTS_DISABLED}. That means that Orbot ignored this
+     * request.  To directly prompt the user to start Tor, use
+     * {@link #requestShowOrbotStart(Activity)}, which will bring up
+     * Orbot itself for the user to manually start Tor.  Orbot always broadcasts
+     * it's status, so your app will receive those no matter how Tor gets
+     * started.
      *
      * @param context the app {@link Context} will receive the reply
      * @return whether the start request was sent to Orbot
+     * @see #requestShowOrbotStart(Activity activity)
      */
     public static boolean requestStartTor(Context context) {
         if (OrbotHelper.isOrbotInstalled(context)) {
@@ -233,14 +247,18 @@ public class OrbotHelper implements ProxyHelper {
     /**
      * First, checks whether Orbot is installed, then checks whether Orbot is
      * running. If Orbot is installed and not running, then an {@link Intent} is
-     * sent to request Orbot to start, which will show the main Orbot screen.
+     * sent to request the user to start Orbot, which will show the main Orbot screen.
      * The result will be returned in
      * {@link Activity#onActivityResult(int requestCode, int resultCode, Intent data)}
-     * with a {@code requestCode} of {@link #START_TOR_RESULT}
+     * with a {@code requestCode} of {@code START_TOR_RESULT}
+     * <p>
+     * Orbot will also always broadcast the status of starting Tor via the
+     * {@link #ACTION_STATUS} Intent, no matter how it is started.
      *
-     * @param activity the {@link Activity} that gets the result of the
-     *            {@code START_TOR_RESULT} request
+     * @param activity the {@code Activity} that gets the result of the
+     *                 {@link #START_TOR_RESULT} request
      * @return whether the start request was sent to Orbot
+     * @see #requestStartTor(Context context)
      */
     public static boolean requestShowOrbotStart(Activity activity) {
         if (OrbotHelper.isOrbotInstalled(activity)) {
