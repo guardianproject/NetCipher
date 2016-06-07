@@ -69,6 +69,161 @@ add this line to your *build.gradle*:
 
 Otherwise, the files can also be [downloaded directly] from bintray.com.
 
+# The Strong Builders
+
+The simplest way to use NetCipher to integrate with Tor via Orbot is
+to use the `StrongBuilder` implementations. There is one of these for
+each of the four most popular HTTP client APIs for Android:
+
+|HTTP Client API                                                   |`StrongBuilder` Implementation|
+|:----------------------------------------------------------------:|:----------------------------:|
+|`HttpUrlConnection`                                               |`StrongConnectionBuilder`     |
+|[OkHttp3](http://square.github.io/okhttp/)                        |`StrongOkHttpClientBuilder`   |
+|[Volley](https://developer.android.com/training/volley/index.html)|`StrongVolleyQueueBuilder`    |
+|Apache HttpClient                                                 |`StrongHttpClientBuilder`     |
+
+(HttpClient is supported by means of the `cz.msebera.android:httpclient` artifact,
+not the discontinued HttpClient implementation in the Android SDK)
+
+## Requesting the Dependency
+
+TBD
+
+## Creating a Builder
+
+Each of the four builder classes has a `public` constructor, taking a `Context`
+as a parameter, that you could use.
+
+A better choice is to call the static `forMaxSecurity()` method, which also
+takes a `Context` as a parameter:
+
+```java
+StrongOkHttpClientBuilder builder=StrongOkHttpClientBuilder.forMaxSecurity(this)
+```
+
+(assuming that `this` is a `Context`, such as an `Activity`)
+
+Note that the `StrongBuilder` classes will hold onto the `Application`
+context to avoid memory leaks, so you do not have to worry about that
+yourself.
+
+The `forMaxSecurity()` method will ensure that your builder is configured
+with defaults that maximize security. In particular, it pre-configures
+the builder with `withBestProxy()`, described below.
+
+## Configuring the Builder
+
+If you want, you can call a series of methods on the builder to further
+configure its behavior. As the name suggests, methods on these builder
+classes return the builder object itself, implementing a builder-style
+API.
+
+The key methods are:
+
+- `withBestProxy()`, which chooses either the HTTP or the SOCKS proxy
+offered by Orbot, based on which is available for use by the HTTP
+client API you are trying to use (e.g., OkHttp3 does not support SOCKS)
+
+- `withHttpProxy()` or `withSocksProxy()`, if you are really sure that
+you want to not use `withBestProxy()`
+
+- `withTrustManagers()`, if you have a `TrustManager[]` that you wish
+to use to tailor the behavior of any SSL connections made through the
+HTTP client API
+
+- `withWeakCiphers()`, if you are running into compatibility issues
+with the stock selection of supported ciphers
+
+Of these, `withTrustManagers()` is the most likely one to be used,
+and then only if you are implementing special SSL handling (e.g.,
+certificate pinning).
+
+In addition, if you are using `HttpURLConnection`, you need to call
+`connectTo()`, passing in the URL that you wish to connect to
+(either as a `String` or a `URL`). This pre-configuration of the URL
+is not required for the other three builders, making them much more
+flexible and reusable.
+
+## Requesting a Connection
+
+To get a connection, call `build()` on the builder. This takes a
+`StrongBuilder.Callback<C>` parameter, where `C` depends on which 
+of the four HTTP client APIs you are using:
+
+|HTTP Client API    |`StrongBuilder` Implementation|`Callback Type`                            |
+|:------------------|:----------------------------:|:-----------------------------------------:|
+|`HttpUrlConnection`|`StrongConnectionBuilder`     |`StrongBuilder.Callback<HttpURLConnection>`|
+|OkHttp3            |`StrongOkHttpClientBuilder`   |`StrongBuilder.Callback<OkHttpClient>`     |
+|Volley             |`StrongVolleyQueueBuilder`    |`StrongBuilder.Callback<RequestQueue>`     |
+|Apache HttpClient  |`StrongHttpClientBuilder`     |`StrongBuilder.Callback<HttpClient>`       |
+
+Your `Callback` needs to implement three methods.
+
+The big one is `void onConnected(C client)`, where you are handed an instance
+of your designated HTTP API connection (e.g., an `OkHttpClient` for OkHttp3).
+At this point, the client object is set up to communicate through Tor
+by means of Orbot, and you are free to start using it for your HTTP requests.
+However, do not make any assumptions about the thread on which `onConnected()`
+is called; please do your HTTP I/O on your own background thread.
+
+You also need to implement:
+
+- `void onConnectionException(Exception e)`, which is called if we ran
+into some problem, so you can report it to the user, log it to your
+crash reporting server, etc.
+
+- `void onTimeout()`, which is called if we were unable to talk to Orbot
+within 30 seconds
+
+Note that `build()` itself may throw an `Exception` as well, which you will
+need to address. Otherwise, `build()` is asynchronous; you will find out
+the results via your `Callback`.
+
+For example, assuming that `this` implements
+`StrongBuilder.Callback<OkHttpClient>`, you could have code like:
+
+```java
+private void doThatHttpThing() {
+  try {
+    StrongOkHttpClientBuilder
+      .forMaxSecurity(this)
+      .build(this);
+  }
+  catch (Exception e) {
+    // do something useful
+  }
+}
+
+@Override
+public void onConnected(final OkHttpClient client) {
+  // use the OkHttpClient on a background thread
+}
+
+@Override
+public void onConnectionException(Exception e) {
+  // do something useful
+}
+
+@Override
+public void onTimeout() {
+  // do something useful
+}
+```
+
+## Sample Apps
+
+This project contains a sample app for each of the four HTTP client APIs:
+
+|HTTP Client API    |Sample App         |
+|:------------------|:-----------------:|
+|`HttpUrlConnection`|`sample-hurl`      |
+|OkHttp3            |`sample-okhttp3`   |
+|Volley             |`sample-volley`    |
+|Apache HttpClient  |`sample-httpclient`|
+
+Each of the four apps does the same thing: request the latest Stack Overflow
+`android` questions and show them in a list. What differs between the
+samples is which dependency and HTTP client API that they use.
 
 # Get help
 
