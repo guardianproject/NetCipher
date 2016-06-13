@@ -34,8 +34,8 @@ import java.net.HttpURLConnection;
 import java.util.List;
 import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongConnectionBuilder;
-import sample.netcipher.okhttp3.model.Item;
-import sample.netcipher.okhttp3.model.SOQuestions;
+import sample.netcipher.hurl.model.Item;
+import sample.netcipher.hurl.model.SOQuestions;
 
 public class MainActivity extends ListActivity implements
   StrongBuilder.Callback<HttpURLConnection> {
