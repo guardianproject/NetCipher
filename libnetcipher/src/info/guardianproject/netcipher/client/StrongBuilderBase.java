@@ -48,6 +48,7 @@ abstract public class
   protected Proxy.Type proxyType;
   protected SSLContext sslContext=null;
   protected boolean useWeakCiphers=false;
+  protected boolean validateTor=false;
 
   /**
    * Standard constructor.
@@ -139,6 +140,16 @@ abstract public class
   @Override
   public T withWeakCiphers() {
     useWeakCiphers=true;
+
+    return((T)this);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public T withTorValidation() {
+    validateTor=true;
 
     return((T)this);
   }

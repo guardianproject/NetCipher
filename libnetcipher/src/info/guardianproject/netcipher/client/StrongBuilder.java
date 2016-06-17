@@ -117,6 +117,18 @@ public interface StrongBuilder<T extends StrongBuilder, C> {
   T withWeakCiphers();
 
   /**
+   * Call this if you want the builder to confirm that we are
+   * communicating over Tor, by reaching out to a Tor test
+   * server and confirming our connection status. By default,
+   * this is skipped. Adding this check adds security, but it
+   * has the chance of false negatives (e.g., we cannot reach
+   * that Tor server for some reason).
+   *
+   * @return the builder
+   */
+  T withTorValidation();
+
+  /**
    * Builds a connection, applying the configuration already
    * specified in the builder.
    *
