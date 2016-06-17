@@ -1,0 +1,7 @@
+<resources>
+
+    <string name="app_name">NetCipher OkHttp3 Sample</string>
+    <string name="msg_timeout">Tor not available; timed out</string>
+    <string name="msg_crash">Ick! We crashed!</string>
+
+</resources>
