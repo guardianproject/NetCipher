@@ -20,6 +20,7 @@ package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 import android.content.Intent;
+import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -43,6 +44,21 @@ import info.guardianproject.netcipher.proxy.OrbotHelper;
 abstract public class
   StrongBuilderBase<T extends StrongBuilderBase, C>
   implements StrongBuilder<T, C> {
+  /**
+   * Performs an HTTP GET request using the supplied connection
+   * to a supplied URL, returning the String response or
+   * throws an Exception (e.g., cannot reach the server).
+   * This is used as part of validating the Tor connection.
+   *
+   * @param status the status Intent we got back from Orbot
+   * @param connection a connection of the type for the builder
+   * @param url an public Web page
+   * @return the String response from the GET request
+   */
+  abstract protected String get(Intent status, C connection, String url)
+    throws Exception;
+
+  final static String TOR_CHECK_URL="https://check.torproject.org/api/ip";
   private final static String PROXY_HOST="127.0.0.1";
   protected final Context ctxt;
   protected Proxy.Type proxyType;
@@ -217,7 +233,15 @@ abstract public class
           OrbotHelper.get(ctxt).removeStatusCallback(this);
 
           try {
-            callback.onConnected(build(statusIntent));
+            C connection=build(statusIntent);
+
+            if (validateTor) {
+              validateTor=false;
+              checkTor(callback, statusIntent, connection);
+            }
+            else {
+              callback.onConnected(connection);
+            }
           }
           catch (Exception e) {
             callback.onConnectionException(e);
@@ -236,5 +260,28 @@ abstract public class
           callback.onTimeout();
         }
       });
+  }
+
+  protected void checkTor(final Callback<C> callback, final Intent status,
+                        final C connection) {
+    new Thread() {
+      @Override
+      public void run() {
+        try {
+          String result=get(status, connection, TOR_CHECK_URL);
+          JSONObject json=new JSONObject(result);
+
+          if (json.optBoolean("IsTor", false)) {
+            callback.onConnected(connection);
+          }
+          else {
+            callback.onInvalid();
+          }
+        }
+        catch (Exception e) {
+          callback.onConnectionException(e);
+        }
+      }
+    }.start();
   }
 }

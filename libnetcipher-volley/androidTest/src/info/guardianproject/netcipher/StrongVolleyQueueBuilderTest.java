@@ -115,7 +115,9 @@ public class StrongVolleyQueueBuilderTest extends
 
     if (isOrbotInstalled.get()) {
       StrongVolleyQueueBuilder builder=
-        StrongVolleyQueueBuilder.forMaxSecurity(getContext());
+        StrongVolleyQueueBuilder
+          .forMaxSecurity(getContext())
+          .withTorValidation();
 
       final StringRequest stringRequest=
         new StringRequest(StringRequest.Method.GET, TEST_URL,
@@ -148,6 +150,11 @@ public class StrongVolleyQueueBuilderTest extends
 
         @Override
         public void onTimeout() {
+          responseLatch.countDown();
+        }
+
+        @Override
+        public void onInvalid() {
           responseLatch.countDown();
         }
       });

@@ -134,6 +134,10 @@ HTTP client API
 - `withWeakCiphers()`, if you are running into compatibility issues
 with the stock selection of supported ciphers
 
+- `withTorValidation()`, if you want to confirm that not only we
+use Orbot, but that the communications via Orbot appear to be
+happening over Tor itself
+
 Of these, `withTrustManagers()` is the most likely one to be used,
 and then only if you are implementing special SSL handling (e.g.,
 certificate pinning).
@@ -157,7 +161,7 @@ of the four HTTP client APIs you are using:
 |Volley             |`StrongVolleyQueueBuilder`    |`StrongBuilder.Callback<RequestQueue>`     |
 |Apache HttpClient  |`StrongHttpClientBuilder`     |`StrongBuilder.Callback<HttpClient>`       |
 
-Your `Callback` needs to implement three methods.
+Your `Callback` needs to implement four methods.
 
 The big one is `void onConnected(C client)`, where you are handed an instance
 of your designated HTTP API connection (e.g., an `OkHttpClient` for OkHttp3).
@@ -175,9 +179,14 @@ crash reporting server, etc.
 - `void onTimeout()`, which is called if we were unable to talk to Orbot
 within 30 seconds
 
+- `void onInvalid()`, which is called if you requested that we validate
+the Tor connection and that test failed
+
 Note that `build()` itself may throw an `Exception` as well, which you will
 need to address. Otherwise, `build()` is asynchronous; you will find out
-the results via your `Callback`.
+the results via your `Callback`. Note that the `Callback` methods may be
+invoked on any thread &mdash; do not assume that the methods will be
+called on any particular thread.
 
 For example, assuming that `this` implements
 `StrongBuilder.Callback<OkHttpClient>`, you could have code like:

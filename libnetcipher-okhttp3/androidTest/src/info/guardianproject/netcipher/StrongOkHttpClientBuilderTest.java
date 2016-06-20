@@ -134,22 +134,28 @@ public class StrongOkHttpClientBuilderTest extends
     }
   }
 
-  // based on http://stackoverflow.com/a/309718/115145
+  public void testValidatedBuilder()
+    throws Exception {
+    assertTrue("we were not initialized", initialized.get());
+    assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
-  public static String slurp(final InputStream is)
-    throws IOException {
-    final char[] buffer = new char[128];
-    final StringBuilder out = new StringBuilder();
-    final Reader in = new InputStreamReader(is, "UTF-8");
+    if (isOrbotInstalled.get()) {
+      StrongOkHttpClientBuilder builder=
+        StrongOkHttpClientBuilder
+          .forMaxSecurity(getContext())
+          .withTorValidation();
 
-    for (;;) {
-      int rsz = in.read(buffer, 0, buffer.length);
-      if (rsz < 0)
-        break;
-      out.append(buffer, 0, rsz);
+      testStrongBuilder(builder,
+        new TestBuilderCallback<OkHttpClient>() {
+          @Override
+          protected void loadResult(OkHttpClient client)
+            throws Exception {
+            Request request=new Request.Builder().url(TEST_URL).build();
+
+            testResult=client.newCall(request).execute().body().string();
+          }
+        });
     }
-
-    return out.toString();
   }
 
   private void testStrongBuilder(StrongBuilder builder,
@@ -193,6 +199,11 @@ public class StrongOkHttpClientBuilderTest extends
 
     @Override
     public void onTimeout() {
+      responseLatch.countDown();
+    }
+
+    @Override
+    public void onInvalid() {
       responseLatch.countDown();
     }
   }

@@ -50,6 +50,7 @@ public class MainActivity extends ListActivity implements
     try {
       StrongVolleyQueueBuilder
         .forMaxSecurity(this)
+        .withTorValidation()
         .build(this);
     }
     catch (Exception e) {
@@ -111,6 +112,14 @@ public class MainActivity extends ListActivity implements
   public void onTimeout() {
     Toast
       .makeText(this, R.string.msg_timeout, Toast.LENGTH_LONG)
+      .show();
+    finish();
+  }
+
+  @Override
+  public void onInvalid() {
+    Toast
+      .makeText(this, R.string.msg_invalid, Toast.LENGTH_LONG)
       .show();
     finish();
   }

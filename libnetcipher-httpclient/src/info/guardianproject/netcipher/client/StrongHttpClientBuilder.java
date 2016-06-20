@@ -20,6 +20,7 @@ package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 import android.content.Intent;
+import org.json.JSONObject;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -27,11 +28,13 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import cz.msebera.android.httpclient.HttpHost;
 import cz.msebera.android.httpclient.client.HttpClient;
+import cz.msebera.android.httpclient.client.methods.HttpGet;
 import cz.msebera.android.httpclient.config.Registry;
 import cz.msebera.android.httpclient.config.RegistryBuilder;
 import cz.msebera.android.httpclient.conn.HttpClientConnectionManager;
 import cz.msebera.android.httpclient.conn.socket.ConnectionSocketFactory;
 import cz.msebera.android.httpclient.conn.socket.PlainConnectionSocketFactory;
+import cz.msebera.android.httpclient.impl.client.BasicResponseHandler;
 import cz.msebera.android.httpclient.impl.client.CloseableHttpClient;
 import cz.msebera.android.httpclient.impl.client.HttpClientBuilder;
 import cz.msebera.android.httpclient.impl.conn.PoolingHttpClientConnectionManager;
@@ -47,6 +50,7 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
   final static String PROXY_HOST="127.0.0.1";
   private Simple netCipher;
   private final Context ctxt;
+  private boolean validateTor=false;
 
   /**
    * Creates a StrongHttpClientBuilder using the strongest set
@@ -107,8 +111,17 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
         @Override
         public void onEnabled(Intent statusIntent) {
           OrbotHelper.get(ctxt).removeStatusCallback(this);
+
           try {
-            callback.onConnected(build(statusIntent));
+            HttpClient connection=build(statusIntent);
+
+            if (validateTor) {
+              validateTor=false;
+              checkTor(callback, statusIntent, connection);
+            }
+            else {
+              callback.onConnected(connection);
+            }
           }
           catch (Exception e) {
             callback.onConnectionException(e);
@@ -121,6 +134,31 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
           callback.onTimeout();
         }
       });
+  }
+
+  private void checkTor(final Callback<HttpClient> callback,
+                        final Intent status,
+                        final HttpClient connection) {
+    new Thread() {
+      @Override
+      public void run() {
+        try {
+          HttpGet get=new HttpGet(StrongBuilderBase.TOR_CHECK_URL);
+          String result=connection.execute(get, new BasicResponseHandler());
+          JSONObject json=new JSONObject(result);
+
+          if (json.optBoolean("IsTor", false)) {
+            callback.onConnected(connection);
+          }
+          else {
+            callback.onInvalid();
+          }
+        }
+        catch (Exception e) {
+          callback.onConnectionException(e);
+        }
+      }
+    }.start();
   }
 
   /**
@@ -190,6 +228,16 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
     return(this);
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public StrongHttpClientBuilder withTorValidation() {
+    validateTor=true;
+
+    return(this);
+  }
+
   protected void init(Intent status) throws Exception {
     StrongSSLSocketFactory2 sFactory;
     int socksPort=netCipher.getSocksPort(status);
@@ -234,13 +282,18 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
       super(ctxt);
     }
 
-    public Simple(
-      StrongBuilderBase original) {
+    public Simple(StrongBuilderBase original) {
       super(original);
     }
 
     @Override
     public HttpClient build(Intent status) throws IOException {
+      throw new IllegalStateException("Um, don't use this, m'kay?");
+    }
+
+    @Override
+    protected String get(Intent status, HttpClient connection,
+                         String url) throws Exception {
       throw new IllegalStateException("Um, don't use this, m'kay?");
     }
   }

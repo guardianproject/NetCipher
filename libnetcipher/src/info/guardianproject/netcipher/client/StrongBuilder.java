@@ -56,6 +56,13 @@ public interface StrongBuilder<T extends StrongBuilder, C> {
      * OrbotInitializer.
      */
     void onTimeout();
+
+    /**
+     * Called if you requested validation that we are connecting
+     * through Tor, and while we were able to connect to Orbot, that
+     * validation failed.
+     */
+    void onInvalid();
   }
 
   /**
@@ -140,7 +147,10 @@ public interface StrongBuilder<T extends StrongBuilder, C> {
 
   /**
    * Asynchronous version of build(), one that uses OrbotInitializer
-   * internally to get the status.
+   * internally to get the status and checks the validity of the Tor
+   * connection (if requested). Note that your callback methods may
+   * be invoked on any thread; do not assume that they will be called
+   * on any particular thread.
    *
    * @param callback Callback to get a connection handed to you
    *                 for use, already set up for NetCipher

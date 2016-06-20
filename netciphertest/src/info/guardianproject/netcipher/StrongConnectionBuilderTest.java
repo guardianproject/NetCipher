@@ -116,7 +116,8 @@ public class StrongConnectionBuilderTest extends
 
     if (isOrbotInstalled.get()) {
       StrongConnectionBuilder builder=
-        StrongConnectionBuilder.forMaxSecurity(getContext());
+        StrongConnectionBuilder
+          .forMaxSecurity(getContext());
 
       testStrongBuilder(builder.connectTo(TEST_URL),
         new TestBuilderCallback<HttpURLConnection>() {
@@ -124,7 +125,8 @@ public class StrongConnectionBuilderTest extends
           protected void loadResult(HttpURLConnection c)
             throws Exception {
             try {
-              testResult=slurp(c.getInputStream());
+              testResult=
+                StrongConnectionBuilder.slurp(c.getInputStream());
             }
             finally {
               c.disconnect();
@@ -134,22 +136,32 @@ public class StrongConnectionBuilderTest extends
     }
   }
 
-  // based on http://stackoverflow.com/a/309718/115145
+  public void testValidatedStrongConnectionBuilder()
+    throws Exception {
+    assertTrue("we were not initialized", initialized.get());
+    assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
-  public static String slurp(final InputStream is)
-    throws IOException {
-    final char[] buffer = new char[128];
-    final StringBuilder out = new StringBuilder();
-    final Reader in = new InputStreamReader(is, "UTF-8");
+    if (isOrbotInstalled.get()) {
+      StrongConnectionBuilder builder=
+        StrongConnectionBuilder
+          .forMaxSecurity(getContext())
+          .withTorValidation();
 
-    for (;;) {
-      int rsz = in.read(buffer, 0, buffer.length);
-      if (rsz < 0)
-        break;
-      out.append(buffer, 0, rsz);
+      testStrongBuilder(builder.connectTo(TEST_URL),
+        new TestBuilderCallback<HttpURLConnection>() {
+          @Override
+          protected void loadResult(HttpURLConnection c)
+            throws Exception {
+            try {
+              testResult=
+                StrongConnectionBuilder.slurp(c.getInputStream());
+            }
+            finally {
+              c.disconnect();
+            }
+          }
+        });
     }
-
-    return out.toString();
   }
 
   private void testStrongBuilder(StrongBuilder builder,
@@ -193,6 +205,11 @@ public class StrongConnectionBuilderTest extends
 
     @Override
     public void onTimeout() {
+      responseLatch.countDown();
+    }
+
+    @Override
+    public void onInvalid() {
       responseLatch.countDown();
     }
   }

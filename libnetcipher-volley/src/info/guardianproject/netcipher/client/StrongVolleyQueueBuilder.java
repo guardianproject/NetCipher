@@ -19,7 +19,12 @@ package info.guardianproject.netcipher.client;
 import android.content.Context;
 import android.content.Intent;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Builds an HttpUrlConnection that connects via Tor through
@@ -68,5 +73,55 @@ public class StrongVolleyQueueBuilder extends
   public RequestQueue build(Intent status) {
     return(Volley.newRequestQueue(ctxt,
       new StrongHurlStack(buildSocketFactory(), buildProxy(status))));
+  }
+
+  @Override
+  protected void checkTor(final Callback<RequestQueue> callback,
+                          final Intent status,
+                          final RequestQueue connection) {
+    new Thread() {
+      @Override
+      public void run() {
+        try {
+          final StringRequest stringRequest=
+            new StringRequest(StringRequest.Method.GET, TOR_CHECK_URL,
+              new Response.Listener<String>() {
+                @Override
+                public void onResponse(String result) {
+                  try {
+                    JSONObject json=new JSONObject(result);
+
+                    if (json.optBoolean("IsTor", false)) {
+                      callback.onConnected(connection);
+                    }
+                    else {
+                      callback.onInvalid();
+                    }
+                  }
+                  catch (JSONException e) {
+                    callback.onConnectionException(e);
+                  }
+                }
+              },
+              new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                  callback.onConnectionException(error);
+                }
+              });
+
+          connection.add(stringRequest);
+        }
+        catch (Exception e) {
+          callback.onConnectionException(e);
+        }
+      }
+    }.start();
+  }
+
+  @Override
+  protected String get(Intent status, RequestQueue connection,
+                       String url) throws Exception {
+    throw new IllegalStateException("How did you get here?");
   }
 }
