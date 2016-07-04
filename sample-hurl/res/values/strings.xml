@@ -3,5 +3,6 @@
     <string name="app_name">NetCipher HURL Sample</string>
     <string name="msg_timeout">Tor not available; timed out</string>
     <string name="msg_crash">Ick! We crashed!</string>
+    <string name="msg_invalid">Hey! Our communications are not going over Tor!</string>
 
 </resources>

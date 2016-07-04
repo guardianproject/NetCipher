@@ -118,7 +118,32 @@ public class StrongHttpClientBuilderTest extends
 
     if (isOrbotInstalled.get()) {
       StrongHttpClientBuilder builder=
-        StrongHttpClientBuilder.forMaxSecurity(getContext());
+        StrongHttpClientBuilder
+          .forMaxSecurity(getContext());
+
+      testStrongBuilder(builder,
+        new TestBuilderCallback<HttpClient>() {
+          @Override
+          protected void loadResult(HttpClient client)
+            throws Exception {
+            HttpGet get=new HttpGet(TEST_URL);
+
+            testResult=client.execute(get, new BasicResponseHandler());
+          }
+        });
+    }
+  }
+
+  public void testValidatedBuilder()
+    throws Exception {
+    assertTrue("we were not initialized", initialized.get());
+    assertNotNull("we did not get an Orbot status", isOrbotInstalled);
+
+    if (isOrbotInstalled.get()) {
+      StrongHttpClientBuilder builder=
+        StrongHttpClientBuilder
+          .forMaxSecurity(getContext())
+          .withTorValidation();
 
       testStrongBuilder(builder,
         new TestBuilderCallback<HttpClient>() {
@@ -192,6 +217,11 @@ public class StrongHttpClientBuilderTest extends
 
     @Override
     public void onTimeout() {
+      responseLatch.countDown();
+    }
+
+    @Override
+    public void onInvalid() {
       responseLatch.countDown();
     }
   }

@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import javax.net.ssl.SSLSocketFactory;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 /**
  * Creates an OkHttpClient using NetCipher configuration. Use
@@ -102,5 +103,13 @@ public class StrongOkHttpClientBuilder extends
 
     return(builder
       .proxy(buildProxy(status)));
+  }
+
+  @Override
+  protected String get(Intent status, OkHttpClient connection,
+                       String url) throws Exception {
+    Request request=new Request.Builder().url(TOR_CHECK_URL).build();
+
+    return(connection.newCall(request).execute().body().string());
   }
 }
