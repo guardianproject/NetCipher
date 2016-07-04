@@ -8,19 +8,13 @@ env:
     - SECOND_EMULATOR_API_LEVEL=21
     # switch glibc to a memory conserving mode
     - MALLOC_ARENA_MAX=2
-    - GRADLE_OPTS='-Dorg.gradle.jvmargs="-Xmx1000m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError"'
     # wait 5 minutes for adb to connect to emulator. Travis-ci cancels a
     # stalled build after 10 minutes, so this should be shorter than that so
     # there is time for the build to report the error.
     - ADB_INSTALL_TIMEOUT=5
 
 jdk:
-  # the release build infrastructure uses OpenJDK from Debian
-  - openjdk7
-  # build against only one JDK for now, to get stable builds
-  # many developers use the Oracle JDK
-  #- oraclejdk8
-  #- oraclejdk7
+  - oraclejdk8
 
 #
 before_cache:
@@ -29,14 +23,6 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-
-# workaround for buffer overflow issue
-# https://github.com/travis-ci/travis-ci/issues/5227
-before_install:
-  - cat /etc/hosts # optionally check the content *before*
-  - sudo hostname "$(hostname | cut -c1-63)"
-  - sed -e "s/^\\(127\\.0\\.0\\.1.*\\)/\\1 $(hostname | cut -c1-63)/" /etc/hosts | sudo tee /etc/hosts
-  - cat /etc/hosts # optionally check the content *after*
 
 android:
   components:
