@@ -1,4 +1,4 @@
-sudo: false
+sudo: required  # workaround to prevent running out of memory
 
 language: android
 
@@ -8,6 +8,7 @@ env:
     - SECOND_EMULATOR_API_LEVEL=21
     # switch glibc to a memory conserving mode
     - MALLOC_ARENA_MAX=2
+    - GRADLE_OPTS='-Dorg.gradle.jvmargs="-Xmx1000m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError"'
     # wait 5 minutes for adb to connect to emulator. Travis-ci cancels a
     # stalled build after 10 minutes, so this should be shorter than that so
     # there is time for the build to report the error.
