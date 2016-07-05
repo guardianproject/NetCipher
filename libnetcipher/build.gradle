@@ -1,9 +1,9 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-	// If you want to fetch these from Maven, uncomment these lines and change
-	// the *.jar depend to exclude these libs:
-	compile fileTree(dir: 'libs', include: '*.jar')
+    // If you want to fetch these from Maven, uncomment these lines and change
+    // the *.jar depend to exclude these libs:
+    compile fileTree(dir: 'libs', include: '*.jar')
     androidTestCompile 'com.android.support.test:runner:0.4.1'
     androidTestCompile 'com.android.support.test:rules:0.4.1'
     androidTestCompile 'junit:junit:4.12'
