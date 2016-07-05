@@ -41,6 +41,10 @@ android {
 
     lintOptions {
         abortOnError false
+
+        htmlReport true
+        xmlReport false
+        textReport false
     }
 
     testOptions {

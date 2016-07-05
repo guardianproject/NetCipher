@@ -20,4 +20,10 @@ android {
             assets.srcDirs = ['assets']
         }
     }
+
+    lintOptions {
+        htmlReport true
+        xmlReport false
+        textReport false
+    }
 }
