@@ -25,5 +25,8 @@ android {
         htmlReport true
         xmlReport false
         textReport false
+
+        // okio refers to java.nio.file, don't stop on error
+        warning 'InvalidPackage'
     }
 }
