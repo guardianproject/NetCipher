@@ -21,6 +21,7 @@ allprojects {
     }
 
     setVersion versionName
+    setGroup 'info.guardianproject.netcipher'
 }
 
 /**
