@@ -43,6 +43,7 @@ android:
 script:
   # run release build script
   - ./make-release-build
+  - for f in libnetcipher/netcipher-*.*; do sha256sum $f; done
   # clean up to start the gradle build from fresh git
   - git clean -fdx
   - git reset --hard
@@ -50,6 +51,9 @@ script:
   - sed -i 's,\s*textReport .*,\ttextReport true,g' */build.gradle
   # 'assemble' everything and run all checks that do not require a device/emulator
   - ./gradlew build -PdisablePreDex
+  # test release process
+  - ./gradlew jarRelease -PdisablePreDex
+  - for f in *netcipher*/build/libs/netcipher*.*; do sha256sum $f; done
   # start the emulator after the build to conserve memory
   - echo no | android create avd --force -n test -t android-$FIRST_EMULATOR_API_LEVEL
   - emulator -avd test -no-skin -no-audio -no-window &
