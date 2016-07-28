@@ -1,4 +1,11 @@
 
+def stdout = new ByteArrayOutputStream()
+exec {
+    commandLine 'git', 'describe', '--tags', '--always'
+    standardOutput = stdout
+}
+def versionName = stdout.toString().trim()
+
 buildscript {
     repositories {
         jcenter()
@@ -12,6 +19,8 @@ allprojects {
     repositories {
         jcenter()
     }
+
+    setVersion versionName
 }
 
 /**
