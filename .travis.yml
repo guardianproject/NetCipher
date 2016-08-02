@@ -29,8 +29,10 @@ android:
     - tools
     - platform-tools
     - build-tools-23.0.3
+    - build-tools-24.0.1
     - extra-android-m2repository
-    - android-22
+    - android-23
+    - android-24
     - android-$FIRST_EMULATOR_API_LEVEL
     - sys-img-armeabi-v7a-android-$FIRST_EMULATOR_API_LEVEL
     - android-$SECOND_EMULATOR_API_LEVEL
