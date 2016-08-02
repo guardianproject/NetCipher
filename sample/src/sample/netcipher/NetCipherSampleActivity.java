@@ -246,7 +246,7 @@ public class NetCipherSampleActivity extends Activity {
             throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException,
             KeyStoreException, CertificateException, IOException {
 
-        StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext());
+        StrongHttpsClient httpclient = new StrongHttpsClient(getApplicationContext(), R.raw.debiancacerts);
 
         if (pType == null) {
             // do nothing
