@@ -39,7 +39,7 @@ android.libraryVariants.all { variant ->
         return; // Skip debug builds.
     }
     def task = project.tasks.create "jar${name.capitalize()}", Jar
-    task.dependsOn variant.javaCompile, sourcesJar, javadocJar
+    task.dependsOn variant.javaCompile, sourcesJar, javadocJar, createPom
     task.from variant.javaCompile.destinationDir
     task.exclude('info/guardianproject/**/BuildConfig.**')
 }
