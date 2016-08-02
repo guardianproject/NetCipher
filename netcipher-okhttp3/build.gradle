@@ -1,16 +1,13 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    // If you want to fetch these from Maven, uncomment these lines and change
-    // the *.jar depend to exclude these libs:
-    compile fileTree(dir: 'libs', include: '*.jar')
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile project(':libnetcipher')
 }
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '23.0.3'
+    compileSdkVersion 24
+    buildToolsVersion '24.0.1'
 
     sourceSets {
         main {
@@ -45,7 +42,7 @@ android.libraryVariants.all { variant ->
         return; // Skip debug builds.
     }
     def task = project.tasks.create "jar${name.capitalize()}", Jar
-    task.dependsOn variant.javaCompile, sourcesJar, javadocJar
+    task.dependsOn variant.javaCompile, sourcesJar, javadocJar, createPom
     task.from variant.javaCompile.destinationDir
     task.exclude('info/guardianproject/**/BuildConfig.**')
 }

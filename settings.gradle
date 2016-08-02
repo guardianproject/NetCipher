@@ -1,1 +1,1 @@
-include ':libnetcipher', ':netcipher-okhttp3', ':netcipher-volley', ':netcipher-httpclient', ':sample', ':sample-hurl', ':sample-okhttp3', ':sample-volley', ':sample-httpclient'
+include ':libnetcipher', ':netcipher-chboye', ':netcipher-okhttp3', ':netcipher-volley', ':netcipher-httpclient', ':netcipher-webkit', ':sample-chboye', ':sample-hurl', ':sample-okhttp3', ':sample-volley', ':sample-httpclient'

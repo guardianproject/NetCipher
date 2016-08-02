@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile "cz.msebera.android:httpclient:4.4.1.2"
     compile project(':libnetcipher')
 }
 
 android {
     compileSdkVersion 24
     buildToolsVersion '24.0.1'
+    useLibrary 'org.apache.http.legacy'
 
     sourceSets {
         main {
@@ -72,8 +72,8 @@ apply plugin: 'maven'
 task createPom << {
     pom {
         project {
-            name 'NetCipher HttpClient'
-            inceptionYear '2016'
+            name 'NetCipher WebKit'
+            inceptionYear '2012'
             licenses {
                 license {
                     name 'The Apache Software License, Version 2.0'
