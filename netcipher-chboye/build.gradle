@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile 'com.squareup.okhttp3:okhttp:3.2.0'
+    compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':libnetcipher')
 }
 
@@ -30,9 +30,6 @@ android {
         htmlReport true
         xmlReport false
         textReport false
-
-        // okio refers to java.nio.file, don't stop on error
-        warning 'InvalidPackage'
     }
 }
 
@@ -75,8 +72,8 @@ apply plugin: 'maven'
 task createPom << {
     pom {
         project {
-            name 'NetCipher OkHTTP'
-            inceptionYear '2016'
+            name 'NetCipher ch.boye'
+            inceptionYear '2013'
             licenses {
                 license {
                     name 'The Apache Software License, Version 2.0'
