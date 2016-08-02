@@ -87,7 +87,7 @@ public class StrongHttpClientBuilderTest extends
             }
           })
         .init();
-      assertTrue("setup timeout", initLatch.await(60, TimeUnit.SECONDS));
+      assertTrue("setup timeout", initLatch.await(600, TimeUnit.SECONDS));
       initialized.set(true);
     }
 
@@ -182,7 +182,7 @@ public class StrongHttpClientBuilderTest extends
     testResult=null;
     builder.build(callback);
 
-    assertTrue(responseLatch.await(120, TimeUnit.SECONDS));
+    assertTrue(responseLatch.await(600, TimeUnit.SECONDS));
 
     if (innerException!=null) {
       throw innerException;
