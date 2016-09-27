@@ -60,7 +60,7 @@ abstract public class
 
   final static String TOR_CHECK_URL="https://check.torproject.org/api/ip";
   private final static String PROXY_HOST="127.0.0.1";
-  protected final Context ctxt;
+  protected final Context context;
   protected Proxy.Type proxyType;
   protected SSLContext sslContext=null;
   protected boolean useWeakCiphers=false;
@@ -69,11 +69,11 @@ abstract public class
   /**
    * Standard constructor.
    *
-   * @param ctxt any Context will do; the StrongBuilderBase
+   * @param context any Context will do; the StrongBuilderBase
    *             will hold onto the Application singleton
    */
-  public StrongBuilderBase(Context ctxt) {
-    this.ctxt=ctxt.getApplicationContext();
+  public StrongBuilderBase(Context context) {
+    this.context=context.getApplicationContext();
   }
 
   /**
@@ -82,7 +82,7 @@ abstract public class
    * @param original builder to clone
    */
   public StrongBuilderBase(StrongBuilderBase original) {
-    this.ctxt=original.ctxt;
+    this.context=original.context;
     this.proxyType=original.proxyType;
     this.sslContext=original.sslContext;
     this.useWeakCiphers=original.useWeakCiphers;
@@ -226,11 +226,11 @@ abstract public class
 
   @Override
   public void build(final Callback<C> callback) {
-    OrbotHelper.get(ctxt).addStatusCallback(
+    OrbotHelper.get(context).addStatusCallback(
       new OrbotHelper.SimpleStatusCallback() {
         @Override
         public void onEnabled(Intent statusIntent) {
-          OrbotHelper.get(ctxt).removeStatusCallback(this);
+          OrbotHelper.get(context).removeStatusCallback(this);
 
           try {
             C connection=build(statusIntent);
@@ -250,13 +250,13 @@ abstract public class
 
         @Override
         public void onNotYetInstalled() {
-          OrbotHelper.get(ctxt).removeStatusCallback(this);
+          OrbotHelper.get(context).removeStatusCallback(this);
           callback.onTimeout();
         }
 
         @Override
         public void onStatusTimeout() {
-          OrbotHelper.get(ctxt).removeStatusCallback(this);
+          OrbotHelper.get(context).removeStatusCallback(this);
           callback.onTimeout();
         }
       });

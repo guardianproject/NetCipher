@@ -38,24 +38,24 @@ public class StrongOkHttpClientBuilder extends
    * options is what you want; otherwise, create a
    * builder via the constructor and configure it as you see fit.
    *
-   * @param ctxt any Context will do
+   * @param context any Context will do
    * @return a configured StrongOkHttpClientBuilder
    * @throws Exception
    */
-  static public StrongOkHttpClientBuilder forMaxSecurity(Context ctxt)
+  static public StrongOkHttpClientBuilder forMaxSecurity(Context context)
     throws Exception {
-    return(new StrongOkHttpClientBuilder(ctxt)
+    return(new StrongOkHttpClientBuilder(context)
       .withBestProxy());
   }
 
   /**
    * Creates a builder instance.
    *
-   * @param ctxt any Context will do; builder will hold onto
+   * @param context any Context will do; builder will hold onto
    *             Application context
    */
-  public StrongOkHttpClientBuilder(Context ctxt) {
-    super(ctxt);
+  public StrongOkHttpClientBuilder(Context context) {
+    super(context);
   }
 
   /**

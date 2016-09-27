@@ -335,7 +335,7 @@ public class OrbotHelper implements ProxyHelper {
 
     /* MLM additions */
 
-    private final Context ctxt;
+    private final Context context;
     private final Handler handler;
     private boolean isInstalled=false;
     private Intent lastStatusIntent=null;
@@ -389,13 +389,13 @@ public class OrbotHelper implements ProxyHelper {
     /**
      * Retrieves the singleton, initializing if if needed
      *
-     * @param ctxt any Context will do, as we will hold onto
+     * @param context any Context will do, as we will hold onto
      *             the Application
      * @return the singleton
      */
-    synchronized public static OrbotHelper get(Context ctxt) {
+    synchronized public static OrbotHelper get(Context context) {
         if (INSTANCE==null) {
-            INSTANCE=new OrbotHelper(ctxt);
+            INSTANCE=new OrbotHelper(context);
         }
 
         return(INSTANCE);
@@ -404,11 +404,11 @@ public class OrbotHelper implements ProxyHelper {
     /**
      * Standard constructor
      *
-     * @param ctxt any Context will do; OrbotInitializer will hold
+     * @param context any Context will do; OrbotInitializer will hold
      *             onto the Application context
      */
-    private OrbotHelper(Context ctxt) {
-        this.ctxt=ctxt.getApplicationContext();
+    private OrbotHelper(Context context) {
+        this.context=context.getApplicationContext();
         this.handler=new Handler(Looper.getMainLooper());
     }
 
@@ -535,7 +535,7 @@ public class OrbotHelper implements ProxyHelper {
      * or version of Orbot with a unofficial signing key is present.
      */
     public boolean init() {
-        Intent orbot=OrbotHelper.getOrbotStartIntent(ctxt);
+        Intent orbot=OrbotHelper.getOrbotStartIntent(context);
 
         if (validateOrbot) {
             ArrayList<String> hashes=new ArrayList<String>();
@@ -546,16 +546,16 @@ public class OrbotHelper implements ProxyHelper {
             hashes.add("A7:02:07:92:4F:61:FF:09:37:1D:54:84:14:5C:4B:EE:77:2C:55:C1:9E:EE:23:2F:57:70:E1:82:71:F7:CB:AE");
 
             orbot=
-              SignatureUtils.validateBroadcastIntent(ctxt, orbot,
+              SignatureUtils.validateBroadcastIntent(context, orbot,
                 hashes, false);
         }
 
         if (orbot!=null) {
             isInstalled=true;
             handler.postDelayed(onStatusTimeout, statusTimeoutMs);
-            ctxt.registerReceiver(orbotStatusReceiver,
+            context.registerReceiver(orbotStatusReceiver,
               new IntentFilter(OrbotHelper.ACTION_STATUS));
-            ctxt.sendBroadcast(orbot);
+            context.sendBroadcast(orbot);
         }
         else {
             isInstalled=false;
@@ -597,13 +597,13 @@ public class OrbotHelper implements ProxyHelper {
 
         filter.addDataScheme("package");
 
-        ctxt.registerReceiver(orbotInstallReceiver, filter);
-        host.startActivity(OrbotHelper.getOrbotInstallIntent(ctxt));
+        context.registerReceiver(orbotInstallReceiver, filter);
+        host.startActivity(OrbotHelper.getOrbotInstallIntent(context));
     }
 
     private BroadcastReceiver orbotStatusReceiver=new BroadcastReceiver() {
         @Override
-        public void onReceive(Context ctxt, Intent intent) {
+        public void onReceive(Context context, Intent intent) {
             if (TextUtils.equals(intent.getAction(),
               OrbotHelper.ACTION_STATUS)) {
                 String status=intent.getStringExtra(OrbotHelper.EXTRA_STATUS);
@@ -638,7 +638,7 @@ public class OrbotHelper implements ProxyHelper {
     private Runnable onStatusTimeout=new Runnable() {
         @Override
         public void run() {
-            ctxt.unregisterReceiver(orbotStatusReceiver);
+            context.unregisterReceiver(orbotStatusReceiver);
 
             for (StatusCallback cb : statusCallbacks) {
                 cb.onStatusTimeout();
@@ -648,7 +648,7 @@ public class OrbotHelper implements ProxyHelper {
 
     private BroadcastReceiver orbotInstallReceiver=new BroadcastReceiver() {
         @Override
-        public void onReceive(Context ctxt, Intent intent) {
+        public void onReceive(Context context, Intent intent) {
             if (TextUtils.equals(intent.getAction(),
               Intent.ACTION_PACKAGE_ADDED)) {
                 String pkgName=intent.getData().getEncodedSchemeSpecificPart();
@@ -656,7 +656,7 @@ public class OrbotHelper implements ProxyHelper {
                 if (OrbotHelper.ORBOT_PACKAGE_NAME.equals(pkgName)) {
                     isInstalled=true;
                     handler.removeCallbacks(onInstallTimeout);
-                    ctxt.unregisterReceiver(orbotInstallReceiver);
+                    context.unregisterReceiver(orbotInstallReceiver);
 
                     for (InstallCallback cb : installCallbacks) {
                         cb.onInstalled();
@@ -671,7 +671,7 @@ public class OrbotHelper implements ProxyHelper {
     private Runnable onInstallTimeout=new Runnable() {
         @Override
         public void run() {
-            ctxt.unregisterReceiver(orbotInstallReceiver);
+            context.unregisterReceiver(orbotInstallReceiver);
 
             for (InstallCallback cb : installCallbacks) {
                 cb.onInstallTimeout();

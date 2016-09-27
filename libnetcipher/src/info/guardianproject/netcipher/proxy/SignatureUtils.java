@@ -28,20 +28,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SignatureUtils {
-  public static String getOwnSignatureHash(Context ctxt)
+  public static String getOwnSignatureHash(Context context)
                                                         throws
     NameNotFoundException,
     NoSuchAlgorithmException {
-    return(getSignatureHash(ctxt, ctxt.getPackageName()));
+    return(getSignatureHash(context, context.getPackageName()));
   }
 
-  public static String getSignatureHash(Context ctxt, String packageName)
+  public static String getSignatureHash(Context context, String packageName)
                                                                          throws
     NameNotFoundException,
     NoSuchAlgorithmException {
     MessageDigest md=MessageDigest.getInstance("SHA-256");
     Signature sig=
-        ctxt.getPackageManager()
+        context.getPackageManager()
             .getPackageInfo(packageName, PackageManager.GET_SIGNATURES).signatures[0];
 
     return(toHexStringWithColons(md.digest(sig.toByteArray())));
@@ -98,7 +98,7 @@ public class SignatureUtils {
    * matching receiver, so the "broadcast" will only go to this
    * one component.
    *
-   * @param ctxt any Context will do; the value is not retained
+   * @param context any Context will do; the value is not retained
    * @param toValidate the Intent that you intend to broadcast
    * @param sigHash the signature hash of the app that you expect
    *                to handle this broadcast
@@ -109,7 +109,7 @@ public class SignatureUtils {
    * hash, or a copy of the toValidate parameter with the full component
    * name of the target receiver added to the Intent
    */
-  public static Intent validateBroadcastIntent(Context ctxt,
+  public static Intent validateBroadcastIntent(Context context,
                                                Intent toValidate,
                                                String sigHash,
                                                boolean failIfHack) {
@@ -117,7 +117,7 @@ public class SignatureUtils {
 
     sigHashes.add(sigHash);
 
-    return(validateBroadcastIntent(ctxt, toValidate, sigHashes,
+    return(validateBroadcastIntent(context, toValidate, sigHashes,
       failIfHack));
   }
 
@@ -150,7 +150,7 @@ public class SignatureUtils {
    * matching receiver, so the "broadcast" will only go to this
    * one component.
    *
-   * @param ctxt any Context will do; the value is not retained
+   * @param context any Context will do; the value is not retained
    * @param toValidate the Intent that you intend to broadcast
    * @param sigHashes the possible signature hashes of the app
    *                  that you expect to handle this broadcast
@@ -161,11 +161,11 @@ public class SignatureUtils {
    * hash, or a copy of the toValidate parameter with the full component
    * name of the target receiver added to the Intent
    */
-  public static Intent validateBroadcastIntent(Context ctxt,
+  public static Intent validateBroadcastIntent(Context context,
                                                Intent toValidate,
                                                List<String> sigHashes,
                                                boolean failIfHack) {
-    PackageManager pm=ctxt.getPackageManager();
+    PackageManager pm=context.getPackageManager();
     Intent result=null;
     List<ResolveInfo> receivers=
       pm.queryBroadcastReceivers(toValidate, 0);
@@ -173,7 +173,7 @@ public class SignatureUtils {
     if (receivers!=null) {
       for (ResolveInfo info : receivers) {
         try {
-          if (sigHashes.contains(getSignatureHash(ctxt,
+          if (sigHashes.contains(getSignatureHash(context,
             info.activityInfo.packageName))) {
             ComponentName cn=
               new ComponentName(info.activityInfo.packageName,
@@ -231,7 +231,7 @@ public class SignatureUtils {
    * matching activity, so a call to startActivity() for this
    * Intent is guaranteed to go to this specific activity.
    *
-   * @param ctxt any Context will do; the value is not retained
+   * @param context any Context will do; the value is not retained
    * @param toValidate the Intent that you intend to use with
    *                   startActivity()
    * @param sigHash the signature hash of the app that you expect
@@ -243,7 +243,7 @@ public class SignatureUtils {
    * hash, or a copy of the toValidate parameter with the full component
    * name of the target activity added to the Intent
    */
-  public static Intent validateActivityIntent(Context ctxt,
+  public static Intent validateActivityIntent(Context context,
                                               Intent toValidate,
                                               String sigHash,
                                               boolean failIfHack) {
@@ -251,7 +251,7 @@ public class SignatureUtils {
 
     sigHashes.add(sigHash);
 
-    return(validateActivityIntent(ctxt, toValidate, sigHashes,
+    return(validateActivityIntent(context, toValidate, sigHashes,
       failIfHack));
   }
 
@@ -284,7 +284,7 @@ public class SignatureUtils {
    * matching activity, so a call to startActivity() for this
    * Intent is guaranteed to go to this specific activity.
    *
-   * @param ctxt any Context will do; the value is not retained
+   * @param context any Context will do; the value is not retained
    * @param toValidate the Intent that you intend to use with
    *                   startActivity()
    * @param sigHashes the signature hashes of the app that you expect
@@ -296,11 +296,11 @@ public class SignatureUtils {
    * hash, or a copy of the toValidate parameter with the full component
    * name of the target activity added to the Intent
    */
-  public static Intent validateActivityIntent(Context ctxt,
+  public static Intent validateActivityIntent(Context context,
                                               Intent toValidate,
                                               List<String> sigHashes,
                                               boolean failIfHack) {
-    PackageManager pm=ctxt.getPackageManager();
+    PackageManager pm=context.getPackageManager();
     Intent result=null;
     List<ResolveInfo> activities=
       pm.queryIntentActivities(toValidate, 0);
@@ -308,7 +308,7 @@ public class SignatureUtils {
     if (activities!=null) {
       for (ResolveInfo info : activities) {
         try {
-          if (sigHashes.contains(getSignatureHash(ctxt,
+          if (sigHashes.contains(getSignatureHash(context,
             info.activityInfo.packageName))) {
             ComponentName cn=
               new ComponentName(info.activityInfo.packageName,
@@ -367,7 +367,7 @@ public class SignatureUtils {
    * bindService() for this Intent is guaranteed to go to this
    * specific service.
    *
-   * @param ctxt any Context will do; the value is not retained
+   * @param context any Context will do; the value is not retained
    * @param toValidate the Intent that you intend to use with
    *                   startService() or bindService()
    * @param sigHash the signature hash of the app that you expect
@@ -379,7 +379,7 @@ public class SignatureUtils {
    * hash, or a copy of the toValidate parameter with the full component
    * name of the target service added to the Intent
    */
-  public static Intent validateServiceIntent(Context ctxt,
+  public static Intent validateServiceIntent(Context context,
                                              Intent toValidate,
                                              String sigHash,
                                              boolean failIfHack) {
@@ -387,7 +387,7 @@ public class SignatureUtils {
 
     sigHashes.add(sigHash);
 
-    return(validateServiceIntent(ctxt, toValidate, sigHashes,
+    return(validateServiceIntent(context, toValidate, sigHashes,
       failIfHack));
   }
 
@@ -421,7 +421,7 @@ public class SignatureUtils {
    * bindService() for this Intent is guaranteed to go to this
    * specific service.
    *
-   * @param ctxt any Context will do; the value is not retained
+   * @param context any Context will do; the value is not retained
    * @param toValidate the Intent that you intend to use with
    *                   startService() or bindService()
    * @param sigHashes the signature hash of the app that you expect
@@ -433,11 +433,11 @@ public class SignatureUtils {
    * hash, or a copy of the toValidate parameter with the full component
    * name of the target service added to the Intent
    */
-  public static Intent validateServiceIntent(Context ctxt,
+  public static Intent validateServiceIntent(Context context,
                                              Intent toValidate,
                                              List<String> sigHashes,
                                              boolean failIfHack) {
-    PackageManager pm=ctxt.getPackageManager();
+    PackageManager pm=context.getPackageManager();
     Intent result=null;
     List<ResolveInfo> services=
       pm.queryIntentServices(toValidate, 0);
@@ -445,7 +445,7 @@ public class SignatureUtils {
     if (services!=null) {
       for (ResolveInfo info : services) {
         try {
-          if (sigHashes.contains(getSignatureHash(ctxt,
+          if (sigHashes.contains(getSignatureHash(context,
             info.serviceInfo.packageName))) {
             ComponentName cn=
               new ComponentName(info.serviceInfo.packageName,

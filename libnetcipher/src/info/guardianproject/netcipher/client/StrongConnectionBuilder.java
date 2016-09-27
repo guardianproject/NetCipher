@@ -44,24 +44,24 @@ public class StrongConnectionBuilder
    * options is what you want; otherwise, create a
    * builder via the constructor and configure it as you see fit.
    *
-   * @param ctxt any Context will do
+   * @param context any Context will do
    * @return a configured StrongConnectionBuilder
    * @throws Exception
    */
-  static public StrongConnectionBuilder forMaxSecurity(Context ctxt)
+  static public StrongConnectionBuilder forMaxSecurity(Context context)
     throws Exception {
-    return(new StrongConnectionBuilder(ctxt)
+    return(new StrongConnectionBuilder(context)
       .withBestProxy());
   }
 
   /**
    * Creates a builder instance.
    *
-   * @param ctxt any Context will do; builder will hold onto
+   * @param context any Context will do; builder will hold onto
    *             Application context
    */
-  public StrongConnectionBuilder(Context ctxt) {
-    super(ctxt);
+  public StrongConnectionBuilder(Context context) {
+    super(context);
   }
 
   /**
