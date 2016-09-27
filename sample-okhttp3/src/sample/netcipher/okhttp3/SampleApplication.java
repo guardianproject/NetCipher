@@ -17,6 +17,7 @@
 package sample.netcipher.okhttp3;
 
 import android.app.Application;
+
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 
 public class SampleApplication extends Application {

@@ -19,14 +19,12 @@ package info.guardianproject.netcipher;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+
 import java.net.HttpURLConnection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongConnectionBuilder;
 import info.guardianproject.netcipher.proxy.OrbotHelper;

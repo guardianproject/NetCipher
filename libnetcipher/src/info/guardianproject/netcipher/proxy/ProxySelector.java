@@ -15,6 +15,8 @@
  */
 package info.guardianproject.netcipher.proxy;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -22,8 +24,6 @@ import java.net.SocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
-import android.util.Log;
 
 public class ProxySelector extends java.net.ProxySelector {
 
