@@ -196,7 +196,7 @@ public class NetCipher {
      * @return the URL in an instance of {@link HttpsURLConnection}
      * @throws IOException
      * @throws IllegalArgumentException if the proxy or TLS setup is incorrect,
-     *             or if an HTTP URL is given that does not support HTTPS
+     *                                  or if an HTTP URL is given that does not support HTTPS
      */
     public static HttpsURLConnection getHttpsURLConnection(String urlString) throws IOException {
         URL url = new URL(urlString.replaceFirst("^[Hh][Tt][Tt][Pp]:", "https:"));
@@ -211,7 +211,7 @@ public class NetCipher {
      * @return the {@code uri} in an instance of {@link HttpsURLConnection}
      * @throws IOException
      * @throws IllegalArgumentException if the proxy or TLS setup is incorrect,
-     *             or if an HTTP URL is given that does not support HTTPS
+     *                                  or if an HTTP URL is given that does not support HTTPS
      */
     public static HttpsURLConnection getHttpsURLConnection(Uri uri) throws IOException {
         return getHttpsURLConnection(uri.toString());
@@ -225,7 +225,7 @@ public class NetCipher {
      * @return the {@code uri} in an instance of {@link HttpsURLConnection}
      * @throws IOException
      * @throws IllegalArgumentException if the proxy or TLS setup is incorrect,
-     *             or if an HTTP URL is given that does not support HTTPS
+     *                                  or if an HTTP URL is given that does not support HTTPS
      */
     public static HttpsURLConnection getHttpsURLConnection(URI uri) throws IOException {
         if (TextUtils.equals(uri.getScheme(), "https"))
@@ -243,7 +243,7 @@ public class NetCipher {
      * @return the {@code url} in an instance of {@link HttpsURLConnection}
      * @throws IOException
      * @throws IllegalArgumentException if the proxy or TLS setup is incorrect,
-     *             or if an HTTP URL is given that does not support HTTPS
+     *                                  or if an HTTP URL is given that does not support HTTPS
      */
     public static HttpsURLConnection getHttpsURLConnection(URL url) throws IOException {
         return getHttpsURLConnection(url, false);
@@ -257,7 +257,7 @@ public class NetCipher {
      * @return the {@code url} in an instance of {@link HttpsURLConnection}
      * @throws IOException
      * @throws IllegalArgumentException if the proxy or TLS setup is incorrect,
-     *             or if an HTTP URL is given that does not support HTTPS
+     *                                  or if an HTTP URL is given that does not support HTTPS
      */
     public static HttpsURLConnection getCompatibleHttpsURLConnection(URL url) throws IOException {
         return getHttpsURLConnection(url, true);
@@ -272,7 +272,7 @@ public class NetCipher {
      * @return the {@code url} in an instance of {@link HttpsURLConnection}
      * @throws IOException
      * @throws IllegalArgumentException if the proxy or TLS setup is incorrect,
-     *             or if an HTTP URL is given that does not support HTTPS
+     *                                  or if an HTTP URL is given that does not support HTTPS
      */
     public static HttpsURLConnection getHttpsURLConnection(URL url, boolean compatible)
             throws IOException {

@@ -53,13 +53,13 @@ import javax.net.ssl.SSLSocketFactory;
  * @author Hans-Christoph Steiner
  */
 public class TlsOnlySocketFactory extends SSLSocketFactory {
-    private static final int HANDSHAKE_TIMEOUT=0;
+    private static final int HANDSHAKE_TIMEOUT = 0;
     private static final String TAG = "TlsOnlySocketFactory";
     private final SSLSocketFactory delegate;
     private final boolean compatible;
 
     public TlsOnlySocketFactory() {
-        this.delegate =SSLCertificateSocketFactory.getDefault(HANDSHAKE_TIMEOUT, null);
+        this.delegate = SSLCertificateSocketFactory.getDefault(HANDSHAKE_TIMEOUT, null);
         this.compatible = false;
     }
 
@@ -91,15 +91,14 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
 
     private Socket makeSocketSafe(Socket socket, String host) {
         if (socket instanceof SSLSocket) {
-            TlsOnlySSLSocket tempSocket=
-              new TlsOnlySSLSocket((SSLSocket) socket, compatible);
+            TlsOnlySSLSocket tempSocket =
+                    new TlsOnlySSLSocket((SSLSocket) socket, compatible);
 
             if (delegate instanceof SSLCertificateSocketFactory &&
-              Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                ((android.net.SSLCertificateSocketFactory)delegate)
-                  .setHostname(socket, host);
-            }
-            else {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                ((android.net.SSLCertificateSocketFactory) delegate)
+                        .setHostname(socket, host);
+            } else {
                 tempSocket.setHostname(host);
             }
 
@@ -132,9 +131,9 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
 
     @Override
     public Socket createSocket(InetAddress address, int port, InetAddress localAddress,
-            int localPort) throws IOException {
+                               int localPort) throws IOException {
         return makeSocketSafe(delegate.createSocket(address, port, localAddress, localPort),
-          address.getHostName());
+                address.getHostName());
     }
 
     private class TlsOnlySSLSocket extends DelegateSSLSocket {
@@ -467,7 +466,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
         @Override
         public void setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
             delegate.setPerformancePreferences(connectionTime,
-              latency, bandwidth);
+                    latency, bandwidth);
         }
 
         @Override
@@ -520,15 +519,14 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
         public DelegateSSLSocket setHostname(String host) {
             try {
                 delegate
-                  .getClass()
-                  .getMethod("setHostname", String.class)
-                  .invoke(delegate, host);
-            }
-            catch (Exception e) {
+                        .getClass()
+                        .getMethod("setHostname", String.class)
+                        .invoke(delegate, host);
+            } catch (Exception e) {
                 throw new IllegalStateException("Could not enable SNI", e);
             }
 
-            return(this);
+            return (this);
         }
 
         @Override

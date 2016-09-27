@@ -35,140 +35,139 @@ import info.guardianproject.netcipher.proxy.OrbotHelper;
 import info.guardianproject.netcipher.proxy.StatusCallback;
 
 public class StrongVolleyQueueBuilderTest extends
-  AndroidTestCase {
-  private static final String TEST_URL=
-    "https://wares.commonsware.com/test.json";
-  private static final String EXPECTED="{\"Hello\": \"world\"}";
-  private static AtomicBoolean initialized=new AtomicBoolean(false);
-  private static AtomicBoolean isOrbotInstalled=null;
-  private CountDownLatch responseLatch;
-  private Exception innerException=null;
-  private String testResult=null;
-  private static CountDownLatch initLatch=new CountDownLatch(1);
+        AndroidTestCase {
+    private static final String TEST_URL =
+            "https://wares.commonsware.com/test.json";
+    private static final String EXPECTED = "{\"Hello\": \"world\"}";
+    private static AtomicBoolean initialized = new AtomicBoolean(false);
+    private static AtomicBoolean isOrbotInstalled = null;
+    private CountDownLatch responseLatch;
+    private Exception innerException = null;
+    private String testResult = null;
+    private static CountDownLatch initLatch = new CountDownLatch(1);
 
-  public void setUp() throws InterruptedException {
-    if (!initialized.get()) {
-      OrbotHelper
-        .get(getContext())
-        .statusTimeout(60000)
-        .addStatusCallback(
-          new StatusCallback() {
-            @Override
-            public void onEnabled(Intent statusIntent) {
-              isOrbotInstalled=new AtomicBoolean(true);
-              initLatch.countDown();
-            }
+    public void setUp() throws InterruptedException {
+        if (!initialized.get()) {
+            OrbotHelper
+                    .get(getContext())
+                    .statusTimeout(60000)
+                    .addStatusCallback(
+                            new StatusCallback() {
+                                @Override
+                                public void onEnabled(Intent statusIntent) {
+                                    isOrbotInstalled = new AtomicBoolean(true);
+                                    initLatch.countDown();
+                                }
 
-            @Override
-            public void onStarting() {
+                                @Override
+                                public void onStarting() {
 
-            }
+                                }
 
-            @Override
-            public void onStopping() {
+                                @Override
+                                public void onStopping() {
 
-            }
+                                }
 
-            @Override
-            public void onDisabled() {
-              // we got a broadcast with a status of off, so keep waiting
-            }
+                                @Override
+                                public void onDisabled() {
+                                    // we got a broadcast with a status of off, so keep waiting
+                                }
 
-            @Override
-            public void onStatusTimeout() {
-              initLatch.countDown();
-              throw new RuntimeException("Orbot status request timed out");
-            }
+                                @Override
+                                public void onStatusTimeout() {
+                                    initLatch.countDown();
+                                    throw new RuntimeException("Orbot status request timed out");
+                                }
 
-            @Override
-            public void onNotYetInstalled() {
-              isOrbotInstalled=new AtomicBoolean(false);
-              initLatch.countDown();
-            }
-          })
-        .init();
-      assertTrue("setup timeout", initLatch.await(600, TimeUnit.SECONDS));
-      initialized.set(true);
-    }
-
-    responseLatch=new CountDownLatch(1);
-  }
-
-  public void testOrbotInstalled() throws InterruptedException {
-    assertTrue("we were not initialized", initialized.get());
-    assertNotNull("we did not get an Orbot status", isOrbotInstalled);
-
-    try {
-      getContext()
-        .getPackageManager()
-        .getApplicationInfo("org.torproject.android", 0);
-      assertTrue("Orbot is installed, but NetCipher thinks it is not",
-        isOrbotInstalled.get());
-    }
-    catch (PackageManager.NameNotFoundException e) {
-      assertFalse("Orbot not installed, but NetCipher thinks it is",
-        isOrbotInstalled.get());
-    }
-  }
-
-  public void testBuilder()
-    throws Exception {
-    assertTrue("we were not initialized", initialized.get());
-    assertNotNull("we did not get an Orbot status", isOrbotInstalled);
-
-    if (isOrbotInstalled.get()) {
-      StrongVolleyQueueBuilder builder=
-        StrongVolleyQueueBuilder
-          .forMaxSecurity(getContext())
-          .withTorValidation();
-
-      final StringRequest stringRequest=
-        new StringRequest(StringRequest.Method.GET, TEST_URL,
-          new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-              testResult=response;
-              responseLatch.countDown();
-            }
-          },
-          new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-              innerException=error;
-              responseLatch.countDown();
-            }
-        });
-
-      builder.build(new StrongBuilder.Callback<RequestQueue>() {
-        @Override
-        public void onConnected(RequestQueue connection) {
-          connection.add(stringRequest);
+                                @Override
+                                public void onNotYetInstalled() {
+                                    isOrbotInstalled = new AtomicBoolean(false);
+                                    initLatch.countDown();
+                                }
+                            })
+                    .init();
+            assertTrue("setup timeout", initLatch.await(600, TimeUnit.SECONDS));
+            initialized.set(true);
         }
 
-        @Override
-        public void onConnectionException(Exception e) {
-          innerException=e;
-          responseLatch.countDown();
-        }
-
-        @Override
-        public void onTimeout() {
-          responseLatch.countDown();
-        }
-
-        @Override
-        public void onInvalid() {
-          responseLatch.countDown();
-        }
-      });
-
-      assertTrue(responseLatch.await(600, TimeUnit.SECONDS));
-
-      if (innerException!=null) {
-        throw innerException;
-      }
-
-      assertEquals(EXPECTED, testResult);
+        responseLatch = new CountDownLatch(1);
     }
-  }
+
+    public void testOrbotInstalled() throws InterruptedException {
+        assertTrue("we were not initialized", initialized.get());
+        assertNotNull("we did not get an Orbot status", isOrbotInstalled);
+
+        try {
+            getContext()
+                    .getPackageManager()
+                    .getApplicationInfo("org.torproject.android", 0);
+            assertTrue("Orbot is installed, but NetCipher thinks it is not",
+                    isOrbotInstalled.get());
+        } catch (PackageManager.NameNotFoundException e) {
+            assertFalse("Orbot not installed, but NetCipher thinks it is",
+                    isOrbotInstalled.get());
+        }
+    }
+
+    public void testBuilder()
+            throws Exception {
+        assertTrue("we were not initialized", initialized.get());
+        assertNotNull("we did not get an Orbot status", isOrbotInstalled);
+
+        if (isOrbotInstalled.get()) {
+            StrongVolleyQueueBuilder builder =
+                    StrongVolleyQueueBuilder
+                            .forMaxSecurity(getContext())
+                            .withTorValidation();
+
+            final StringRequest stringRequest =
+                    new StringRequest(StringRequest.Method.GET, TEST_URL,
+                            new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    testResult = response;
+                                    responseLatch.countDown();
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    innerException = error;
+                                    responseLatch.countDown();
+                                }
+                            });
+
+            builder.build(new StrongBuilder.Callback<RequestQueue>() {
+                @Override
+                public void onConnected(RequestQueue connection) {
+                    connection.add(stringRequest);
+                }
+
+                @Override
+                public void onConnectionException(Exception e) {
+                    innerException = e;
+                    responseLatch.countDown();
+                }
+
+                @Override
+                public void onTimeout() {
+                    responseLatch.countDown();
+                }
+
+                @Override
+                public void onInvalid() {
+                    responseLatch.countDown();
+                }
+            });
+
+            assertTrue(responseLatch.await(600, TimeUnit.SECONDS));
+
+            if (innerException != null) {
+                throw innerException;
+            }
+
+            assertEquals(EXPECTED, testResult);
+        }
+    }
 }
