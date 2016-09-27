@@ -25,9 +25,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.util.List;
+
 import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongOkHttpClientBuilder;
 import okhttp3.OkHttpClient;

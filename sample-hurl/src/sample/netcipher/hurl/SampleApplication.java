@@ -17,6 +17,7 @@
 package sample.netcipher.hurl;
 
 import android.app.Application;
+
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 
 public class SampleApplication extends Application {

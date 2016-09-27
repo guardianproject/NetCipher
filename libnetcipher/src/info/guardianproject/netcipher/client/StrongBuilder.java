@@ -17,13 +17,11 @@
 package info.guardianproject.netcipher.client;
 
 import android.content.Intent;
+
 import java.io.IOException;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
+
 import javax.net.ssl.TrustManager;
 
 public interface StrongBuilder<T extends StrongBuilder, C> {

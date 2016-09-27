@@ -18,18 +18,6 @@
 
 package info.guardianproject.netcipher.webkit;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-
-import org.apache.http.HttpHost;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -44,6 +32,18 @@ import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.webkit.WebView;
+
+import org.apache.http.HttpHost;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
 public class WebkitProxy {
 

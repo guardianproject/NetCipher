@@ -20,21 +20,18 @@ package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 import android.content.Intent;
+
 import org.json.JSONObject;
-import java.io.IOException;
-import java.io.InputStream;
+
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
+
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 
 /**

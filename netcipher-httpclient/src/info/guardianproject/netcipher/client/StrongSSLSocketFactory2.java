@@ -21,20 +21,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Socket;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
+
 import cz.msebera.android.httpclient.HttpHost;
 import cz.msebera.android.httpclient.conn.socket.LayeredConnectionSocketFactory;
 import cz.msebera.android.httpclient.protocol.HttpContext;

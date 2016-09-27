@@ -20,12 +20,16 @@ package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 import android.content.Intent;
+
 import org.json.JSONObject;
+
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+
 import cz.msebera.android.httpclient.HttpHost;
 import cz.msebera.android.httpclient.client.HttpClient;
 import cz.msebera.android.httpclient.client.methods.HttpGet;

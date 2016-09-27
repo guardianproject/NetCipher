@@ -17,9 +17,6 @@ package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 
-import ch.boye.httpclientandroidlib.conn.scheme.LayeredSchemeSocketFactory;
-import ch.boye.httpclientandroidlib.params.HttpParams;
-
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.Socket;
@@ -41,6 +38,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+
+import ch.boye.httpclientandroidlib.conn.scheme.LayeredSchemeSocketFactory;
+import ch.boye.httpclientandroidlib.params.HttpParams;
 
 public class StrongSSLSocketFactory extends
 		ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory implements
