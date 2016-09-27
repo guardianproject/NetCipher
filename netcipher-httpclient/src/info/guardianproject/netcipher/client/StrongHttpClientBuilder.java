@@ -49,7 +49,7 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
   implements StrongBuilder<StrongHttpClientBuilder, HttpClient> {
   final static String PROXY_HOST="127.0.0.1";
   private Simple netCipher;
-  private final Context ctxt;
+  private final Context context;
   private boolean validateTor=false;
 
   /**
@@ -58,24 +58,24 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
    * options is what you want; otherwise, create a
    * builder via the constructor and configure it as you see fit.
    *
-   * @param ctxt any Context will do
+   * @param context any Context will do
    * @return a configured StrongHttpClientBuilder
    * @throws Exception
    */
-  static public StrongHttpClientBuilder forMaxSecurity(Context ctxt)
+  static public StrongHttpClientBuilder forMaxSecurity(Context context)
     throws Exception {
-    return(new StrongHttpClientBuilder(ctxt));
+    return(new StrongHttpClientBuilder(context));
   }
 
   /**
    * Standard constructor
    *
-   * @param ctxt any Context will do; we hold onto the Application
+   * @param context any Context will do; we hold onto the Application
    *             singleton
    */
-  public StrongHttpClientBuilder(Context ctxt) {
-    this.ctxt=ctxt.getApplicationContext();
-    netCipher=new Simple(ctxt);
+  public StrongHttpClientBuilder(Context context) {
+    this.context=context.getApplicationContext();
+    netCipher=new Simple(context);
   }
 
   /**
@@ -85,7 +85,7 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
    */
   public StrongHttpClientBuilder(StrongHttpClientBuilder original) {
     this.netCipher=new Simple(original.netCipher);
-    this.ctxt=original.ctxt;
+    this.context=original.context;
   }
 
   @Override
@@ -106,11 +106,11 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
 
   @Override
   public void build(final Callback<HttpClient> callback) {
-    OrbotHelper.get(ctxt).addStatusCallback(
+    OrbotHelper.get(context).addStatusCallback(
       new OrbotHelper.SimpleStatusCallback() {
         @Override
         public void onEnabled(Intent statusIntent) {
-          OrbotHelper.get(ctxt).removeStatusCallback(this);
+          OrbotHelper.get(context).removeStatusCallback(this);
 
           try {
             HttpClient connection=build(statusIntent);
@@ -130,7 +130,7 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
 
         @Override
         public void onStatusTimeout() {
-          OrbotHelper.get(ctxt).removeStatusCallback(this);
+          OrbotHelper.get(context).removeStatusCallback(this);
           callback.onTimeout();
         }
       });
@@ -278,8 +278,8 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
   }
 
   private static class Simple extends StrongBuilderBase<Simple, HttpClient> {
-    public Simple(Context ctxt) {
-      super(ctxt);
+    public Simple(Context context) {
+      super(context);
     }
 
     public Simple(StrongBuilderBase original) {

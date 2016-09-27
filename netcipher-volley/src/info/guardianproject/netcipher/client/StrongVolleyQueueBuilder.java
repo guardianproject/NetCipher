@@ -38,23 +38,23 @@ public class StrongVolleyQueueBuilder extends
    * options is what you want; otherwise, create a
    * builder via the constructor and configure it as you see fit.
    *
-   * @param ctxt any Context will do
+   * @param context any Context will do
    * @return a configured StrongVolleyQueueBuilder
    * @throws Exception
    */
-  static public StrongVolleyQueueBuilder forMaxSecurity(Context ctxt)
+  static public StrongVolleyQueueBuilder forMaxSecurity(Context context)
     throws Exception {
-    return(new StrongVolleyQueueBuilder(ctxt).withBestProxy());
+    return(new StrongVolleyQueueBuilder(context).withBestProxy());
   }
 
   /**
    * Creates a builder instance.
    *
-   * @param ctxt any Context will do; builder will hold onto
+   * @param context any Context will do; builder will hold onto
    *             Application context
    */
-  public StrongVolleyQueueBuilder(Context ctxt) {
-    super(ctxt);
+  public StrongVolleyQueueBuilder(Context context) {
+    super(context);
   }
 
   /**
@@ -71,7 +71,7 @@ public class StrongVolleyQueueBuilder extends
    */
   @Override
   public RequestQueue build(Intent status) {
-    return(Volley.newRequestQueue(ctxt,
+    return(Volley.newRequestQueue(context,
       new StrongHurlStack(buildSocketFactory(), buildProxy(status))));
   }
 
