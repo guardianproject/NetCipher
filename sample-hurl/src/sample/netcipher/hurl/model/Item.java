@@ -17,11 +17,11 @@
 package sample.netcipher.hurl.model;
 
 public class Item {
-  public String title;
-  public String link;
-  
-  @Override
-  public String toString() {
-    return(title);
-  }
+    public String title;
+    public String link;
+
+    @Override
+    public String toString() {
+        return (title);
+    }
 }

@@ -32,22 +32,22 @@ public class PsiphonHelper implements ProxyHelper {
 
     public final static String PACKAGE_NAME = "com.psiphon3";
     public final static String COMPONENT_NAME = "com.psiphon3.StatusActivity";
-    
-    
+
+
     public final static String MARKET_URI = "market://details?id=" + PACKAGE_NAME;
     public final static String FDROID_URI = "https://f-droid.org/repository/browse/?fdid="
             + PACKAGE_NAME;
     public final static String ORBOT_PLAY_URI = "https://play.google.com/store/apps/details?id="
             + PACKAGE_NAME;
-    
+
     public final static int DEFAULT_SOCKS_PORT = 1080;
     public final static int DEFAULT_HTTP_PORT = 8080;
-    
-	@Override
-	public boolean isInstalled(Context context) {
+
+    @Override
+    public boolean isInstalled(Context context) {
         return isAppInstalled(context, PACKAGE_NAME);
-	}
-	
+    }
+
 
     private static boolean isAppInstalled(Context context, String uri) {
         try {
@@ -59,119 +59,110 @@ public class PsiphonHelper implements ProxyHelper {
         }
     }
 
-	@Override
-	public void requestStatus(final Context context) {
-	
-		Thread thread = new Thread ()
-		{			
-			public void run ()
-			{
-				//can connect to default HTTP proxy port?
-				boolean isSocksOpen = false;
-				boolean isHttpOpen = false;
-				
-				int socksPort = DEFAULT_SOCKS_PORT;
-				int httpPort = DEFAULT_HTTP_PORT;
-				
-				for (int i = 0; i < 10 && (!isSocksOpen); i++)				
-					isSocksOpen = isPortOpen("127.0.0.1",socksPort++,100);								
-				
-				for (int i = 0; i < 10 && (!isHttpOpen); i++)				
-					isHttpOpen = isPortOpen("127.0.0.1",httpPort++,100);								
+    @Override
+    public void requestStatus(final Context context) {
 
-				//any other check?
-				
-				Intent intent = new Intent(ProxyHelper.ACTION_STATUS);
-				intent.putExtra(EXTRA_PACKAGE_NAME, PACKAGE_NAME);
-				
-				if (isSocksOpen && isHttpOpen)
-				{				
-				  intent.putExtra(EXTRA_STATUS, STATUS_ON);
-				  
-				  intent.putExtra(EXTRA_PROXY_PORT_HTTP, httpPort-1);
-				  intent.putExtra(EXTRA_PROXY_PORT_SOCKS, socksPort-1);
-				  
-				
-				}
-				else
-				{
-					intent.putExtra(EXTRA_STATUS, STATUS_OFF);
-				}
-				
-				  context.sendBroadcast(intent);
-			}
-		};
-		
-		thread.start();
-		
-	}
+        Thread thread = new Thread() {
+            public void run() {
+                //can connect to default HTTP proxy port?
+                boolean isSocksOpen = false;
+                boolean isHttpOpen = false;
 
-	@Override
-	public boolean requestStart(Context context) {
+                int socksPort = DEFAULT_SOCKS_PORT;
+                int httpPort = DEFAULT_HTTP_PORT;
 
-		Intent intent = getStartIntent(context);
-	//	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		context.startActivity(intent);
-		
-		return true;
-	}
+                for (int i = 0; i < 10 && (!isSocksOpen); i++)
+                    isSocksOpen = isPortOpen("127.0.0.1", socksPort++, 100);
 
-	@Override
-	public Intent getInstallIntent(Context context) {
-		 final Intent intent = new Intent(Intent.ACTION_VIEW);
-	        intent.setData(Uri.parse(MARKET_URI));
+                for (int i = 0; i < 10 && (!isHttpOpen); i++)
+                    isHttpOpen = isPortOpen("127.0.0.1", httpPort++, 100);
 
-	        PackageManager pm = context.getPackageManager();
-	        List<ResolveInfo> resInfos = pm.queryIntentActivities(intent, 0);
+                //any other check?
 
-	        String foundPackageName = null;
-	        for (ResolveInfo r : resInfos) {
-	            if (TextUtils.equals(r.activityInfo.packageName, FDROID_PACKAGE_NAME)
-	                    || TextUtils.equals(r.activityInfo.packageName, PLAY_PACKAGE_NAME)) {
-	                foundPackageName = r.activityInfo.packageName;
-	                break;
-	            }
-	        }
+                Intent intent = new Intent(ProxyHelper.ACTION_STATUS);
+                intent.putExtra(EXTRA_PACKAGE_NAME, PACKAGE_NAME);
 
-	        if (foundPackageName == null) {
-	            intent.setData(Uri.parse(FDROID_URI));
-	        } else {
-	            intent.setPackage(foundPackageName);
-	        }
-	        return intent;
-	}
+                if (isSocksOpen && isHttpOpen) {
+                    intent.putExtra(EXTRA_STATUS, STATUS_ON);
 
-	@Override
-	public Intent getStartIntent(Context context) {
-		 Intent intent = new Intent();
-		 intent.setComponent(new ComponentName(PACKAGE_NAME, COMPONENT_NAME));
+                    intent.putExtra(EXTRA_PROXY_PORT_HTTP, httpPort - 1);
+                    intent.putExtra(EXTRA_PROXY_PORT_SOCKS, socksPort - 1);
 
-	     return intent;
-	}
-	
-	public static boolean isPortOpen(final String ip, final int port, final int timeout) {
+
+                } else {
+                    intent.putExtra(EXTRA_STATUS, STATUS_OFF);
+                }
+
+                context.sendBroadcast(intent);
+            }
+        };
+
+        thread.start();
+
+    }
+
+    @Override
+    public boolean requestStart(Context context) {
+
+        Intent intent = getStartIntent(context);
+        //	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+
+        return true;
+    }
+
+    @Override
+    public Intent getInstallIntent(Context context) {
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(MARKET_URI));
+
+        PackageManager pm = context.getPackageManager();
+        List<ResolveInfo> resInfos = pm.queryIntentActivities(intent, 0);
+
+        String foundPackageName = null;
+        for (ResolveInfo r : resInfos) {
+            if (TextUtils.equals(r.activityInfo.packageName, FDROID_PACKAGE_NAME)
+                    || TextUtils.equals(r.activityInfo.packageName, PLAY_PACKAGE_NAME)) {
+                foundPackageName = r.activityInfo.packageName;
+                break;
+            }
+        }
+
+        if (foundPackageName == null) {
+            intent.setData(Uri.parse(FDROID_URI));
+        } else {
+            intent.setPackage(foundPackageName);
+        }
+        return intent;
+    }
+
+    @Override
+    public Intent getStartIntent(Context context) {
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName(PACKAGE_NAME, COMPONENT_NAME));
+
+        return intent;
+    }
+
+    public static boolean isPortOpen(final String ip, final int port, final int timeout) {
         try {
             Socket socket = new Socket();
             socket.connect(new InetSocketAddress(ip, port), timeout);
             socket.close();
             return true;
-        } 
-
-        catch(ConnectException ce){
+        } catch (ConnectException ce) {
             ce.printStackTrace();
             return false;
-        }
-
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             return false;
         }
     }
 
 
-	@Override
-	public String getName() {
-		return PACKAGE_NAME;
-	}
+    @Override
+    public String getName() {
+        return PACKAGE_NAME;
+    }
 
 }

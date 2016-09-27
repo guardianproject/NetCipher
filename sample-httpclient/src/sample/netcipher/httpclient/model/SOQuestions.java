@@ -19,5 +19,5 @@ package sample.netcipher.httpclient.model;
 import java.util.List;
 
 public class SOQuestions {
-  public List<Item> items;
+    public List<Item> items;
 }

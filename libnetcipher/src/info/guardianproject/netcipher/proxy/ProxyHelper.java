@@ -21,16 +21,21 @@ import android.content.Intent;
 
 public interface ProxyHelper {
 
-	public boolean isInstalled (Context context);
-	public void requestStatus (Context context);
-	public boolean requestStart (Context context);
-	public Intent getInstallIntent (Context context);
-	public Intent getStartIntent (Context context);
-	public String getName ();
+    public boolean isInstalled(Context context);
+
+    public void requestStatus(Context context);
+
+    public boolean requestStart(Context context);
+
+    public Intent getInstallIntent(Context context);
+
+    public Intent getStartIntent(Context context);
+
+    public String getName();
 
     public final static String FDROID_PACKAGE_NAME = "org.fdroid.fdroid";
     public final static String PLAY_PACKAGE_NAME = "com.android.vending";
-    
+
     /**
      * A request to Orbot to transparently start Tor services
      */
@@ -45,10 +50,10 @@ public interface ProxyHelper {
      * {@link #STATUS_STOPPING}
      */
     public final static String EXTRA_STATUS = "android.intent.extra.PROXY_STATUS";
-    
+
     public final static String EXTRA_PROXY_PORT_HTTP = "android.intent.extra.PROXY_PORT_HTTP";
     public final static String EXTRA_PROXY_PORT_SOCKS = "android.intent.extra.PROXY_PORT_SOCKS";
-    
+
     /**
      * A {@link String} {@code packageName} for Orbot to direct its status reply
      * to, used in {@link #ACTION_START} {@link Intent}s sent to Orbot

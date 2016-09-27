@@ -41,7 +41,7 @@ public abstract class SocksAwareProxyRoutePlanner extends DefaultRoutePlanner {
     /**
      * Determine the proxy required for the provided target.
      *
-     * @param target see {@link #determineProxy(HttpHost, HttpRequest, HttpContext) determineProxy()}
+     * @param target  see {@link #determineProxy(HttpHost, HttpRequest, HttpContext) determineProxy()}
      * @param request see {@link #determineProxy(HttpHost, HttpRequest, HttpContext) determineProxy()}.
      *                Will be null when called from {@link SocksAwareClientConnOperator} to
      *                determine if target requires a SOCKS proxy, so don't rely on it in this case.

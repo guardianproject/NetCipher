@@ -21,10 +21,10 @@ import android.app.Application;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 
 public class SampleApplication extends Application {
-  @Override
-  public void onCreate() {
-    super.onCreate();
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
-    OrbotHelper.get(this).init();
-  }
+        OrbotHelper.get(this).init();
+    }
 }

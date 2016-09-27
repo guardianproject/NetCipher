@@ -50,255 +50,250 @@ import info.guardianproject.netcipher.proxy.OrbotHelper;
  * of socket connections.
  */
 public class StrongHttpClientBuilder extends HttpClientBuilder
-  implements StrongBuilder<StrongHttpClientBuilder, HttpClient> {
-  final static String PROXY_HOST="127.0.0.1";
-  private Simple netCipher;
-  private final Context context;
-  private boolean validateTor=false;
+        implements StrongBuilder<StrongHttpClientBuilder, HttpClient> {
+    final static String PROXY_HOST = "127.0.0.1";
+    private Simple netCipher;
+    private final Context context;
+    private boolean validateTor = false;
 
-  /**
-   * Creates a StrongHttpClientBuilder using the strongest set
-   * of options for security. Use this if the strongest set of
-   * options is what you want; otherwise, create a
-   * builder via the constructor and configure it as you see fit.
-   *
-   * @param context any Context will do
-   * @return a configured StrongHttpClientBuilder
-   * @throws Exception
-   */
-  static public StrongHttpClientBuilder forMaxSecurity(Context context)
-    throws Exception {
-    return(new StrongHttpClientBuilder(context));
-  }
-
-  /**
-   * Standard constructor
-   *
-   * @param context any Context will do; we hold onto the Application
-   *             singleton
-   */
-  public StrongHttpClientBuilder(Context context) {
-    this.context=context.getApplicationContext();
-    netCipher=new Simple(context);
-  }
-
-  /**
-   * Copy constructor.
-   *
-   * @param original builder to clone
-   */
-  public StrongHttpClientBuilder(StrongHttpClientBuilder original) {
-    this.netCipher=new Simple(original.netCipher);
-    this.context=original.context;
-  }
-
-  @Override
-  public CloseableHttpClient build() {
-    throw new IllegalStateException(
-      "Use a one-parameter build() method please");
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public HttpClient build(Intent status) throws Exception {
-    init(status);
-
-    return(super.build());
-  }
-
-  @Override
-  public void build(final Callback<HttpClient> callback) {
-    OrbotHelper.get(context).addStatusCallback(
-      new OrbotHelper.SimpleStatusCallback() {
-        @Override
-        public void onEnabled(Intent statusIntent) {
-          OrbotHelper.get(context).removeStatusCallback(this);
-
-          try {
-            HttpClient connection=build(statusIntent);
-
-            if (validateTor) {
-              validateTor=false;
-              checkTor(callback, statusIntent, connection);
-            }
-            else {
-              callback.onConnected(connection);
-            }
-          }
-          catch (Exception e) {
-            callback.onConnectionException(e);
-          }
-        }
-
-        @Override
-        public void onStatusTimeout() {
-          OrbotHelper.get(context).removeStatusCallback(this);
-          callback.onTimeout();
-        }
-      });
-  }
-
-  private void checkTor(final Callback<HttpClient> callback,
-                        final Intent status,
-                        final HttpClient connection) {
-    new Thread() {
-      @Override
-      public void run() {
-        try {
-          HttpGet get=new HttpGet(StrongBuilderBase.TOR_CHECK_URL);
-          String result=connection.execute(get, new BasicResponseHandler());
-          JSONObject json=new JSONObject(result);
-
-          if (json.optBoolean("IsTor", false)) {
-            callback.onConnected(connection);
-          }
-          else {
-            callback.onInvalid();
-          }
-        }
-        catch (Exception e) {
-          callback.onConnectionException(e);
-        }
-      }
-    }.start();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public StrongHttpClientBuilder withBestProxy() {
-    netCipher.withBestProxy();
-
-    return(this);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean supportsHttpProxy() {
-    return(true);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public StrongHttpClientBuilder withHttpProxy() {
-    netCipher.withHttpProxy();
-
-    return(this);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean supportsSocksProxy() {
-    return(true);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public StrongHttpClientBuilder withSocksProxy() {
-    netCipher.withSocksProxy();
-
-    return(this);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public StrongHttpClientBuilder withWeakCiphers() {
-    netCipher.withWeakCiphers();
-
-    return(this);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public StrongHttpClientBuilder withTrustManagers(TrustManager[] trustManagers)
-    throws NoSuchAlgorithmException, KeyManagementException {
-    netCipher.withTrustManagers(trustManagers);
-
-    return(this);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public StrongHttpClientBuilder withTorValidation() {
-    validateTor=true;
-
-    return(this);
-  }
-
-  protected void init(Intent status) throws Exception {
-    StrongSSLSocketFactory2 sFactory;
-    int socksPort=netCipher.getSocksPort(status);
-    SSLContext sslContext=netCipher.getSSLContext();
-
-    if (sslContext==null) {
-      sslContext=SSLContext.getInstance("TLSv1");
-      sslContext.init(null, null, null);
+    /**
+     * Creates a StrongHttpClientBuilder using the strongest set
+     * of options for security. Use this if the strongest set of
+     * options is what you want; otherwise, create a
+     * builder via the constructor and configure it as you see fit.
+     *
+     * @param context any Context will do
+     * @return a configured StrongHttpClientBuilder
+     * @throws Exception
+     */
+    static public StrongHttpClientBuilder forMaxSecurity(Context context)
+            throws Exception {
+        return (new StrongHttpClientBuilder(context));
     }
 
-    if (socksPort==-1) {
-      int httpPort=netCipher.getHttpPort(status);
-
-      if (httpPort!=-1) {
-        setProxy(new HttpHost(PROXY_HOST, httpPort));
-      }
-
-      sFactory=
-        new StrongSSLSocketFactory2(sslContext);
-    }
-    else {
-      sFactory=
-        new StrongSSLSocketFactory2(sslContext, socksPort);
+    /**
+     * Standard constructor
+     *
+     * @param context any Context will do; we hold onto the Application
+     *                singleton
+     */
+    public StrongHttpClientBuilder(Context context) {
+        this.context = context.getApplicationContext();
+        netCipher = new Simple(context);
     }
 
-    setSSLSocketFactory(sFactory);
-
-    Registry<ConnectionSocketFactory> registry=
-      RegistryBuilder.<ConnectionSocketFactory>create()
-        .register("http", PlainConnectionSocketFactory.getSocketFactory())
-        .register("https", sFactory)
-        .build();
-
-    HttpClientConnectionManager ccm=
-      new PoolingHttpClientConnectionManager(registry);
-
-    setConnectionManager(ccm);
-  }
-
-  private static class Simple extends StrongBuilderBase<Simple, HttpClient> {
-    public Simple(Context context) {
-      super(context);
-    }
-
-    public Simple(StrongBuilderBase original) {
-      super(original);
+    /**
+     * Copy constructor.
+     *
+     * @param original builder to clone
+     */
+    public StrongHttpClientBuilder(StrongHttpClientBuilder original) {
+        this.netCipher = new Simple(original.netCipher);
+        this.context = original.context;
     }
 
     @Override
-    public HttpClient build(Intent status) throws IOException {
-      throw new IllegalStateException("Um, don't use this, m'kay?");
+    public CloseableHttpClient build() {
+        throw new IllegalStateException(
+                "Use a one-parameter build() method please");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public HttpClient build(Intent status) throws Exception {
+        init(status);
+
+        return (super.build());
     }
 
     @Override
-    protected String get(Intent status, HttpClient connection,
-                         String url) throws Exception {
-      throw new IllegalStateException("Um, don't use this, m'kay?");
+    public void build(final Callback<HttpClient> callback) {
+        OrbotHelper.get(context).addStatusCallback(
+                new OrbotHelper.SimpleStatusCallback() {
+                    @Override
+                    public void onEnabled(Intent statusIntent) {
+                        OrbotHelper.get(context).removeStatusCallback(this);
+
+                        try {
+                            HttpClient connection = build(statusIntent);
+
+                            if (validateTor) {
+                                validateTor = false;
+                                checkTor(callback, statusIntent, connection);
+                            } else {
+                                callback.onConnected(connection);
+                            }
+                        } catch (Exception e) {
+                            callback.onConnectionException(e);
+                        }
+                    }
+
+                    @Override
+                    public void onStatusTimeout() {
+                        OrbotHelper.get(context).removeStatusCallback(this);
+                        callback.onTimeout();
+                    }
+                });
     }
-  }
+
+    private void checkTor(final Callback<HttpClient> callback,
+                          final Intent status,
+                          final HttpClient connection) {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    HttpGet get = new HttpGet(StrongBuilderBase.TOR_CHECK_URL);
+                    String result = connection.execute(get, new BasicResponseHandler());
+                    JSONObject json = new JSONObject(result);
+
+                    if (json.optBoolean("IsTor", false)) {
+                        callback.onConnected(connection);
+                    } else {
+                        callback.onInvalid();
+                    }
+                } catch (Exception e) {
+                    callback.onConnectionException(e);
+                }
+            }
+        }.start();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StrongHttpClientBuilder withBestProxy() {
+        netCipher.withBestProxy();
+
+        return (this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean supportsHttpProxy() {
+        return (true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StrongHttpClientBuilder withHttpProxy() {
+        netCipher.withHttpProxy();
+
+        return (this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean supportsSocksProxy() {
+        return (true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StrongHttpClientBuilder withSocksProxy() {
+        netCipher.withSocksProxy();
+
+        return (this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StrongHttpClientBuilder withWeakCiphers() {
+        netCipher.withWeakCiphers();
+
+        return (this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StrongHttpClientBuilder withTrustManagers(TrustManager[] trustManagers)
+            throws NoSuchAlgorithmException, KeyManagementException {
+        netCipher.withTrustManagers(trustManagers);
+
+        return (this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StrongHttpClientBuilder withTorValidation() {
+        validateTor = true;
+
+        return (this);
+    }
+
+    protected void init(Intent status) throws Exception {
+        StrongSSLSocketFactory2 sFactory;
+        int socksPort = netCipher.getSocksPort(status);
+        SSLContext sslContext = netCipher.getSSLContext();
+
+        if (sslContext == null) {
+            sslContext = SSLContext.getInstance("TLSv1");
+            sslContext.init(null, null, null);
+        }
+
+        if (socksPort == -1) {
+            int httpPort = netCipher.getHttpPort(status);
+
+            if (httpPort != -1) {
+                setProxy(new HttpHost(PROXY_HOST, httpPort));
+            }
+
+            sFactory =
+                    new StrongSSLSocketFactory2(sslContext);
+        } else {
+            sFactory =
+                    new StrongSSLSocketFactory2(sslContext, socksPort);
+        }
+
+        setSSLSocketFactory(sFactory);
+
+        Registry<ConnectionSocketFactory> registry =
+                RegistryBuilder.<ConnectionSocketFactory>create()
+                        .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                        .register("https", sFactory)
+                        .build();
+
+        HttpClientConnectionManager ccm =
+                new PoolingHttpClientConnectionManager(registry);
+
+        setConnectionManager(ccm);
+    }
+
+    private static class Simple extends StrongBuilderBase<Simple, HttpClient> {
+        public Simple(Context context) {
+            super(context);
+        }
+
+        public Simple(StrongBuilderBase original) {
+            super(original);
+        }
+
+        @Override
+        public HttpClient build(Intent status) throws IOException {
+            throw new IllegalStateException("Um, don't use this, m'kay?");
+        }
+
+        @Override
+        protected String get(Intent status, HttpClient connection,
+                             String url) throws Exception {
+            throw new IllegalStateException("Um, don't use this, m'kay?");
+        }
+    }
 }

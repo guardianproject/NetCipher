@@ -33,113 +33,112 @@ import cz.msebera.android.httpclient.conn.socket.LayeredConnectionSocketFactory;
 import cz.msebera.android.httpclient.protocol.HttpContext;
 
 public class StrongSSLSocketFactory2 extends
-  SSLConnectionSocketFactory
-  implements LayeredConnectionSocketFactory {
-  private boolean mEnableStongerDefaultSSLCipherSuite = true;
-  private boolean mEnableStongerDefaultProtocalVersion = true;
-  private String[] mProtocols;
-  private String[] mCipherSuites;
-  private Proxy socksProxy=null;
+        SSLConnectionSocketFactory
+        implements LayeredConnectionSocketFactory {
+    private boolean mEnableStongerDefaultSSLCipherSuite = true;
+    private boolean mEnableStongerDefaultProtocalVersion = true;
+    private String[] mProtocols;
+    private String[] mCipherSuites;
+    private Proxy socksProxy = null;
 
-  StrongSSLSocketFactory2(SSLContext sslContext) {
-    super(sslContext);
-  }
-
-  StrongSSLSocketFactory2(SSLContext sslContext, int socksPort) {
-    super(sslContext);
-
-    InetSocketAddress socksAddr=
-      new InetSocketAddress(StrongHttpClientBuilder.PROXY_HOST,
-        socksPort);
-
-    socksProxy=new Proxy(Proxy.Type.SOCKS, socksAddr);
-  }
-
-  private void readSSLParameters(SSLSocket sslSocket) {
-    List<String> protocolsToEnable = new ArrayList<String>();
-    List<String> supportedProtocols = Arrays.asList(sslSocket.getSupportedProtocols());
-    for(String enabledProtocol : StrongConstants.ENABLED_PROTOCOLS) {
-      if(supportedProtocols.contains(enabledProtocol)) {
-        protocolsToEnable.add(enabledProtocol);
-      }
-    }
-    this.mProtocols = protocolsToEnable.toArray(new String[protocolsToEnable.size()]);
-
-    List<String> cipherSuitesToEnable = new ArrayList<String>();
-    List<String> supportedCipherSuites = Arrays.asList(
-      sslSocket.getSupportedCipherSuites());
-    for(String enabledCipherSuite : StrongConstants.ENABLED_CIPHERS) {
-      if(supportedCipherSuites.contains(enabledCipherSuite)) {
-        cipherSuitesToEnable.add(enabledCipherSuite);
-      }
-    }
-    this.mCipherSuites = cipherSuitesToEnable.toArray(new String[cipherSuitesToEnable.size()]);
-  }
-
-  @Override
-  public Socket createSocket(HttpContext context)
-    throws IOException {
-    Socket result;
-
-    if (socksProxy==null) {
-      result=super.createSocket(context);
-    }
-    else {
-      result=new Socket(socksProxy);
+    StrongSSLSocketFactory2(SSLContext sslContext) {
+        super(sslContext);
     }
 
-    enableStrongerDefaults(result);
+    StrongSSLSocketFactory2(SSLContext sslContext, int socksPort) {
+        super(sslContext);
 
-    return(result);
-  }
+        InetSocketAddress socksAddr =
+                new InetSocketAddress(StrongHttpClientBuilder.PROXY_HOST,
+                        socksPort);
 
-  @Override
-  public Socket createLayeredSocket(Socket socket, String target,
-                                    int port,
-                                    HttpContext context)
-    throws IOException {
-    Socket result;
-
-    result=super.createLayeredSocket(socket, target, port,
-      context);
-
-    enableStrongerDefaults(result);
-
-    return(result);
-  }
-
-  @Override
-  public Socket connectSocket(int connectTimeout, Socket socket,
-                              HttpHost host,
-                              InetSocketAddress remoteAddress,
-                              InetSocketAddress localAddress,
-                              HttpContext context)
-    throws IOException {
-    return(super.connectSocket(connectTimeout, socket, host,
-      remoteAddress, localAddress, context));
-  }
-
-  /**
-   * Defaults the SSL connection to use a strong cipher suite and TLS version
-   *
-   * @param socket
-   */
-  private void enableStrongerDefaults(Socket socket) {
-    if (isSecure(socket)) {
-      SSLSocket sslSocket = (SSLSocket) socket;
-      readSSLParameters(sslSocket);
-
-      if (mEnableStongerDefaultProtocalVersion && mProtocols != null) {
-        sslSocket.setEnabledProtocols(mProtocols);
-      }
-
-      if (mEnableStongerDefaultSSLCipherSuite && mCipherSuites != null) {
-        sslSocket.setEnabledCipherSuites(mCipherSuites);
-      }
+        socksProxy = new Proxy(Proxy.Type.SOCKS, socksAddr);
     }
-  }
 
-  public boolean isSecure(Socket sock) throws IllegalArgumentException {
-    return(sock instanceof SSLSocket);
-  }
+    private void readSSLParameters(SSLSocket sslSocket) {
+        List<String> protocolsToEnable = new ArrayList<String>();
+        List<String> supportedProtocols = Arrays.asList(sslSocket.getSupportedProtocols());
+        for (String enabledProtocol : StrongConstants.ENABLED_PROTOCOLS) {
+            if (supportedProtocols.contains(enabledProtocol)) {
+                protocolsToEnable.add(enabledProtocol);
+            }
+        }
+        this.mProtocols = protocolsToEnable.toArray(new String[protocolsToEnable.size()]);
+
+        List<String> cipherSuitesToEnable = new ArrayList<String>();
+        List<String> supportedCipherSuites = Arrays.asList(
+                sslSocket.getSupportedCipherSuites());
+        for (String enabledCipherSuite : StrongConstants.ENABLED_CIPHERS) {
+            if (supportedCipherSuites.contains(enabledCipherSuite)) {
+                cipherSuitesToEnable.add(enabledCipherSuite);
+            }
+        }
+        this.mCipherSuites = cipherSuitesToEnable.toArray(new String[cipherSuitesToEnable.size()]);
+    }
+
+    @Override
+    public Socket createSocket(HttpContext context)
+            throws IOException {
+        Socket result;
+
+        if (socksProxy == null) {
+            result = super.createSocket(context);
+        } else {
+            result = new Socket(socksProxy);
+        }
+
+        enableStrongerDefaults(result);
+
+        return (result);
+    }
+
+    @Override
+    public Socket createLayeredSocket(Socket socket, String target,
+                                      int port,
+                                      HttpContext context)
+            throws IOException {
+        Socket result;
+
+        result = super.createLayeredSocket(socket, target, port,
+                context);
+
+        enableStrongerDefaults(result);
+
+        return (result);
+    }
+
+    @Override
+    public Socket connectSocket(int connectTimeout, Socket socket,
+                                HttpHost host,
+                                InetSocketAddress remoteAddress,
+                                InetSocketAddress localAddress,
+                                HttpContext context)
+            throws IOException {
+        return (super.connectSocket(connectTimeout, socket, host,
+                remoteAddress, localAddress, context));
+    }
+
+    /**
+     * Defaults the SSL connection to use a strong cipher suite and TLS version
+     *
+     * @param socket
+     */
+    private void enableStrongerDefaults(Socket socket) {
+        if (isSecure(socket)) {
+            SSLSocket sslSocket = (SSLSocket) socket;
+            readSSLParameters(sslSocket);
+
+            if (mEnableStongerDefaultProtocalVersion && mProtocols != null) {
+                sslSocket.setEnabledProtocols(mProtocols);
+            }
+
+            if (mEnableStongerDefaultSSLCipherSuite && mCipherSuites != null) {
+                sslSocket.setEnabledCipherSuites(mCipherSuites);
+            }
+        }
+    }
+
+    public boolean isSecure(Socket sock) throws IllegalArgumentException {
+        return (sock instanceof SSLSocket);
+    }
 }

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="info.guardianproject.netcipher.httpclient.test"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0">
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -16,7 +16,7 @@
 
     <application
         android:allowBackup="false"
-        android:label="NetCipherTest" >
+        android:label="NetCipherTest">
         <uses-library android:name="android.test.runner" />
     </application>
 

@@ -52,7 +52,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
     /**
      * @param context the app {@link Context}
-     * @param resid the BKS keystore as a raw resource ID
+     * @param resid   the BKS keystore as a raw resource ID
      */
     public StrongHttpsClient(Context context, int resid) {
         this.context = context;
@@ -92,7 +92,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
                 new Scheme(TYPE_HTTP, 80, PlainSocketFactory.getSocketFactory()));
 
         try {
-        	TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             sFactory = new StrongSSLSocketFactory(context, trustManagerFactory.getTrustManagers(), keystore, TRUSTSTORE_PASSWORD);
             mRegistry.register(new Scheme("https", 443, sFactory));
         } catch (Exception e) {
@@ -103,8 +103,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
     @Override
     protected ThreadSafeClientConnManager createClientConnectionManager() {
 
-        return new ThreadSafeClientConnManager(getParams(), mRegistry)
-        {
+        return new ThreadSafeClientConnManager(getParams(), mRegistry) {
             @Override
             protected ClientConnectionOperator createConnectionOperator(
                     SchemeRegistry schreg) {
@@ -115,42 +114,33 @@ public class StrongHttpsClient extends DefaultHttpClient {
         };
     }
 
-    public void useProxy(boolean enableTor, String type, String host, int port)
-    {
-        if (enableTor)
-        {
+    public void useProxy(boolean enableTor, String type, String host, int port) {
+        if (enableTor) {
             this.proxyType = type;
 
-            if (type.equalsIgnoreCase(TYPE_SOCKS))
-            {
+            if (type.equalsIgnoreCase(TYPE_SOCKS)) {
                 proxyHost = new HttpHost(host, port);
-            }
-            else
-            {
-            	proxyHost = new HttpHost(host, port, type);
+            } else {
+                proxyHost = new HttpHost(host, port, type);
                 getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHost);
             }
-        }
-        else
-        {
-        	getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
+        } else {
+            getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
             proxyHost = null;
         }
 
     }
 
-    public void disableProxy ()
-    {
-    	getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
+    public void disableProxy() {
+        getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
         proxyHost = null;
     }
 
-    public void useProxyRoutePlanner(SocksAwareProxyRoutePlanner proxyRoutePlanner)
-    {
+    public void useProxyRoutePlanner(SocksAwareProxyRoutePlanner proxyRoutePlanner) {
         routePlanner = proxyRoutePlanner;
         setRoutePlanner(proxyRoutePlanner);
     }
-    
+
     /**
      * NOT ADVISED, but some sites don't yet have latest protocols and ciphers available, and some
      * apps still need to support them
