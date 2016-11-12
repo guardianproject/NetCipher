@@ -87,7 +87,77 @@ not the discontinued HttpClient implementation in the Android SDK)
 
 ## Requesting the Dependency
 
-TBD
+You will need up to three dependencies to pull in the right bits for your
+project.
+
+At minimum, you will need the `netcipher` base artifact. The `StrongBuilder`
+classes are in 2.0.0 and higher:
+
+```groovy
+compile 'info.guardianproject.netcipher:netcipher:2.0.0-alpha1'
+```
+
+If you are planning on using `HttpURLConnection` and `StrongConnectionBuilder`,
+that is all you need.
+
+If you plan on using one of the other supported HTTP client APIs and its
+associated builder, you need to *also* request the appropriate artifact
+*in addition to* requesting the `netcipher` artifact:
+
+|HTTP Client API      |NetCipher Artifact      |
+|:-------------------:|:----------------------:|
+|OkHttp3              | `info.guardianproject.netcipher:netcipher-okhttp3`    |
+|HttpClient           | `info.guardianproject.netcipher:netcipher-httpclient` |
+|Volley               | `info.guardianproject.netcipher:netcipher-volley`     |
+
+Plus, you will need whatever artifact contains your HTTP client API:
+
+|HTTP Client API      |Library Module          |
+|:-------------------:|:----------------------:|
+|OkHttp3              | `com.squareup.okhttp3:okhttp:3.4.2`    |
+|HttpClient           | `cz.msebera.android:httpclient:4.4.1.2` |
+|Volley               | `com.android.volley:volley:1.0.0`     |
+
+So, for example, a project wishing to use OkHttp3 and NetCipher together
+would have these dependencies, in addition to any others that the
+project needs:
+
+```groovy
+compile 'info.guardianproject.netcipher:netcipher:2.0.0-alpha1'
+compile 'info.guardianproject.netcipher:netcipher-okhttp3:2.0.0-alpha1'
+compile 'com.squareup.okhttp3:okhttp:3.4.2'
+```
+
+## Creating the OrbotHelper
+
+`OrbotHelper` is a singleton that manages a lot of the asynchronous
+communication between your app and Orbot. It is designed to be initialized
+fairly early on in your app's lifecycle. One likely candidate is to have
+a custom `Application` subclass, where you override `onCreate()` and
+set up `OrbotHelper`.
+
+So, you might have something like this:
+
+```java
+public class SampleApplication extends Application {
+  @Override
+  public void onCreate() {
+    super.onCreate();
+
+    OrbotHelper.get(this).init();
+  }
+}
+```
+
+`SampleApplication` would need to be registered in your manifest via
+the `<application>` tag:
+
+```xml
+<application
+    android:name=".SampleApplication"
+    ...
+    >
+```
 
 ## Creating a Builder
 
