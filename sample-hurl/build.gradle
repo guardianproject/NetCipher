@@ -6,8 +6,8 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 24
+    buildToolsVersion '24.0.1'
 
     sourceSets {
         main {
@@ -19,5 +19,11 @@ android {
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
+    }
+
+    lintOptions {
+        htmlReport true
+        xmlReport false
+        textReport false
     }
 }

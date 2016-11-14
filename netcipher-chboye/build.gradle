@@ -1,0 +1,87 @@
+apply plugin: 'com.android.library'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: '*.jar')
+    compile project(':libnetcipher')
+}
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion '24.0.1'
+    useLibrary 'org.apache.http.legacy'
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+
+        androidTest {
+            manifest.srcFile 'androidTest/AndroidManifest.xml'
+            java.srcDirs = ['androidTest/src']
+        }
+    }
+
+    lintOptions {
+        htmlReport true
+        xmlReport false
+        textReport false
+    }
+}
+
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
+        return; // Skip debug builds.
+    }
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile, sourcesJar, javadocJar, createPom
+    task.from variant.javaCompile.destinationDir
+    task.exclude('info/guardianproject/**/BuildConfig.**')
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.compile
+    options.addStringOption('notimestamp')
+    failOnError false
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+apply plugin: 'maven'
+
+task createPom << {
+    pom {
+        project {
+            name 'NetCipher ch.boye'
+            inceptionYear '2013'
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+        }
+    }.writeTo(project.getBuildDir().toString() + "/libs/" + project.name + "-" + project.version + ".pom")
+}

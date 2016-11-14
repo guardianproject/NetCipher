@@ -1,4 +1,4 @@
-sudo: false
+sudo: required  # workaround to prevent running out of memory
 
 language: android
 
@@ -14,12 +14,7 @@ env:
     - ADB_INSTALL_TIMEOUT=5
 
 jdk:
-  # the release build infrastructure uses OpenJDK from Debian
-  - openjdk7
-  # build against only one JDK for now, to get stable builds
-  # many developers use the Oracle JDK
-  #- oraclejdk8
-  #- oraclejdk7
+  - oraclejdk8
 
 #
 before_cache:
@@ -33,9 +28,11 @@ android:
   components:
     - tools
     - platform-tools
-    - build-tools-23.0.2
+    - build-tools-23.0.3
+    - build-tools-24.0.1
     - extra-android-m2repository
-    - android-22
+    - android-23
+    - android-24
     - android-$FIRST_EMULATOR_API_LEVEL
     - sys-img-armeabi-v7a-android-$FIRST_EMULATOR_API_LEVEL
     - android-$SECOND_EMULATOR_API_LEVEL
@@ -48,11 +45,17 @@ android:
 script:
   # run release build script
   - ./make-release-build
+  - for f in libnetcipher/netcipher-*.*; do sha256sum $f; done
   # clean up to start the gradle build from fresh git
   - git clean -fdx
   - git reset --hard
+  # print lint errors/warnings to build log
+  - sed -i 's,\s*textReport .*,\ttextReport true,g' */build.gradle
   # 'assemble' everything and run all checks that do not require a device/emulator
   - ./gradlew build -PdisablePreDex
+  # test release process
+  - ./gradlew jarRelease -PdisablePreDex
+  - for f in *netcipher*/build/libs/netcipher*.*; do sha256sum $f; done
   # start the emulator after the build to conserve memory
   - echo no | android create avd --force -n test -t android-$FIRST_EMULATOR_API_LEVEL
   - emulator -avd test -no-skin -no-audio -no-window &

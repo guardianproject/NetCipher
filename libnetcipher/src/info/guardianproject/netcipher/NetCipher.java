@@ -53,7 +53,7 @@ public class NetCipher {
     /**
      * Set the global HTTP proxy for all new {@link HttpURLConnection}s and
      * {@link HttpsURLConnection}s that are created after this is called.
-     * <p/>
+     * <p>
      * {@link #useTor()} will override this setting.  Traffic must be directed
      * to Tor using the proxy settings, and Orbot has its own proxy settings
      * for connections that need proxies to work.  So if "use Tor" is enabled,
@@ -75,7 +75,7 @@ public class NetCipher {
     /**
      * Set the global HTTP proxy for all new {@link HttpURLConnection}s and
      * {@link HttpsURLConnection}s that are created after this is called.
-     * <p/>
+     * <p>
      * {@link #useTor()} will override this setting.  Traffic must be directed
      * to Tor using the proxy settings, and Orbot has its own proxy settings
      * for connections that need proxies to work.  So if "use Tor" is enabled,
@@ -115,7 +115,7 @@ public class NetCipher {
      * s and {@link HttpsURLConnection}s that are created after this is called.
      * This overrides all future calls to {@link #setProxy(Proxy)}, except to
      * clear the proxy, e.g. {@code #setProxy(null)} or {@link #clearProxy()}.
-     * <p/>
+     * <p>
      * Traffic must be directed to Tor using the proxy settings, and Orbot has its
      * own proxy settings for connections that need proxies to work.  So if "use
      * Tor" is enabled, as tested by looking for the static instance of Proxy,

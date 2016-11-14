@@ -36,7 +36,6 @@ import ch.boye.httpclientandroidlib.conn.scheme.Scheme;
 import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
 import ch.boye.httpclientandroidlib.impl.client.DefaultHttpClient;
 import ch.boye.httpclientandroidlib.impl.conn.tsccm.ThreadSafeClientConnManager;
-import info.guardianproject.netcipher.R;
 
 public class StrongHttpsClient extends DefaultHttpClient {
 
@@ -51,7 +50,11 @@ public class StrongHttpsClient extends DefaultHttpClient {
     private final static String TRUSTSTORE_TYPE = "BKS";
     private final static String TRUSTSTORE_PASSWORD = "changeit";
 
-    public StrongHttpsClient(Context context) {
+    /**
+     * @param context the app {@link Context}
+     * @param resid the BKS keystore as a raw resource ID
+     */
+    public StrongHttpsClient(Context context, int resid) {
         this.context = context;
 
         mRegistry = new SchemeRegistry();
@@ -60,7 +63,7 @@ public class StrongHttpsClient extends DefaultHttpClient {
 
 
         try {
-            KeyStore keyStore = loadKeyStore();
+            KeyStore keyStore = loadKeyStore(resid);
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(keyStore);
             sFactory = new StrongSSLSocketFactory(context, trustManagerFactory.getTrustManagers(), keyStore, TRUSTSTORE_PASSWORD);
@@ -70,12 +73,12 @@ public class StrongHttpsClient extends DefaultHttpClient {
         }
     }
 
-    private KeyStore loadKeyStore () throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException
-    {
+    private KeyStore loadKeyStore(int resid)
+            throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
         KeyStore trustStore = KeyStore.getInstance(TRUSTSTORE_TYPE);
         // load our bundled cacerts from raw assets
-        InputStream in = context.getResources().openRawResource(R.raw.debiancacerts);
+        InputStream in = context.getResources().openRawResource(resid);
         trustStore.load(in, TRUSTSTORE_PASSWORD.toCharArray());
 
         return trustStore;

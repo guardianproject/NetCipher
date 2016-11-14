@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package info.guardianproject.netcipher.web;
+package info.guardianproject.netcipher.webkit;
 
 import java.io.IOException;
 import java.io.PrintWriter;

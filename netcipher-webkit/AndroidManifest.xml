@@ -1,7 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="info.guardianproject.netcipher.okhttp3"
-    android:versionCode="12"
-    android:versionName="1.2">
+    package="info.guardianproject.netcipher.webkit">
 
     <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="22" />
 
