@@ -135,7 +135,6 @@ public class HttpURLConnectionTest {
     public void testStandardHttpURLConnection()
             throws MalformedURLException, IOException, KeyManagementException, NoSuchAlgorithmException {
         String[] hosts = {
-                "yahoo.com",
                 "www.yandex.ru",
                 "openstreetmap.org",
                 "f-droid.org",
@@ -173,7 +172,6 @@ public class HttpURLConnectionTest {
     public void testConnectHttps()
             throws MalformedURLException, IOException, KeyManagementException {
         String[] hosts = {
-                "yahoo.com",
                 "www.yandex.ru",
                 "openstreetmap.org",
                 "f-droid.org",
@@ -208,7 +206,6 @@ public class HttpURLConnectionTest {
             throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
         String[] hosts = {
                 // these are here to make sure it works with good servers too
-                "yahoo.com",
                 "www.yandex.ru",
                 "openstreetmap.org",
                 "f-droid.org",
