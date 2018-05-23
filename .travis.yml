@@ -57,7 +57,7 @@ script:
   - ./gradlew jarRelease -PdisablePreDex
   - for f in *netcipher*/build/libs/netcipher*.*; do sha256sum $f; done
   # start the emulator after the build to conserve memory
-  - echo no | android create avd --force -n test -t android-$FIRST_EMULATOR_API_LEVEL
+  - echo no | android create avd --force -n test --abi default/armeabi-v7a -t android-$FIRST_EMULATOR_API_LEVEL
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
@@ -71,7 +71,7 @@ script:
   - kill `ps -ef | grep '[e]mulator' | awk {'print$2'}`
 
   # now run the second emulator
-  - echo no | android create avd --force -n test -t android-$SECOND_EMULATOR_API_LEVEL
+  - echo no | android create avd --force -n test --abi default/armeabi-v7a -t android-$SECOND_EMULATOR_API_LEVEL
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
