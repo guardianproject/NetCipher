@@ -145,6 +145,10 @@ public class HttpURLConnectionTest {
                 // uses SNI
                 "firstlook.org",
                 "guardianproject.info",
+                // TLS 1.3 enabled
+                "enabled.tls13.com",
+                "www.allizom.org",
+                "www.theregister.co.uk",
         };
         prefetchDns(hosts);
         // reset the default SSLSocketFactory, since it is global
@@ -182,6 +186,10 @@ public class HttpURLConnectionTest {
                 // uses SNI
                 "firstlook.org",
                 "guardianproject.info",
+                // TLS 1.3 enabled
+                "enabled.tls13.com",
+                "www.allizom.org",
+                "www.theregister.co.uk",
         };
         prefetchDns(hosts);
         for (String host : hosts) {
@@ -214,6 +222,10 @@ public class HttpURLConnectionTest {
                 // uses SNI
                 "firstlook.org",
                 "guardianproject.info",
+                // TLS 1.3 enabled
+                "enabled.tls13.com",
+                "www.allizom.org",
+                "www.theregister.co.uk",
         };
         prefetchDns(hosts);
         for (String host : hosts) {
