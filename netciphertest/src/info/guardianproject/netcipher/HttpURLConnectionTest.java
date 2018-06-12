@@ -240,7 +240,12 @@ public class HttpURLConnectionTest {
                 "wrong.host.badssl.com",
                 "self-signed.badssl.com",
                 "expired.badssl.com",
+                "untrusted-root.badssl.com",
                 "rc4.badssl.com",
+                "rc4-md5.badssl.com",
+                "null.badssl.com",
+                "dh480.badssl.com",
+                "dh512.badssl.com",
         };
         prefetchDns(hosts);
         for (String host : hosts) {
@@ -253,7 +258,7 @@ public class HttpURLConnectionTest {
             assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
             try {
                 connection.getContent();
-                System.out.println("This should not have connected, it has BAD SSL!");
+                System.out.println("This should not have connected, it has BAD SSL: " + host);
                 fail();
             } catch (IOException e) {
                 e.printStackTrace();
