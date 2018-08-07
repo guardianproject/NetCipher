@@ -11,7 +11,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0+'
+        // 2.2.2 is the version in Debian/stretch
+        classpath 'com.android.tools.build:gradle:2.2.2'
     }
 }
 
