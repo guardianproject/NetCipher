@@ -181,7 +181,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
              * should never even have been an option in TLS.
              */
             ArrayList<String> enabledCiphers = new ArrayList<String>(10);
-            Pattern exclude = Pattern.compile(".*(_DES|DH_|DSS|EXPORT|MD5|NULL|RC4).*");
+            Pattern exclude = Pattern.compile(".*(_DES|DH_|DSS|EXPORT|MD5|NULL|RC4|TLS_FALLBACK_SCSV).*");
             for (String cipher : delegate.getSupportedCipherSuites()) {
                 if (!exclude.matcher(cipher).matches()) {
                     enabledCiphers.add(cipher);
