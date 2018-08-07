@@ -526,11 +526,13 @@ public class OrbotHelper implements ProxyHelper {
     }
 
     /**
-     * Initializes the connection to Orbot, revalidating that it
-     * is installed and requesting fresh status broadcasts.
+     * Initializes the connection to Orbot, revalidating that it is installed
+     * and requesting fresh status broadcasts.  This is best run in your app's
+     * {@link android.app.Application} subclass, in its
+     * {@link android.app.Application#onCreate()} method.
      *
-     * @return true if initialization is proceeding, false if
-     * Orbot is not installed
+     * @return true if initialization is proceeding, false if Orbot is not installed,
+     * or version of Orbot with a unofficial signing key is present.
      */
     public boolean init() {
         Intent orbot=OrbotHelper.getOrbotStartIntent(ctxt);
