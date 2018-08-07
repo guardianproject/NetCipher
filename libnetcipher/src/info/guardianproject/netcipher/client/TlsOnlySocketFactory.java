@@ -89,6 +89,9 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
         return delegate.getSupportedCipherSuites();
     }
 
+    /**
+     * @see <a href="https://timtaubert.de/blog/2014/11/the-sad-state-of-server-side-tls-session-resumption-implementations/">The sad state of server-side TLS Session Resumption implementations</a>
+     */
     private Socket makeSocketSafe(Socket socket, String host) {
         if (socket instanceof SSLSocket) {
             TlsOnlySSLSocket tempSocket =
@@ -96,8 +99,9 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
 
             if (delegate instanceof SSLCertificateSocketFactory &&
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                ((android.net.SSLCertificateSocketFactory) delegate)
-                        .setHostname(socket, host);
+                SSLCertificateSocketFactory factory = (SSLCertificateSocketFactory) delegate;
+                factory.setHostname(socket, host);
+                factory.setUseSessionTickets(socket, false);
             } else {
                 tempSocket.setHostname(host);
             }
