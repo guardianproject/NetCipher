@@ -1,0 +1,31 @@
+apply plugin: 'com.android.application'
+
+dependencies {
+    compile project(':netcipher-webkit')
+
+    // also available as maven artifact via:
+    // compile("info.guardianproject.netcipher:netcipher-webkit:2.0.0-alpha1")
+}
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion '24.0.1'
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+    }
+
+    lintOptions {
+        htmlReport true
+        xmlReport false
+        textReport false
+    }
+}
