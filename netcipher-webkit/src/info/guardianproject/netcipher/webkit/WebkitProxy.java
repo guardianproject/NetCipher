@@ -286,13 +286,6 @@ public class WebkitProxy {
     private static boolean setKitKatProxy(String appClass, Context appContext, String host, int port) {
         //Context appContext = webView.getContext().getApplicationContext();
 
-        if (host != null) {
-            System.setProperty("http.proxyHost", host);
-            System.setProperty("http.proxyPort", Integer.toString(port));
-            System.setProperty("https.proxyHost", host);
-            System.setProperty("https.proxyPort", Integer.toString(port));
-        }
-
         try {
             Class applictionCls = Class.forName(appClass);
             Field loadedApkField = applictionCls.getField("mLoadedApk");
@@ -381,12 +374,6 @@ public class WebkitProxy {
     @TargetApi(21) // for android.util.ArrayMap methods
     @SuppressWarnings("rawtypes")
     private static boolean setWebkitProxyLollipop(Context appContext, String host, int port) {
-        if (host != null) {
-            System.setProperty("http.proxyHost", host);
-            System.setProperty("http.proxyPort", Integer.toString(port));
-            System.setProperty("https.proxyHost", host);
-            System.setProperty("https.proxyPort", Integer.toString(port));
-        }
 
         try {
             Class applictionClass = Class.forName("android.app.Application");
