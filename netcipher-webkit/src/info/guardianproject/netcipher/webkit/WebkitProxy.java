@@ -286,13 +286,6 @@ public class WebkitProxy {
     private static boolean setKitKatProxy(String appClass, Context appContext, String host, int port) {
         //Context appContext = webView.getContext().getApplicationContext();
 
-        if (host != null) {
-            System.setProperty("http.proxyHost", host);
-            System.setProperty("http.proxyPort", Integer.toString(port));
-            System.setProperty("https.proxyHost", host);
-            System.setProperty("https.proxyPort", Integer.toString(port));
-        }
-
         try {
             Class applictionCls = Class.forName(appClass);
             Field loadedApkField = applictionCls.getField("mLoadedApk");
@@ -381,10 +374,7 @@ public class WebkitProxy {
     @TargetApi(21) // for android.util.ArrayMap methods
     @SuppressWarnings("rawtypes")
     private static boolean setWebkitProxyLollipop(Context appContext, String host, int port) {
-        System.setProperty("http.proxyHost", host);
-        System.setProperty("http.proxyPort", Integer.toString(port));
-        System.setProperty("https.proxyHost", host);
-        System.setProperty("https.proxyPort", Integer.toString(port));
+
         try {
             Class applictionClass = Class.forName("android.app.Application");
             Field mLoadedApkField = applictionClass.getDeclaredField("mLoadedApk");
@@ -400,6 +390,14 @@ public class WebkitProxy {
                     if (clazz.getName().contains("ProxyChangeListener")) {
                         Method onReceiveMethod = clazz.getDeclaredMethod("onReceive", Context.class, Intent.class);
                         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
+                        Object proxyInfo = null;
+                        if (host != null) {
+                            final String CLASS_NAME = "android.net.ProxyInfo";
+                            Class cls = Class.forName(CLASS_NAME);
+                            Method buildDirectProxyMethod = cls.getMethod("buildDirectProxy", String.class, Integer.TYPE);
+                            proxyInfo = buildDirectProxyMethod.invoke(cls, host, port);
+                        }
+                        intent.putExtra("proxy", (Parcelable) proxyInfo);
                         onReceiveMethod.invoke(receiver, appContext, intent);
                     }
                 }
@@ -635,8 +633,10 @@ public class WebkitProxy {
             resetProxyForGingerBread(ctx);
         } else if (Build.VERSION.SDK_INT < 19) {
             resetProxyForICS();
-        } else {
+        } else if (Build.VERSION.SDK_INT < 20) {
             resetKitKatProxy(appClass, ctx);
+        } else if (Build.VERSION.SDK_INT >= 21) {
+            resetLollipopProxy(appClass, ctx);
         }
 
     }
