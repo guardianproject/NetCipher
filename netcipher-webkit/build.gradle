@@ -2,6 +2,11 @@ apply plugin: 'com.android.library'
 
 dependencies {
     compile project(':libnetcipher')
+
+    androidTestCompile 'junit:junit:4.12'
+    androidTestCompile "com.android.support.test:runner:1.0.2"
+    androidTestCompile "com.android.support.test:rules:1.0.2"
+    androidTestCompile "com.android.support.test.espresso:espresso-core:3.0.2"
 }
 
 android {
@@ -23,6 +28,10 @@ android {
         androidTest {
             manifest.srcFile 'androidTest/AndroidManifest.xml'
             java.srcDirs = ['androidTest/src']
+        }
+
+        defaultConfig {
+            testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
         }
     }
 
