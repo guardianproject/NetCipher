@@ -30,13 +30,13 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 public class WebviewProxyTestActivityTest {
 
     public static final String GOOD_BODY = "<html><head></head><body><h1>good</h1></body></html>";
-    public static final int TEST_WEB_SERVER_PORT = 18488;
 
     static TestWebServer testWebServer = null;
 
     public static class TestWebServer extends NanoHTTPD {
         public TestWebServer() throws IOException {
-            super(TEST_WEB_SERVER_PORT);
+            // port = 0 means to just auto-select a random available port
+            super(0);
         }
 
         @Override
@@ -51,6 +51,7 @@ public class WebviewProxyTestActivityTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
+
         // start local web server
         testWebServer = new TestWebServer();
         testWebServer.start();
@@ -71,7 +72,7 @@ public class WebviewProxyTestActivityTest {
                 .check(matches(isAssignableFrom(WebView.class)));
 
         final WebView webView = (WebView) activityTestRule.getActivity().findViewById(webviewId);
-        loadUrl(webView, String.format("http://localhost:%d", TEST_WEB_SERVER_PORT));
+        loadUrl(webView, String.format("http://localhost:%d", testWebServer.getListeningPort()));
         String html = getHtml(webView);
 
         Assert.assertNotNull(html);
