@@ -17,7 +17,7 @@ public class WebviewProxyTestActivity extends Activity {
         webView = new WebView(this);
         webView.setId(View.generateViewId());
         setContentView(webView);
-        webView.loadData("<html><h1>default</h1></html>", "text/html", StandardCharsets.UTF_8.name());
+        webView.loadData("<html><h1>default</h1></html>", "text/html", "UTF-8");
         webView.getSettings().setJavaScriptEnabled(true);
     }
 
