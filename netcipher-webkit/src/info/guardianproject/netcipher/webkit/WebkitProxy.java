@@ -227,7 +227,7 @@ public class WebkitProxy {
     }
 
 
-    private static Object getFieldValueSafely(Field field, Object classInstance) throws IllegalArgumentException, IllegalAccessException {
+    private static Object getFieldValueSafely(Field field, Object classInstance) throws IllegalAccessException {
         boolean oldAccessibleValue = field.isAccessible();
         field.setAccessible(true);
         Object result = field.get(classInstance);
@@ -691,8 +691,7 @@ public class WebkitProxy {
     }
 
     private static Object getDeclaredField(Object obj, String name)
-            throws SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+            throws  NoSuchFieldException,IllegalAccessException {
         Field f = obj.getClass().getDeclaredField(name);
         f.setAccessible(true);
         Object out = f.get(obj);
@@ -702,8 +701,7 @@ public class WebkitProxy {
     }
 
     private static void setDeclaredField(Object obj, String name, Object value)
-            throws SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+            throws  NoSuchFieldException,IllegalAccessException {
         Field f = obj.getClass().getDeclaredField(name);
         f.setAccessible(true);
         f.set(obj, value);
