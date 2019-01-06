@@ -47,7 +47,7 @@ import java.net.Socket;
 
 public class WebkitProxy {
 
-    private final static String DEFAULT_HOST = "localhost";//"127.0.0.1";
+    private final static String DEFAULT_HOST = "localhost";
     private final static int DEFAULT_PORT = 8118;
     private final static int DEFAULT_SOCKS_PORT = 9050;
 
@@ -101,21 +101,6 @@ public class WebkitProxy {
 
         System.setProperty("socksProxyHost", host);
         System.setProperty("socksProxyPort", Integer.toString(DEFAULT_SOCKS_PORT));
-        
-        
-        /*
-        ProxySelector pSelect = new ProxySelector();
-        pSelect.addProxy(Proxy.Type.HTTP, host, port);
-        ProxySelector.setDefault(pSelect);
-        */
-        /*
-        System.setProperty("http_proxy", "http://" + host + ":" + port);
-        System.setProperty("proxy-server", "http://" + host + ":" + port);
-        System.setProperty("host-resolver-rules","MAP * 0.0.0.0 , EXCLUDE myproxy");
-
-        System.getProperty("networkaddress.cache.ttl", "-1");
-        */
-
     }
 
     private static void resetSystemProperties() {
@@ -135,7 +120,6 @@ public class WebkitProxy {
 
         System.setProperty("socksProxyHost", "");
         System.setProperty("socksProxyPort", Integer.toString(DEFAULT_SOCKS_PORT));
-
     }
 
     /**
@@ -452,183 +436,6 @@ public class WebkitProxy {
 
     }
 
-    /**
-     private static boolean setKitKatProxy0(Context ctx, String host, int port)
-     {
-
-     try
-     {
-     Class cmClass = Class.forName("android.net.ConnectivityManager");
-
-     Class proxyPropertiesClass = Class.forName("android.net.ProxyProperties");
-     if (cmClass != null && proxyPropertiesClass != null)
-     {
-     Constructor c = proxyPropertiesClass.getConstructor(String.class, Integer.TYPE,
-     String.class);
-
-     if (c != null)
-     {
-     c.setAccessible(true);
-
-     Object proxyProps = c.newInstance(host, port, null);
-     ConnectivityManager cm =
-     (ConnectivityManager)ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-     Method mSetGlobalProxy = cmClass.getDeclaredMethod("setGlobalProxy", proxyPropertiesClass);
-
-     mSetGlobalProxy.invoke(cm, proxyProps);
-
-     return true;
-     }
-
-     }
-     } catch (Exception e)
-     {
-     Log.e("ProxySettings",
-     "ConnectivityManager.setGlobalProxy ",e);
-     }
-
-     return false;
-
-     }
-     */
-    //CommandLine.initFromFile(COMMAND_LINE_FILE);
-
-    /**
-     * private static boolean setKitKatProxy2 (Context ctx, String host, int port)
-     * {
-     * <p>
-     * String commandLinePath = "/data/local/tmp/orweb.conf";
-     * try
-     * {
-     * Class webViewCoreClass = Class.forName("org.chromium.content.common.CommandLine");
-     * <p>
-     * if (webViewCoreClass != null)
-     * {
-     * for (Method method : webViewCoreClass.getDeclaredMethods())
-     * {
-     * Log.d("Orweb","Proxy methods: " + method.getName());
-     * }
-     * <p>
-     * Method m = webViewCoreClass.getDeclaredMethod("initFromFile",
-     * String.class);
-     * <p>
-     * if (m != null)
-     * {
-     * m.setAccessible(true);
-     * m.invoke(null, commandLinePath);
-     * return true;
-     * }
-     * else
-     * return false;
-     * }
-     * } catch (Exception e)
-     * {
-     * Log.e("ProxySettings",
-     * "Exception setting WebKit proxy through android.net.ProxyProperties: "
-     * + e.toString());
-     * } catch (Error e)
-     * {
-     * Log.e("ProxySettings",
-     * "Exception setting WebKit proxy through android.webkit.Network: "
-     * + e.toString());
-     * }
-     * <p>
-     * return false;
-     * }
-     * <p>
-     * /**
-     * private static boolean setKitKatProxy (Context ctx, String host, int port)
-     * {
-     * <p>
-     * try
-     * {
-     * Class webViewCoreClass = Class.forName("android.net.Proxy");
-     * <p>
-     * Class proxyPropertiesClass = Class.forName("android.net.ProxyProperties");
-     * if (webViewCoreClass != null && proxyPropertiesClass != null)
-     * {
-     * for (Method method : webViewCoreClass.getDeclaredMethods())
-     * {
-     * Log.d("Orweb","Proxy methods: " + method.getName());
-     * }
-     * <p>
-     * Method m = webViewCoreClass.getDeclaredMethod("setHttpProxySystemProperty",
-     * proxyPropertiesClass);
-     * Constructor c = proxyPropertiesClass.getConstructor(String.class, Integer.TYPE,
-     * String.class);
-     * <p>
-     * if (m != null && c != null)
-     * {
-     * m.setAccessible(true);
-     * c.setAccessible(true);
-     * Object properties = c.newInstance(host, port, null);
-     * <p>
-     * m.invoke(null, properties);
-     * return true;
-     * }
-     * else
-     * return false;
-     * }
-     * } catch (Exception e)
-     * {
-     * Log.e("ProxySettings",
-     * "Exception setting WebKit proxy through android.net.ProxyProperties: "
-     * + e.toString());
-     * } catch (Error e)
-     * {
-     * Log.e("ProxySettings",
-     * "Exception setting WebKit proxy through android.webkit.Network: "
-     * + e.toString());
-     * }
-     * <p>
-     * return false;
-     * }
-     * <p>
-     * private static boolean resetProxyForKitKat ()
-     * {
-     * <p>
-     * try
-     * {
-     * Class webViewCoreClass = Class.forName("android.net.Proxy");
-     * <p>
-     * Class proxyPropertiesClass = Class.forName("android.net.ProxyProperties");
-     * if (webViewCoreClass != null && proxyPropertiesClass != null)
-     * {
-     * for (Method method : webViewCoreClass.getDeclaredMethods())
-     * {
-     * Log.d("Orweb","Proxy methods: " + method.getName());
-     * }
-     * <p>
-     * Method m = webViewCoreClass.getDeclaredMethod("setHttpProxySystemProperty",
-     * proxyPropertiesClass);
-     * <p>
-     * if (m != null)
-     * {
-     * m.setAccessible(true);
-     * <p>
-     * m.invoke(null, null);
-     * return true;
-     * }
-     * else
-     * return false;
-     * }
-     * } catch (Exception e)
-     * {
-     * Log.e("ProxySettings",
-     * "Exception setting WebKit proxy through android.net.ProxyProperties: "
-     * + e.toString());
-     * } catch (Error e)
-     * {
-     * Log.e("ProxySettings",
-     * "Exception setting WebKit proxy through android.webkit.Network: "
-     * + e.toString());
-     * }
-     * <p>
-     * return false;
-     * }
-     **/
-
     public static void resetProxy(String appClass, Context ctx) throws Exception {
 
         resetSystemProperties();
@@ -699,8 +506,6 @@ public class WebkitProxy {
         Field f = obj.getClass().getDeclaredField(name);
         f.setAccessible(true);
         Object out = f.get(obj);
-        // System.out.println(obj.getClass().getName() + "." + name + " = "+
-        // out);
         return out;
     }
 
@@ -722,8 +527,6 @@ public class WebkitProxy {
             Method method = c.getMethod(methodName);
             out = method.invoke(object);
         }
-        // System.out.println(object.getClass().getName() + "." + methodName +
-        // "() = "+ out);
         return out;
     }
 
