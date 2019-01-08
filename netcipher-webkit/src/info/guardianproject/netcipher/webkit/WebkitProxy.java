@@ -436,23 +436,23 @@ public class WebkitProxy {
 
     }
 
-    public static void resetProxy(String appClass, Context ctx) throws Exception {
+    public static boolean resetProxy(String appClass, Context ctx) throws Exception {
 
         resetSystemProperties();
 
         if (Build.VERSION.SDK_INT < 14) {
-            resetProxyForGingerBread(ctx);
+            return resetProxyForGingerBread(ctx);
         } else if (Build.VERSION.SDK_INT < 19) {
-            resetProxyForICS();
+            return resetProxyForICS();
         } else if (Build.VERSION.SDK_INT < 20) {
-            resetKitKatProxy(appClass, ctx);
+            return resetKitKatProxy(appClass, ctx);
         } else if (Build.VERSION.SDK_INT >= 21) {
-            resetLollipopProxy(appClass, ctx);
+            return resetLollipopProxy(appClass, ctx);
         }
-
+        return false;
     }
 
-    private static void resetProxyForICS() throws Exception {
+    private static boolean resetProxyForICS() throws Exception {
         try {
             Class webViewCoreClass = Class.forName("android.webkit.WebViewCore");
             Class proxyPropertiesClass = Class.forName("android.net.ProxyProperties");
@@ -465,8 +465,10 @@ public class WebkitProxy {
 
                     // android.webkit.WebViewCore.EventHub.PROXY_CHANGED = 193;
                     m.invoke(null, 193, null);
+                    return true;
                 }
             }
+            return false;
         } catch (Exception e) {
             Log.e("ProxySettings",
                     "Exception setting WebKit proxy through android.net.ProxyProperties: "
@@ -480,11 +482,13 @@ public class WebkitProxy {
         }
     }
 
-    private static void resetProxyForGingerBread(Context ctx) throws Exception {
+    private static boolean resetProxyForGingerBread(Context ctx) throws Exception {
         Object requestQueueObject = getRequestQueue(ctx);
         if (requestQueueObject != null) {
             setDeclaredField(requestQueueObject, "mProxyHost", null);
+            return true;
         }
+        return false;
     }
 
     public static Object getRequestQueue(Context ctx) throws Exception {
