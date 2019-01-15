@@ -2,6 +2,14 @@ apply plugin: 'com.android.library'
 
 dependencies {
     compile project(':libnetcipher')
+
+    androidTestCompile "com.android.support:multidex:1.0.3"
+    androidTestCompile "junit:junit:4.12"
+    androidTestCompile "com.android.support.test:runner:1.0.2"
+    androidTestCompile "com.android.support.test:rules:1.0.2"
+    androidTestCompile "com.android.support.test.espresso:espresso-core:3.0.2"
+    androidTestCompile "org.nanohttpd:nanohttpd:2.2.0"
+    androidTestCompile "net.lightbody.bmp:browsermob-core:2.1.5"
 }
 
 android {
@@ -24,6 +32,16 @@ android {
             manifest.srcFile 'androidTest/AndroidManifest.xml'
             java.srcDirs = ['androidTest/src']
         }
+
+        defaultConfig {
+            testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        }
+
+        dexOptions {
+            // tests have massive dependencies and
+            // building on api-level < 22 requires a ton of memory
+            javaMaxHeapSize "1536m"
+        }
     }
 
     lintOptions {
@@ -31,6 +49,16 @@ android {
         xmlReport false
         textReport false
     }
+
+    defaultConfig {
+        multiDexEnabled true
+    }
+
+    packagingOptions {
+        pickFirst  'META-INF/license.txt'
+        pickFirst  'META-INF/LICENSE'
+    }
+
 }
 
 android.libraryVariants.all { variant ->
