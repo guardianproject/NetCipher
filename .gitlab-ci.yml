@@ -74,6 +74,15 @@ connected24:
     AVD_PACKAGE: "system-images;android-${AVD_SDK};${AVD_TAG};armeabi-v7a"
   <<: *connected-template
 
+connected22:
+  retry: 1
+  <<: *test-template
+  variables:
+    AVD_SDK: "22"
+    AVD_TAG: "default"
+    AVD_PACKAGE: "system-images;android-${AVD_SDK};${AVD_TAG};armeabi-v7a"
+  <<: *connected-template
+
 
 after_script:
     # this file changes every time but should not be cached
