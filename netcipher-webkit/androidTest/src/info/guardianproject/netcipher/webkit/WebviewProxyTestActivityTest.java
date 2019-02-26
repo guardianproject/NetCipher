@@ -1,7 +1,6 @@
 package info.guardianproject.netcipher.webkit;
 
 import android.os.Build;
-import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -171,7 +170,11 @@ public class WebviewProxyTestActivityTest {
 
         // wait until webview loaded or timeout
         while (!finished.get() && timeout > System.currentTimeMillis()) {
-            Thread.sleep(50);
+            Thread.sleep(50 * TestHelper.timeoutScale());
+        }
+
+        if (System.currentTimeMillis() >= timeout) {
+            throw new RuntimeException("timeout exceeded.");
         }
     }
 
@@ -207,7 +210,11 @@ public class WebviewProxyTestActivityTest {
 
         // wait until content is ready
         while (htmlContent.get() == null && timeout > System.currentTimeMillis()) {
-            Thread.sleep(50);
+            Thread.sleep(50 * TestHelper.timeoutScale());
+        }
+
+        if (System.currentTimeMillis() >= timeout) {
+            throw new RuntimeException("timeout exceeded.");
         }
 
         return htmlContent.get();

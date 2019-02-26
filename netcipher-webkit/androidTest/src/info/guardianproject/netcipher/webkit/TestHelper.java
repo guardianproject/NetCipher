@@ -12,7 +12,7 @@ public class TestHelper {
      */
     public static long timeoutScale() {
         if (isEmulator() && isARM()) {
-            return 10L;
+            return 25L;
         } else {
             return 1L;
         }
