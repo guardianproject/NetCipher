@@ -148,7 +148,7 @@ public class WebviewProxyTestActivityTest {
      */
     private void loadUrl(final WebView webView, final String url) throws InterruptedException {
 
-        long timeout = System.currentTimeMillis() + (5 * 1000);
+        long timeout = System.currentTimeMillis() + (5 * 1000 * TestHelper.timeoutScale());
         final AtomicBoolean finished = new AtomicBoolean(false);
 
         activityTestRule.getActivity().runOnUiThread(new Runnable() {
@@ -175,7 +175,7 @@ public class WebviewProxyTestActivityTest {
      * fetch content of a webview
      */
     private String getHtml(final WebView webView) throws InterruptedException {
-        long timeout = System.currentTimeMillis() + (5 * 1000);
+        long timeout = System.currentTimeMillis() + (5 * 1000 * TestHelper.timeoutScale());
         final AtomicReference<String> htmlContent = new AtomicReference<>(null);
         activityTestRule.getActivity().runOnUiThread(new Runnable() {
             @Override
