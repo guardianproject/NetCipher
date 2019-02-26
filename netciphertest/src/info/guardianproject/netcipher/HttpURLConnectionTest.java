@@ -266,11 +266,10 @@ public class HttpURLConnectionTest {
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
             connection.setReadTimeout(20000);
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
-            assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
+            assertTrue("socket factory of type 'TlsOnlySocketFactory' expected", sslSocketFactory instanceof TlsOnlySocketFactory);
             try {
                 connection.getContent();
-                System.out.println("This should not have connected, it has BAD SSL: " + host);
-                fail();
+                fail("This should not have connected, it has BAD SSL: " + host);
             } catch (IOException e) {
                 e.printStackTrace();
                 // success! these should fail!
