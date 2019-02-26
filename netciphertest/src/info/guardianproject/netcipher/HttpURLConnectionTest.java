@@ -16,6 +16,7 @@
 
 package info.guardianproject.netcipher;
 
+import android.os.Build;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -33,6 +34,8 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -65,6 +68,10 @@ public class HttpURLConnectionTest {
                 }
             }.start();
         }
+    }
+
+    private void prefetchDns(List<String> hosts) {
+        prefetchDns((String[]) hosts.toArray());
     }
 
     @Test
@@ -247,17 +254,20 @@ public class HttpURLConnectionTest {
     @Test
     public void testConnectBadSslCom()
             throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
-        String[] hosts = {
+        List<String> hosts = Arrays.asList(
                 "wrong.host.badssl.com",
                 "self-signed.badssl.com",
                 "expired.badssl.com",
                 "untrusted-root.badssl.com",
                 "rc4.badssl.com",
                 "rc4-md5.badssl.com",
-                "null.badssl.com",
-                "dh480.badssl.com",
-                "dh512.badssl.com",
-        };
+                "null.badssl.com");
+
+        if (Build.VERSION.SDK_INT > 22 ){
+            hosts.add("dh480.badssl.com");
+            hosts.add("dh512.badssl.com");
+        }
+
         prefetchDns(hosts);
         for (String host : hosts) {
             URL url = new URL("https://" + host);
