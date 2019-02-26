@@ -59,6 +59,10 @@ android {
         pickFirst  'META-INF/LICENSE'
     }
 
+    compileOptions {
+        sourceCompatibility = '1.7'
+        targetCompatibility = '1.7'
+    }
 }
 
 android.libraryVariants.all { variant ->
