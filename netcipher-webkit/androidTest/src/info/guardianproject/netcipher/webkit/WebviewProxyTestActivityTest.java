@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -127,6 +128,9 @@ public class WebviewProxyTestActivityTest {
     public void testWebkitProxy() throws Exception {
 
         Assume.assumeTrue("API level has to be >= 19", Build.VERSION.SDK_INT >= 19);
+        Assume.assumeFalse("support for API level 22 and 23 is broken, " +
+                "see: https://gitlab.com/guardianproject/NetCipher/issues/1",
+                Arrays.asList(22, 23).contains(Build.VERSION.SDK_INT));
 
         int webviewId = activityTestRule.getActivity().getWebViewId();
         onView(withId(webviewId))
