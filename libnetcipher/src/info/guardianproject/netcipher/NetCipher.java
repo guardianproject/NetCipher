@@ -21,7 +21,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
+import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
+import info.guardianproject.netcipher.proxy.OrbotHelper;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -30,13 +35,6 @@ import java.net.URI;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-
-import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
-import info.guardianproject.netcipher.proxy.OrbotHelper;
 
 public class NetCipher {
     private static final String TAG = "NetCipher";
@@ -47,6 +45,8 @@ public class NetCipher {
 
     public final static Proxy ORBOT_HTTP_PROXY = new Proxy(Proxy.Type.HTTP,
             new InetSocketAddress("127.0.0.1", OrbotHelper.DEFAULT_PROXY_HTTP_PORT));
+    public final static Proxy ORBOT_SOCKS_PROXY = new Proxy(Proxy.Type.SOCKS,
+            new InetSocketAddress("127.0.0.1", OrbotHelper.DEFAULT_PROXY_SOCKS_PORT));
 
     private static Proxy proxy;
 
@@ -122,7 +122,11 @@ public class NetCipher {
      * then no other proxy settings are allowed to override the current Tor proxy.
      */
     public static void useTor() {
-        setProxy(ORBOT_HTTP_PROXY);
+        if (Build.VERSION.SDK_INT < 24) {
+            setProxy(ORBOT_HTTP_PROXY);
+        } else {
+            setProxy(ORBOT_SOCKS_PROXY);
+        }
     }
 
     /**
@@ -167,8 +171,13 @@ public class NetCipher {
             throws IOException {
         // .onion addresses only work via Tor, so force Tor for all of them
         Proxy proxy = NetCipher.proxy;
-        if (OrbotHelper.isOnionAddress(url))
-            proxy = ORBOT_HTTP_PROXY;
+        if (OrbotHelper.isOnionAddress(url)) {
+            if (Build.VERSION.SDK_INT < 24) {
+                proxy = ORBOT_HTTP_PROXY;
+            } else {
+                proxy = ORBOT_SOCKS_PROXY;
+            }
+        }
 
         HttpURLConnection connection;
         if (proxy != null) {
