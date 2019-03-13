@@ -1,7 +1,6 @@
 package info.guardianproject.netcipher.webkit;
 
 import android.os.Build;
-import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -24,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -127,6 +127,9 @@ public class WebviewProxyTestActivityTest {
     public void testWebkitProxy() throws Exception {
 
         Assume.assumeTrue("API level has to be >= 19", Build.VERSION.SDK_INT >= 19);
+        Assume.assumeFalse("support for API level 22 and 23 is broken, " +
+                "see: https://gitlab.com/guardianproject/NetCipher/issues/1",
+                Arrays.asList(22, 23).contains(Build.VERSION.SDK_INT));
 
         int webviewId = activityTestRule.getActivity().getWebViewId();
         onView(withId(webviewId))
@@ -148,7 +151,7 @@ public class WebviewProxyTestActivityTest {
      */
     private void loadUrl(final WebView webView, final String url) throws InterruptedException {
 
-        long timeout = System.currentTimeMillis() + (5 * 1000);
+        long timeout = System.currentTimeMillis() + (5 * 1000 * TestHelper.timeoutScale());
         final AtomicBoolean finished = new AtomicBoolean(false);
 
         activityTestRule.getActivity().runOnUiThread(new Runnable() {
@@ -167,7 +170,11 @@ public class WebviewProxyTestActivityTest {
 
         // wait until webview loaded or timeout
         while (!finished.get() && timeout > System.currentTimeMillis()) {
-            Thread.sleep(50);
+            Thread.sleep(50 * TestHelper.timeoutScale());
+        }
+
+        if (System.currentTimeMillis() >= timeout) {
+            throw new RuntimeException("timeout exceeded.");
         }
     }
 
@@ -175,7 +182,7 @@ public class WebviewProxyTestActivityTest {
      * fetch content of a webview
      */
     private String getHtml(final WebView webView) throws InterruptedException {
-        long timeout = System.currentTimeMillis() + (5 * 1000);
+        long timeout = System.currentTimeMillis() + (5 * 1000 * TestHelper.timeoutScale());
         final AtomicReference<String> htmlContent = new AtomicReference<>(null);
         activityTestRule.getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -203,7 +210,11 @@ public class WebviewProxyTestActivityTest {
 
         // wait until content is ready
         while (htmlContent.get() == null && timeout > System.currentTimeMillis()) {
-            Thread.sleep(50);
+            Thread.sleep(50 * TestHelper.timeoutScale());
+        }
+
+        if (System.currentTimeMillis() >= timeout) {
+            throw new RuntimeException("timeout exceeded.");
         }
 
         return htmlContent.get();

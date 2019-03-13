@@ -65,11 +65,12 @@ errorprone:
     - adb shell input keyevent 82 &
     - ./gradlew connectedCheck || (adb -e logcat -d '*:E' > logcat.txt; exit 1)
 
-connected24:
+
+connected22:
   retry: 1
   <<: *test-template
   variables:
-    AVD_SDK: "24"
+    AVD_SDK: "22"
     AVD_TAG: "default"
     AVD_PACKAGE: "system-images;android-${AVD_SDK};${AVD_TAG};armeabi-v7a"
   <<: *connected-template
