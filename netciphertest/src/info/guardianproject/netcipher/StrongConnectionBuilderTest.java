@@ -107,8 +107,7 @@ public class StrongConnectionBuilderTest extends
     }
   }
 
-  // TODO: re-enable as soon as netchiphertest/res/test.json was merged on gitlab
-  public void disabled_testStrongConnectionBuilder()
+  public void testStrongConnectionBuilder()
     throws Exception {
     assertTrue("we were not initialized", initialized.get());
     assertNotNull("we did not get an Orbot status", isOrbotInstalled);
@@ -135,8 +134,7 @@ public class StrongConnectionBuilderTest extends
     }
   }
 
-  // TODO: re-enable as soon as netchiphertest/res/test.json was merged on gitlab
-  public void disabled_testValidatedStrongConnectionBuilder()
+  public void testValidatedStrongConnectionBuilder()
     throws Exception {
     assertTrue("we were not initialized", initialized.get());
     assertNotNull("we did not get an Orbot status", isOrbotInstalled);
