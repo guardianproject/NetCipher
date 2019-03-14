@@ -29,27 +29,8 @@
 package info.guardianproject.netcipher.client;
 
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.util.Log;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import javax.security.auth.x500.X500Principal;
-
 import cz.msebera.android.httpclient.HttpHost;
 import cz.msebera.android.httpclient.conn.socket.LayeredConnectionSocketFactory;
 import cz.msebera.android.httpclient.conn.ssl.DefaultHostnameVerifier;
@@ -60,6 +41,24 @@ import cz.msebera.android.httpclient.conn.util.PublicSuffixMatcherLoader;
 import cz.msebera.android.httpclient.protocol.HttpContext;
 import cz.msebera.android.httpclient.util.Args;
 import cz.msebera.android.httpclient.util.TextUtils;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import javax.security.auth.x500.X500Principal;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
 import org.apache.commons.logging.Log;
@@ -194,6 +193,7 @@ public class SSLConnectionSocketFactory implements
                 SSLContexts.createDefault(), getDefaultHostnameVerifier());
     }
 
+    @Nullable
     private static String[] split(final String s) {
         if (TextUtils.isBlank(s)) {
             return null;

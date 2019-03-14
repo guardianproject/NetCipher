@@ -3,6 +3,7 @@ apply plugin: 'com.android.library'
 dependencies {
     api "cz.msebera.android:httpclient:4.4.1.2"
     api project(':libnetcipher')
+    implementation 'com.android.support:support-annotations:27.1.1'
 }
 
 android {

@@ -21,6 +21,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.security.MessageDigest;
@@ -115,6 +116,7 @@ public class SignatureUtils {
      * hash, or a copy of the toValidate parameter with the full component
      * name of the target receiver added to the Intent
      */
+    @Nullable
     public static Intent validateBroadcastIntent(Context context,
                                                  Intent toValidate,
                                                  String sigHash,
@@ -167,6 +169,7 @@ public class SignatureUtils {
      * hash, or a copy of the toValidate parameter with the full component
      * name of the target receiver added to the Intent
      */
+    @Nullable
     public static Intent validateBroadcastIntent(Context context,
                                                  Intent toValidate,
                                                  List<String> sigHashes,
@@ -246,6 +249,7 @@ public class SignatureUtils {
      * hash, or a copy of the toValidate parameter with the full component
      * name of the target activity added to the Intent
      */
+    @Nullable
     public static Intent validateActivityIntent(Context context,
                                                 Intent toValidate,
                                                 String sigHash,
@@ -299,6 +303,7 @@ public class SignatureUtils {
      * hash, or a copy of the toValidate parameter with the full component
      * name of the target activity added to the Intent
      */
+    @Nullable
     public static Intent validateActivityIntent(Context context,
                                                 Intent toValidate,
                                                 List<String> sigHashes,
@@ -379,6 +384,7 @@ public class SignatureUtils {
      * hash, or a copy of the toValidate parameter with the full component
      * name of the target service added to the Intent
      */
+    @Nullable
     public static Intent validateServiceIntent(Context context,
                                                Intent toValidate,
                                                String sigHash,
@@ -433,6 +439,7 @@ public class SignatureUtils {
      * hash, or a copy of the toValidate parameter with the full component
      * name of the target service added to the Intent
      */
+    @Nullable
     public static Intent validateServiceIntent(Context context,
                                                Intent toValidate,
                                                List<String> sigHashes,

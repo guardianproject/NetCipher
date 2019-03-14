@@ -20,6 +20,7 @@ package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import org.json.JSONObject;
 
@@ -163,6 +164,7 @@ StrongBuilderBase<T extends StrongBuilderBase, C>
         return ((T) this);
     }
 
+    @Nullable
     public SSLContext getSSLContext() {
         return (sslContext);
     }
@@ -187,18 +189,15 @@ StrongBuilderBase<T extends StrongBuilderBase, C>
         return (-1);
     }
 
+    @Nullable
     protected SSLSocketFactory buildSocketFactory() {
         if (sslContext == null) {
             return (null);
         }
-
-        SSLSocketFactory result =
-                new TlsOnlySocketFactory(sslContext.getSocketFactory(),
-                        useWeakCiphers);
-
-        return (result);
+        return new TlsOnlySocketFactory(sslContext.getSocketFactory(), useWeakCiphers);
     }
 
+    @Nullable
     public Proxy buildProxy(Intent status) {
         Proxy result = null;
 
