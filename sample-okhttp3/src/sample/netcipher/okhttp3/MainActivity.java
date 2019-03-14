@@ -25,12 +25,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
-
-import java.io.IOException;
-import java.util.List;
-
 import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongOkHttpClientBuilder;
 import okhttp3.OkHttpClient;
@@ -39,9 +34,12 @@ import okhttp3.Response;
 import sample.netcipher.okhttp3.model.Item;
 import sample.netcipher.okhttp3.model.SOQuestions;
 
+import java.io.IOException;
+import java.util.List;
+
 public class MainActivity extends ListActivity implements
         StrongBuilder.Callback<OkHttpClient> {
-    String SO_URL =
+    static final String SO_URL =
             "https://api.stackexchange.com/2.1/questions?"
                     + "order=desc&sort=creation&site=stackoverflow&tagged=android";
 

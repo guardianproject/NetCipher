@@ -390,7 +390,7 @@ public class OrbotHelper implements ProxyHelper {
         void onInstallTimeout();
     }
 
-    private static volatile OrbotHelper INSTANCE;
+    private static volatile OrbotHelper instance;
 
     /**
      * Retrieves the singleton, initializing if if needed
@@ -400,11 +400,11 @@ public class OrbotHelper implements ProxyHelper {
      * @return the singleton
      */
     synchronized public static OrbotHelper get(Context context) {
-        if (INSTANCE == null) {
-            INSTANCE = new OrbotHelper(context);
+        if (instance == null) {
+            instance = new OrbotHelper(context);
         }
 
-        return (INSTANCE);
+        return (instance);
     }
 
     /**

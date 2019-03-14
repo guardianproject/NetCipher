@@ -25,24 +25,22 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
-
-import java.io.StringReader;
-import java.util.List;
-
 import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongVolleyQueueBuilder;
 import sample.netcipher.volley.model.Item;
 import sample.netcipher.volley.model.SOQuestions;
 
+import java.io.StringReader;
+import java.util.List;
+
 public class MainActivity extends ListActivity implements
         StrongBuilder.Callback<RequestQueue> {
-    String SO_URL =
+    static final String SO_URL =
             "https://api.stackexchange.com/2.1/questions?"
                     + "order=desc&sort=creation&site=stackoverflow&tagged=android";
 
