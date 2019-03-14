@@ -27,6 +27,7 @@ tasks.withType(JavaCompile) {
         '-Xep:OperatorPrecedence:OFF',
         '-Xep:StringSplitter:OFF',
         '-Xep:UnsynchronizedOverridesSynchronized:OFF',
+        '-XepExcludedPaths:.*/build/generated/.*',
     ]
 }
 
