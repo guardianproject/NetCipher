@@ -44,8 +44,10 @@ public class StrongSSLSocketFactory extends
         ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory implements
         LayeredSchemeSocketFactory {
 
+    @Nullable
     private SSLSocketFactory mFactory = null;
 
+    @Nullable
     private Proxy mProxy = null;
 
     public static final String TLS = "TLS";

@@ -57,6 +57,7 @@ StrongBuilderBase<T extends StrongBuilderBase, C>
     private final static String PROXY_HOST = "127.0.0.1";
     protected final Context context;
     protected Proxy.Type proxyType;
+    @Nullable
     protected SSLContext sslContext = null;
     protected boolean useWeakCiphers = false;
     protected boolean validateTor = false;

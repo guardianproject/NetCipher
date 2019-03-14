@@ -29,6 +29,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -69,6 +70,7 @@ public class NetCipherSampleActivity extends Activity {
 
     private final static String DEFAULT_ONION_URL = "http://3g2upl4pq6kufc4m.onion";
 
+    @Nullable
     private Proxy.Type mProxyType;
 
     /**

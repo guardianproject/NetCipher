@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 dependencies {
     implementation project(':libnetcipher')
     implementation project(':netcipher-chboye')
+    implementation 'com.android.support:support-annotations:27.1.1'
 }
 
 android {
