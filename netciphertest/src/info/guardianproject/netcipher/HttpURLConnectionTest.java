@@ -149,7 +149,7 @@ public class HttpURLConnectionTest {
                 "www.google.com",
                 "glympse.com",
                 // uses SNI
-                "firstlook.org",
+                "check-tls.akamaized.net",
                 "guardianproject.info",
                 // TLS 1.3 enabled
                 "enabled.tls13.com",
@@ -190,7 +190,7 @@ public class HttpURLConnectionTest {
                 "www.google.com",
                 "glympse.com",
                 // uses SNI
-                "firstlook.org",
+                "check-tls.akamaized.net",
                 "guardianproject.info",
                 // TLS 1.3 enabled
                 "enabled.tls13.com",
@@ -226,7 +226,7 @@ public class HttpURLConnectionTest {
                 "web.wechat.com",
                 "www.google.com",
                 // uses SNI
-                "firstlook.org",
+                "check-tls.akamaized.net",
                 "guardianproject.info",
                 // TLS 1.3 enabled
                 "enabled.tls13.com",
