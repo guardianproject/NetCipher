@@ -34,6 +34,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -71,7 +72,7 @@ public class HttpURLConnectionTest {
     }
 
     private void prefetchDns(List<String> hosts) {
-        prefetchDns((String[]) hosts.toArray());
+        prefetchDns(hosts.toArray(new String[hosts.size()]));
     }
 
     @Test
@@ -254,14 +255,14 @@ public class HttpURLConnectionTest {
     @Test
     public void testConnectBadSslCom()
             throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
-        List<String> hosts = Arrays.asList(
+        ArrayList<String> hosts = new ArrayList<>(Arrays.asList(
                 "wrong.host.badssl.com",
                 "self-signed.badssl.com",
                 "expired.badssl.com",
                 "untrusted-root.badssl.com",
                 "rc4.badssl.com",
                 "rc4-md5.badssl.com",
-                "null.badssl.com");
+                "null.badssl.com"));
 
         if (Build.VERSION.SDK_INT > 22 ){
             hosts.add("dh480.badssl.com");
