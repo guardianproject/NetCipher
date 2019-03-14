@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile project(':netcipher-volley')
-    compile 'com.google.code.gson:gson:2.5'
+    implementation project(':netcipher-volley')
+    implementation 'com.google.code.gson:gson:2.5'
 }
 
 android {

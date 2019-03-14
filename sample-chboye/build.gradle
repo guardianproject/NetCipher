@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile project(':libnetcipher')
-    compile project(':netcipher-chboye')
+    implementation project(':libnetcipher')
+    implementation project(':netcipher-chboye')
 }
 
 android {
