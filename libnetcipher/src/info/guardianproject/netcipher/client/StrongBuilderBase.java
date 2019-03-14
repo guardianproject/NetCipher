@@ -20,19 +20,16 @@ package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 import android.content.Intent;
-
+import info.guardianproject.netcipher.proxy.OrbotHelper;
 import org.json.JSONObject;
-
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-
-import info.guardianproject.netcipher.proxy.OrbotHelper;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Builds an HttpUrlConnection that connects via Tor through
@@ -55,7 +52,7 @@ StrongBuilderBase<T extends StrongBuilderBase, C>
     abstract protected String get(Intent status, C connection, String url)
             throws Exception;
 
-    final static String TOR_CHECK_URL = "https://check.torproject.org/api/ip";
+    public static final String TOR_CHECK_URL = "https://check.torproject.org/api/ip";
     private final static String PROXY_HOST = "127.0.0.1";
     protected final Context context;
     protected Proxy.Type proxyType;

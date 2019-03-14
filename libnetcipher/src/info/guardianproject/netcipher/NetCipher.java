@@ -22,7 +22,9 @@ import android.app.Application;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.JsonReader;
 import android.util.Log;
+import info.guardianproject.netcipher.client.StrongBuilderBase;
 import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
 import info.guardianproject.netcipher.proxy.NetCipherURLStreamHandlerFactory;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
@@ -31,11 +33,13 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLStreamHandlerFactory;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -138,6 +142,61 @@ public class NetCipher {
         } else {
             setProxy(ORBOT_SOCKS_PROXY);
         }
+    }
+
+    /**
+     * Makes a connection to {@code check.torproject.org} to read its results
+     * of whether the connection came via Tor or not.
+     *
+     * @return true if {@code check.torproject.org} says connection is via Tor, false if not or on error
+     * @see <a href="https://check.torproject.org">check.torproject.org</a>
+     */
+    @TargetApi(11)
+    public static boolean isURLConnectionUsingTor() {
+        if (Build.VERSION.SDK_INT < 11) {
+            throw new UnsupportedOperationException("only works on android-11 or higher");
+        }
+
+        try {
+            URL url = new URL(StrongBuilderBase.TOR_CHECK_URL);
+            return checkIsTor(url.openConnection());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @TargetApi(11)
+    public static boolean isNetCipherGetHttpURLConnectionUsingTor() {
+        if (Build.VERSION.SDK_INT < 11) {
+            throw new UnsupportedOperationException("only works on android-11 or higher");
+        }
+
+        try {
+            URL url = new URL(StrongBuilderBase.TOR_CHECK_URL);
+            return checkIsTor(NetCipher.getHttpURLConnection(url));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @TargetApi(11)
+    private static boolean checkIsTor(URLConnection connection) throws IOException {
+        boolean isTor = false;
+        Log.i(TAG, "content length: " + connection.getContentLength());
+        JsonReader jsonReader = new JsonReader(new InputStreamReader(connection.getInputStream()));
+        jsonReader.beginObject();
+        while (jsonReader.hasNext()) {
+            String name = jsonReader.nextName();
+            if ("IsTor".equals(name)) {
+                isTor = jsonReader.nextBoolean();
+                break;
+            } else {
+                jsonReader.skipValue();
+            }
+        }
+        return isTor;
     }
 
     /**
