@@ -168,7 +168,7 @@ public class HttpURLConnectionTest {
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertFalse(sslSocketFactory instanceof TlsOnlySocketFactory);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
-            connection.setReadTimeout(20000);
+            connection.setReadTimeout(0);
             connection.getContent();
             assertEquals(200, connection.getResponseCode());
             assertEquals("text/html", connection.getContentType().split(";")[0]);
@@ -203,7 +203,7 @@ public class HttpURLConnectionTest {
             System.out.println("netcipher " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getHttpsURLConnection(url);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
-            connection.setReadTimeout(20000);
+            connection.setReadTimeout(0);
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
             connection.getContent();
@@ -239,7 +239,7 @@ public class HttpURLConnectionTest {
             System.out.println("outdated " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getCompatibleHttpsURLConnection(url);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
-            connection.setReadTimeout(20000);
+            connection.setReadTimeout(0);
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
             connection.getContent();
@@ -274,7 +274,7 @@ public class HttpURLConnectionTest {
             System.out.println("badssl " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getHttpsURLConnection(url);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
-            connection.setReadTimeout(20000);
+            connection.setReadTimeout(0);
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertTrue("socket factory of type 'TlsOnlySocketFactory' expected", sslSocketFactory instanceof TlsOnlySocketFactory);
             try {
