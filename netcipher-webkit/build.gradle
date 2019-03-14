@@ -32,16 +32,6 @@ android {
             manifest.srcFile 'androidTest/AndroidManifest.xml'
             java.srcDirs = ['androidTest/src']
         }
-
-        defaultConfig {
-            testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
-        }
-
-        dexOptions {
-            // tests have massive dependencies and
-            // building on api-level < 22 requires a ton of memory
-            javaMaxHeapSize "1536m"
-        }
     }
 
     lintOptions {
@@ -52,11 +42,12 @@ android {
 
     defaultConfig {
         multiDexEnabled true
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
     packagingOptions {
-        pickFirst  'META-INF/license.txt'
-        pickFirst  'META-INF/LICENSE'
+        pickFirst 'META-INF/license.txt'
+        pickFirst 'META-INF/LICENSE'
     }
 
     compileOptions {
