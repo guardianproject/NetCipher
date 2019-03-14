@@ -46,7 +46,7 @@ public class NetCipher {
     }
 
     public final static Proxy ORBOT_HTTP_PROXY = new Proxy(Proxy.Type.HTTP,
-            new InetSocketAddress("127.0.0.1", 8118));
+            new InetSocketAddress("127.0.0.1", OrbotHelper.DEFAULT_PROXY_HTTP_PORT));
 
     private static Proxy proxy;
 

@@ -61,6 +61,10 @@ public class OrbotHelper implements ProxyHelper {
     public final static String ORBOT_PLAY_URI = "https://play.google.com/store/apps/details?id="
             + ORBOT_PACKAGE_NAME;
 
+    public final static String DEFAULT_PROXY_HOST = "localhost";//"127.0.0.1";
+    public final static int DEFAULT_PROXY_HTTP_PORT = 8118;
+    public final static int DEFAULT_PROXY_SOCKS_PORT = 9050;
+
     /**
      * A request to Orbot to transparently start Tor services
      */

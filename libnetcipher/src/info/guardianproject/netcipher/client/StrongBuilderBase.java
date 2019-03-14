@@ -174,7 +174,7 @@ StrongBuilderBase<T extends StrongBuilderBase, C>
         if (status.getStringExtra(OrbotHelper.EXTRA_STATUS)
                 .equals(OrbotHelper.STATUS_ON)) {
             return (status.getIntExtra(OrbotHelper.EXTRA_PROXY_PORT_SOCKS,
-                    9050));
+                    OrbotHelper.DEFAULT_PROXY_SOCKS_PORT));
         }
 
         return (-1);
@@ -184,7 +184,7 @@ StrongBuilderBase<T extends StrongBuilderBase, C>
         if (status.getStringExtra(OrbotHelper.EXTRA_STATUS)
                 .equals(OrbotHelper.STATUS_ON)) {
             return (status.getIntExtra(OrbotHelper.EXTRA_PROXY_PORT_HTTP,
-                    8118));
+                    OrbotHelper.DEFAULT_PROXY_HTTP_PORT));
         }
 
         return (-1);
