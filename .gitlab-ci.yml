@@ -49,7 +49,6 @@ errorprone:
   script:
     - for f in */build.gradle; do cat tools/errorprone.gradle >> $f; done
     - ./gradlew assembleDebug -PdisablePreDex
-  allow_failure: true
 
 .connected-template: &connected-template
   retry: 2
