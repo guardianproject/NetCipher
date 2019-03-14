@@ -55,6 +55,10 @@ public class WebkitProxy {
 
     private final static String TAG = "OrbotHelpher";
 
+    private WebkitProxy() {
+        // this is a utility class with only static methods
+    }
+
     public static boolean setProxy(String appClass, Context ctx, WebView wView, String host, int port) throws Exception {
 
         setSystemProperties(host, port);

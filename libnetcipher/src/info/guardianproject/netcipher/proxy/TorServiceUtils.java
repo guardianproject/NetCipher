@@ -39,6 +39,10 @@ public class TorServiceUtils {
 
     public final static String CHMOD_EXE_VALUE = "700";
 
+    private TorServiceUtils() {
+        // this is a utility class with only static methods
+    }
+
     public static boolean isRootPossible() {
 
         StringBuilder log = new StringBuilder();
