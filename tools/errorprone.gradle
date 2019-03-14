@@ -14,20 +14,21 @@ apply plugin: "net.ltgt.errorprone"
 
 tasks.withType(JavaCompile) {
     options.compilerArgs += [
-        '-XepAllDisabledChecksAsWarnings',
-        '-Xep:CatchFail:OFF',
-        '-Xep:ClassCanBeStatic:OFF',
-        '-Xep:DateFormatConstant:OFF',
-        '-Xep:DefaultCharset:OFF',
-        '-Xep:FormatString:OFF',
-        '-Xep:JavaLangClash:OFF',
-        '-Xep:MissingCasesInEnumSwitch:OFF',
-        '-Xep:MissingOverride:OFF',
-        '-Xep:NonAtomicVolatileUpdate:OFF',
-        '-Xep:OperatorPrecedence:OFF',
-        '-Xep:StringSplitter:OFF',
-        '-Xep:UnsynchronizedOverridesSynchronized:OFF',
-        '-XepExcludedPaths:.*/build/generated/.*',
+            '-XepAllDisabledChecksAsWarnings',
+            '-Xep:CatchFail:OFF',
+            '-Xep:ClassCanBeStatic:OFF',
+            '-Xep:DateFormatConstant:OFF',
+            '-Xep:DefaultCharset:OFF',
+            '-Xep:FormatString:OFF',
+            '-Xep:JavaLangClash:OFF',
+            '-Xep:MissingCasesInEnumSwitch:OFF',
+            '-Xep:MissingOverride:OFF',
+            '-Xep:NonAtomicVolatileUpdate:OFF',
+            '-Xep:OperatorPrecedence:OFF',
+            '-Xep:StringSplitter:OFF',
+            '-Xep:UnsynchronizedOverridesSynchronized:OFF',
+            '-Xep:Var:OFF',
+            '-XepExcludedPaths:.*/build/generated/.*',
     ]
 }
 
