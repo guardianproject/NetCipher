@@ -53,6 +53,10 @@ import javax.net.ssl.SSLSocketFactory;
  * @author Hans-Christoph Steiner
  */
 public class TlsOnlySocketFactory extends SSLSocketFactory {
+
+    public static final String SSLV3 = "SSLv3";
+    public static final String SSLV2 = "SSLv2";
+
     private static final int HANDSHAKE_TIMEOUT = 0;
     private static final String TAG = "TlsOnlySocketFactory";
     private final SSLSocketFactory delegate;
@@ -152,8 +156,8 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
             if (compatible) {
                 ArrayList<String> protocols = new ArrayList<String>(Arrays.asList(delegate
                         .getEnabledProtocols()));
-                protocols.remove("SSLv2");
-                protocols.remove("SSLv3");
+                protocols.remove(SSLV2);
+                protocols.remove(SSLV3);
                 super.setEnabledProtocols(protocols.toArray(new String[protocols.size()]));
 
                 /*
@@ -175,8 +179,8 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
             // https://developer.android.com/reference/javax/net/ssl/SSLSocket.html
             ArrayList<String> protocols = new ArrayList<String>(Arrays.asList(delegate
                     .getSupportedProtocols()));
-            protocols.remove("SSLv2");
-            protocols.remove("SSLv3");
+            protocols.remove(SSLV2);
+            protocols.remove(SSLV3);
             super.setEnabledProtocols(protocols.toArray(new String[protocols.size()]));
 
             /*
@@ -198,7 +202,7 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
          */
         @Override
         public void setEnabledProtocols(String[] protocols) {
-            if (protocols != null && protocols.length == 1 && "SSLv3".equals(protocols[0])) {
+            if (protocols != null && protocols.length == 1 && SSLV3.equals(protocols[0])) {
                 List<String> systemProtocols;
                 if (this.compatible) {
                     systemProtocols = Arrays.asList(delegate.getEnabledProtocols());
@@ -207,8 +211,8 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
                 }
                 List<String> enabledProtocols = new ArrayList<String>(systemProtocols);
                 if (enabledProtocols.size() > 1) {
-                    enabledProtocols.remove("SSLv2");
-                    enabledProtocols.remove("SSLv3");
+                    enabledProtocols.remove(SSLV2);
+                    enabledProtocols.remove(SSLV3);
                 } else {
                     Log.w(TAG, "SSL stuck with protocol available for "
                             + String.valueOf(enabledProtocols));

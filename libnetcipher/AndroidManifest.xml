@@ -2,7 +2,7 @@
     package="info.guardianproject.netcipher">
 
     <uses-sdk
-        android:minSdkVersion="8"
-        android:targetSdkVersion="22" />
+        android:minSdkVersion="9"
+        android:targetSdkVersion="24" />
 
 </manifest>

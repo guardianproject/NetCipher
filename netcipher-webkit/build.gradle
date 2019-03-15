@@ -1,15 +1,15 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile project(':libnetcipher')
+    api project(':libnetcipher')
 
-    androidTestCompile "com.android.support:multidex:1.0.3"
-    androidTestCompile "junit:junit:4.12"
-    androidTestCompile "com.android.support.test:runner:1.0.2"
-    androidTestCompile "com.android.support.test:rules:1.0.2"
-    androidTestCompile "com.android.support.test.espresso:espresso-core:3.0.2"
-    androidTestCompile "org.nanohttpd:nanohttpd:2.2.0"
-    androidTestCompile "net.lightbody.bmp:browsermob-core:2.1.5"
+    androidTestImplementation "com.android.support:multidex:1.0.3"
+    androidTestImplementation "junit:junit:4.12"
+    androidTestImplementation "com.android.support.test:runner:1.0.2"
+    androidTestImplementation "com.android.support.test:rules:1.0.2"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.2"
+    androidTestImplementation "org.nanohttpd:nanohttpd:2.2.0"
+    androidTestImplementation "net.lightbody.bmp:browsermob-core:2.1.5"
 }
 
 android {
@@ -32,16 +32,6 @@ android {
             manifest.srcFile 'androidTest/AndroidManifest.xml'
             java.srcDirs = ['androidTest/src']
         }
-
-        defaultConfig {
-            testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
-        }
-
-        dexOptions {
-            // tests have massive dependencies and
-            // building on api-level < 22 requires a ton of memory
-            javaMaxHeapSize "1536m"
-        }
     }
 
     lintOptions {
@@ -52,16 +42,12 @@ android {
 
     defaultConfig {
         multiDexEnabled true
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
     packagingOptions {
-        pickFirst  'META-INF/license.txt'
-        pickFirst  'META-INF/LICENSE'
-    }
-
-    compileOptions {
-        sourceCompatibility = '1.7'
-        targetCompatibility = '1.7'
+        pickFirst 'META-INF/license.txt'
+        pickFirst 'META-INF/LICENSE'
     }
 }
 

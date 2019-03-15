@@ -40,6 +40,7 @@ import ch.boye.httpclientandroidlib.params.HttpParams;
 import ch.boye.httpclientandroidlib.protocol.HttpContext;
 
 public class SocksAwareClientConnOperator extends DefaultClientConnectionOperator {
+    public static final String TAG = "SocksAwareClientConnOpe";
 
     private static final int CONNECT_TIMEOUT_MILLISECONDS = 60000;
     private static final int READ_TIMEOUT_MILLISECONDS = 60000;
@@ -68,32 +69,32 @@ public class SocksAwareClientConnOperator extends DefaultClientConnectionOperato
             final HttpParams params) throws IOException {
         if (mProxyHost != null) {
             if (mProxyType != null && mProxyType.equalsIgnoreCase("socks")) {
-                Log.d("StrongHTTPS", "proxying using SOCKS");
+                Log.d(TAG, "proxying using SOCKS");
                 openSocksConnection(mProxyHost, conn, target, local, context, params);
             } else {
-                Log.d("StrongHTTPS", "proxying with: " + mProxyType);
+                Log.d(TAG, "proxying with: " + mProxyType);
                 openNonSocksConnection(conn, target, local, context, params);
             }
         } else if (mRoutePlanner != null) {
             if (mRoutePlanner.isProxy(target)) {
                 // HTTP proxy, already handled by the route planner system
-                Log.d("StrongHTTPS", "proxying using non-SOCKS");
+                Log.d(TAG, "proxying using non-SOCKS");
                 openNonSocksConnection(conn, target, local, context, params);
             } else {
                 // Either SOCKS or direct
                 HttpHost proxy = mRoutePlanner.determineRequiredProxy(target, null, context);
                 if (proxy == null) {
-                    Log.d("StrongHTTPS", "not proxying");
+                    Log.d(TAG, "not proxying");
                     openNonSocksConnection(conn, target, local, context, params);
                 } else if (mRoutePlanner.isSocksProxy(proxy)) {
-                    Log.d("StrongHTTPS", "proxying using SOCKS");
+                    Log.d(TAG, "proxying using SOCKS");
                     openSocksConnection(proxy, conn, target, local, context, params);
                 } else {
                     throw new IllegalStateException("Non-SOCKS proxy returned");
                 }
             }
         } else {
-            Log.d("StrongHTTPS", "not proxying");
+            Log.d(TAG, "not proxying");
             openNonSocksConnection(conn, target, local, context, params);
         }
     }

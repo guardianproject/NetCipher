@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile project(':netcipher-okhttp3')
-    compile 'com.google.code.gson:gson:2.5'
+    implementation project(':netcipher-okhttp3')
+    implementation 'com.google.code.gson:gson:2.5'
 }
 
 android {

@@ -20,7 +20,6 @@ import android.content.Context;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -124,7 +123,7 @@ public class StrongSSLSocketFactory extends
 
     @Override
     public Socket createSocket(Socket socket, String host, int port,
-                               boolean autoClose) throws IOException, UnknownHostException {
+                               boolean autoClose) throws IOException {
 
         Socket newSocket = mFactory.createSocket(socket, host, port, autoClose);
 
@@ -154,7 +153,7 @@ public class StrongSSLSocketFactory extends
     }
 
     @Override
-    public boolean isSecure(Socket sock) throws IllegalArgumentException {
+    public boolean isSecure(Socket sock) {
         return (sock instanceof SSLSocket);
     }
 
@@ -194,7 +193,7 @@ public class StrongSSLSocketFactory extends
 
     @Override
     public Socket createLayeredSocket(Socket arg0, String arg1, int arg2,
-                                      boolean arg3) throws IOException, UnknownHostException {
+                                      boolean arg3) throws IOException {
         return ((LayeredSchemeSocketFactory) mFactory).createLayeredSocket(
                 arg0, arg1, arg2, arg3);
     }

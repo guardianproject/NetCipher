@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile project(':netcipher-webkit')
+    implementation project(':netcipher-webkit')
 
     // also available as maven artifact via:
     // compile("info.guardianproject.netcipher:netcipher-webkit:2.0.0-alpha1")

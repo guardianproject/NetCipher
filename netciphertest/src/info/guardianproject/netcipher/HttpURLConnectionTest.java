@@ -34,6 +34,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -71,7 +72,7 @@ public class HttpURLConnectionTest {
     }
 
     private void prefetchDns(List<String> hosts) {
-        prefetchDns((String[]) hosts.toArray());
+        prefetchDns(hosts.toArray(new String[hosts.size()]));
     }
 
     @Test
@@ -149,7 +150,7 @@ public class HttpURLConnectionTest {
                 "www.google.com",
                 "glympse.com",
                 // uses SNI
-                "firstlook.org",
+                "check-tls.akamaized.net",
                 "guardianproject.info",
                 // TLS 1.3 enabled
                 "enabled.tls13.com",
@@ -168,7 +169,7 @@ public class HttpURLConnectionTest {
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertFalse(sslSocketFactory instanceof TlsOnlySocketFactory);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
-            connection.setReadTimeout(20000);
+            connection.setReadTimeout(0);
             connection.getContent();
             assertEquals(200, connection.getResponseCode());
             assertEquals("text/html", connection.getContentType().split(";")[0]);
@@ -190,7 +191,7 @@ public class HttpURLConnectionTest {
                 "www.google.com",
                 "glympse.com",
                 // uses SNI
-                "firstlook.org",
+                "check-tls.akamaized.net",
                 "guardianproject.info",
                 // TLS 1.3 enabled
                 "enabled.tls13.com",
@@ -203,7 +204,7 @@ public class HttpURLConnectionTest {
             System.out.println("netcipher " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getHttpsURLConnection(url);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
-            connection.setReadTimeout(20000);
+            connection.setReadTimeout(0);
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
             connection.getContent();
@@ -226,7 +227,7 @@ public class HttpURLConnectionTest {
                 "web.wechat.com",
                 "www.google.com",
                 // uses SNI
-                "firstlook.org",
+                "check-tls.akamaized.net",
                 "guardianproject.info",
                 // TLS 1.3 enabled
                 "enabled.tls13.com",
@@ -239,7 +240,7 @@ public class HttpURLConnectionTest {
             System.out.println("outdated " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getCompatibleHttpsURLConnection(url);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
-            connection.setReadTimeout(20000);
+            connection.setReadTimeout(0);
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertTrue(sslSocketFactory instanceof TlsOnlySocketFactory);
             connection.getContent();
@@ -254,14 +255,14 @@ public class HttpURLConnectionTest {
     @Test
     public void testConnectBadSslCom()
             throws MalformedURLException, IOException, KeyManagementException, InterruptedException {
-        List<String> hosts = Arrays.asList(
+        ArrayList<String> hosts = new ArrayList<>(Arrays.asList(
                 "wrong.host.badssl.com",
                 "self-signed.badssl.com",
                 "expired.badssl.com",
                 "untrusted-root.badssl.com",
                 "rc4.badssl.com",
                 "rc4-md5.badssl.com",
-                "null.badssl.com");
+                "null.badssl.com"));
 
         if (Build.VERSION.SDK_INT > 22 ){
             hosts.add("dh480.badssl.com");
@@ -274,7 +275,7 @@ public class HttpURLConnectionTest {
             System.out.println("badssl " + url + " =================================");
             HttpsURLConnection connection = NetCipher.getHttpsURLConnection(url);
             connection.setConnectTimeout(0); // blocking connect with TCP timeout
-            connection.setReadTimeout(20000);
+            connection.setReadTimeout(0);
             SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
             assertTrue("socket factory of type 'TlsOnlySocketFactory' expected", sslSocketFactory instanceof TlsOnlySocketFactory);
             try {

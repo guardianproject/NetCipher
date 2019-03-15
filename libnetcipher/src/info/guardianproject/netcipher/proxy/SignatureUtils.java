@@ -29,6 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SignatureUtils {
+
+    private SignatureUtils() {
+        // this is a utility class with only static methods
+    }
+
     public static String getOwnSignatureHash(Context context)
             throws
             NameNotFoundException,
