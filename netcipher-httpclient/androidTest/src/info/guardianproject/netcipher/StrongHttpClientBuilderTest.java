@@ -37,7 +37,7 @@ import info.guardianproject.netcipher.proxy.StatusCallback;
 public class StrongHttpClientBuilderTest extends
   AndroidTestCase {
   private static final String TEST_URL=
-      "https://gitlab.com/guardianproject/NetCipher/tree/master/netciphertest/res/test.json";
+      "https://gitlab.com/guardianproject/NetCipher/raw/master/netciphertest/res/test.json";
   private static final String EXPECTED="{\"Hello\": \"world\"}";
   private static AtomicBoolean initialized=new AtomicBoolean(false);
   private static AtomicBoolean isOrbotInstalled=null;
