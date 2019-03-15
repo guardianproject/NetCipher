@@ -152,9 +152,6 @@ import org.apache.http.util.TextUtils;
 public class SSLConnectionSocketFactory implements
         LayeredConnectionSocketFactory {
     private final static String TAG = "HttpClient";
-    public static final String TLS = "TLS";
-    public static final String SSL = "SSL";
-    public static final String SSLV2 = "SSLv2";
 
 /*
   @Deprecated

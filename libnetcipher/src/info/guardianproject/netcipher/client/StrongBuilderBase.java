@@ -139,7 +139,7 @@ StrongBuilderBase<T extends StrongBuilderBase, C>
     public T withTrustManagers(TrustManager[] trustManagers)
             throws NoSuchAlgorithmException, KeyManagementException {
 
-        sslContext = SSLContext.getInstance("TLSv1");
+        sslContext = SSLContext.getInstance(TlsOnlySocketFactory.TLSV1);
         sslContext.init(null, trustManagers, null);
 
         return ((T) this);

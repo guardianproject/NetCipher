@@ -192,7 +192,7 @@ public class HttpURLConnectionTest {
         };
         prefetchDns(hosts);
         // reset the default SSLSocketFactory, since it is global
-        SSLContext sslcontext = SSLContext.getInstance("TLSv1");
+        SSLContext sslcontext = SSLContext.getInstance(TlsOnlySocketFactory.TLSV1);
         sslcontext.init(null, null, null); // null means use default
         HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());
         for (String host : hosts) {

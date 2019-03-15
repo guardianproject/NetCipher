@@ -239,7 +239,7 @@ public class NetCipher {
     public static TlsOnlySocketFactory getTlsOnlySocketFactory(boolean compatible) {
         SSLContext sslcontext;
         try {
-            sslcontext = SSLContext.getInstance("TLSv1");
+            sslcontext = SSLContext.getInstance(TlsOnlySocketFactory.TLSV1);
             sslcontext.init(null, null, null);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e);

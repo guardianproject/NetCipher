@@ -51,9 +51,13 @@ import javax.net.ssl.SSLSocketFactory;
  *
  * @author Bhavit S. Sengar
  * @author Hans-Christoph Steiner
+ * @see <a href="https://android.googlesource.com/platform/external/boringssl/+/refs/tags/android-7.1.2_r36/src/include/openssl/ssl.h#3267">source of protocol name constants</a>
  */
 public class TlsOnlySocketFactory extends SSLSocketFactory {
 
+    public static final String TLSV1_2 = "TLSv1.2";
+    public static final String TLSV1_1 = "TLSv1.1";
+    public static final String TLSV1 = "TLSv1";
     public static final String SSLV3 = "SSLv3";
     public static final String SSLV2 = "SSLv2";
 

@@ -244,7 +244,7 @@ public class StrongHttpClientBuilder extends HttpClientBuilder
         SSLContext sslContext = netCipher.getSSLContext();
 
         if (sslContext == null) {
-            sslContext = SSLContext.getInstance("TLSv1");
+            sslContext = SSLContext.getInstance(TlsOnlySocketFactory.TLSV1);
             sslContext.init(null, null, null);
         }
 

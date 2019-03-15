@@ -50,10 +50,6 @@ public class StrongSSLSocketFactory extends
     @Nullable
     private Proxy mProxy = null;
 
-    public static final String TLS = "TLS";
-    public static final String SSL = "SSL";
-    public static final String SSLV2 = "SSLv2";
-
     // private X509HostnameVerifier mHostnameVerifier = new
     // StrictHostnameVerifier();
     // private final HostNameResolver mNameResolver = new
