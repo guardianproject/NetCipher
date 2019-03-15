@@ -29,6 +29,7 @@ import org.w3c.dom.Document;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSocketFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -46,6 +47,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -321,6 +323,35 @@ public class HttpURLConnectionTest {
                 connection.disconnect();
             }
         }
+    }
+
+    @Test(expected = SSLHandshakeException.class)
+    public void testRemovingTLSv1() throws IOException {
+        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
+        URLConnection connection = NetCipher.getHttpURLConnection(new URL("https://tls-v1-0.badssl.com:1010/"));
+        connection.setConnectTimeout(0); // blocking connect with TCP timeout
+        connection.setReadTimeout(0);
+        connection.getContent();
+    }
+
+    @Test(expected = SSLHandshakeException.class)
+    public void testRemovingTLSv1_1() throws IOException {
+        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
+        URLConnection connection = NetCipher.getHttpURLConnection(new URL("https://tls-v1-1.badssl.com:1011/"));
+        connection.setConnectTimeout(0); // blocking connect with TCP timeout
+        connection.setReadTimeout(0);
+        connection.getContent();
+    }
+
+    @Test
+    public void testTLSv1_2Only() throws IOException {
+        HttpsURLConnection connection = NetCipher.getHttpsURLConnection(new URL("https://tls-v1-2.badssl.com:1012/"));
+        connection.setConnectTimeout(0); // blocking connect with TCP timeout
+        connection.setReadTimeout(0);
+        connection.getContent();
+        SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
+        assertTrue("socket factory of type 'TlsOnlySocketFactory' expected",
+                sslSocketFactory instanceof TlsOnlySocketFactory);
     }
 
     @Test
