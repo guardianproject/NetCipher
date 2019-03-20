@@ -23,6 +23,8 @@ before_script:
     name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
     paths:
       - "logcat.txt"
+      - "tor.log"
+      - "syslog"
       - "*/build/reports"
       - "*/build/outputs/*ml"
       - "*/build/outputs/apk"
@@ -94,6 +96,15 @@ errorprone:
     - grep -v '^License' $ANDROID_HOME/system-images/android-$AVD_SDK/$AVD_TAG/$AVD_ARCH/source.properties
     - adb start-server
     - ls -l ~/.android
+    - if [ $AVD_SDK -ge 24 ]; then
+          set -x;
+          apt-get update;
+          apt-get -qy install jq netcat-openbsd tor --no-install-recommends;
+          service tor start;
+          while ! nc -w 1 localhost 9050; do echo "waiting for proxy port..."; sleep 1; done;
+          while ! curl --proxy socks5://localhost:9050 --location https://check.torproject.org/api/ip | jq --exit-status '.IsTor'; do echo 'waiting for tor...'; sleep 1; done;
+          set +x;
+      fi
     - emulator -version
     - emulator -avd avd$AVD_SDK
         -no-audio
@@ -173,3 +184,5 @@ after_script:
     # this file changes every time but should not be cached
     - rm -f $GRADLE_USER_HOME/caches/modules-2/modules-2.lock
     - rm -fr $GRADLE_USER_HOME/caches/*/plugin-resolution/
+    - (cp /var/log/tor/log tor.log; chmod a+r tor.log) || true
+    - (cp /var/log/syslog syslog; chmod a+r syslog) || true
