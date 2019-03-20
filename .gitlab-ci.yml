@@ -128,11 +128,22 @@ connected 26 google_apis x86:
 
 connected 27 google_apis_playstore x86:
   <<: *kvm-template
-  only:
-    - master@guardianproject/netcipher
 
-connected 28 default x86_64:
-  <<: *kvm-template
+
+jarRelease:
+  stage: deploy
+  artifacts:
+    name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
+    paths:
+      - "logcat.txt"
+      - "*/build/libs"
+      - "*/build/reports"
+      - "*/build/outputs/*ml"
+      - "*/build/outputs/apk"
+    expire_in: 1 week
+    when: always
+  script:
+    - ./make-release-build
 
 
 after_script:

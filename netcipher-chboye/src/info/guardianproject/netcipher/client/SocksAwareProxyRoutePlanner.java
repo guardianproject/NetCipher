@@ -15,6 +15,7 @@
  */
 package info.guardianproject.netcipher.client;
 
+import android.support.annotation.Nullable;
 import ch.boye.httpclientandroidlib.HttpException;
 import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.HttpRequest;
@@ -27,6 +28,7 @@ public abstract class SocksAwareProxyRoutePlanner extends DefaultRoutePlanner {
         super(schemePortResolver);
     }
 
+    @Nullable
     @Override
     protected HttpHost determineProxy(
             HttpHost target,

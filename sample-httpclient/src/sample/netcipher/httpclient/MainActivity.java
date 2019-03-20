@@ -25,13 +25,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.List;
-
 import cz.msebera.android.httpclient.client.HttpClient;
 import cz.msebera.android.httpclient.client.methods.HttpGet;
 import cz.msebera.android.httpclient.impl.client.BasicResponseHandler;
@@ -40,9 +34,13 @@ import info.guardianproject.netcipher.client.StrongHttpClientBuilder;
 import sample.netcipher.httpclient.model.Item;
 import sample.netcipher.httpclient.model.SOQuestions;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
+
 public class MainActivity extends ListActivity implements
         StrongBuilder.Callback<HttpClient> {
-    String SO_URL =
+    static final String SO_URL =
             "https://api.stackexchange.com/2.1/questions?"
                     + "order=desc&sort=creation&site=stackoverflow&tagged=android";
 

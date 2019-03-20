@@ -18,16 +18,7 @@
 package info.guardianproject.netcipher.client;
 
 import android.content.Context;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-
-import javax.net.ssl.TrustManagerFactory;
-
+import android.support.annotation.Nullable;
 import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.conn.ClientConnectionOperator;
 import ch.boye.httpclientandroidlib.conn.params.ConnRoutePNames;
@@ -37,9 +28,18 @@ import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
 import ch.boye.httpclientandroidlib.impl.client.DefaultHttpClient;
 import ch.boye.httpclientandroidlib.impl.conn.tsccm.ThreadSafeClientConnManager;
 
+import javax.net.ssl.TrustManagerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
 public class StrongHttpsClient extends DefaultHttpClient {
 
     final Context context;
+    @Nullable
     private HttpHost proxyHost;
     private String proxyType;
     private SocksAwareProxyRoutePlanner routePlanner;

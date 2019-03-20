@@ -29,6 +29,7 @@ import android.net.Proxy;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.webkit.WebView;
@@ -485,6 +486,7 @@ public class WebkitProxy {
         return false;
     }
 
+    @Nullable
     public static Object getRequestQueue(Context ctx) throws Exception {
         Object ret = null;
         Class networkClass = Class.forName("android.webkit.Network");
@@ -542,6 +544,7 @@ public class WebkitProxy {
 
     }
 
+    @Nullable
     public static AlertDialog initOrbot(Activity activity,
                                         CharSequence stringTitle,
                                         CharSequence stringMessage,

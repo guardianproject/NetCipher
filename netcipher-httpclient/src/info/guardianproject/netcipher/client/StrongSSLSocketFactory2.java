@@ -17,6 +17,13 @@
 
 package info.guardianproject.netcipher.client;
 
+import android.support.annotation.Nullable;
+import cz.msebera.android.httpclient.HttpHost;
+import cz.msebera.android.httpclient.conn.socket.LayeredConnectionSocketFactory;
+import cz.msebera.android.httpclient.protocol.HttpContext;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -25,20 +32,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-
-import cz.msebera.android.httpclient.HttpHost;
-import cz.msebera.android.httpclient.conn.socket.LayeredConnectionSocketFactory;
-import cz.msebera.android.httpclient.protocol.HttpContext;
-
-public class StrongSSLSocketFactory2 extends
-        SSLConnectionSocketFactory
+public class StrongSSLSocketFactory2 extends SSLConnectionSocketFactory
         implements LayeredConnectionSocketFactory {
     private boolean mEnableStongerDefaultSSLCipherSuite = true;
     private boolean mEnableStongerDefaultProtocalVersion = true;
     private String[] mProtocols;
     private String[] mCipherSuites;
+    @Nullable
     private Proxy socksProxy = null;
 
     StrongSSLSocketFactory2(SSLContext sslContext) {

@@ -28,6 +28,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -341,6 +342,7 @@ public class OrbotHelper implements ProxyHelper {
     private final Context context;
     private final Handler handler;
     private boolean isInstalled = false;
+    @Nullable
     private Intent lastStatusIntent = null;
     private Set<StatusCallback> statusCallbacks =
             newSetFromMap(new WeakHashMap<StatusCallback, Boolean>());
@@ -388,7 +390,7 @@ public class OrbotHelper implements ProxyHelper {
         void onInstallTimeout();
     }
 
-    private static volatile OrbotHelper INSTANCE;
+    private static volatile OrbotHelper instance;
 
     /**
      * Retrieves the singleton, initializing if if needed
@@ -398,11 +400,11 @@ public class OrbotHelper implements ProxyHelper {
      * @return the singleton
      */
     synchronized public static OrbotHelper get(Context context) {
-        if (INSTANCE == null) {
-            INSTANCE = new OrbotHelper(context);
+        if (instance == null) {
+            instance = new OrbotHelper(context);
         }
 
-        return (INSTANCE);
+        return (instance);
     }
 
     /**

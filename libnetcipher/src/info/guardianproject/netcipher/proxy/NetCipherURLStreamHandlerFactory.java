@@ -18,6 +18,7 @@
 package info.guardianproject.netcipher.proxy;
 
 import android.annotation.SuppressLint;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.net.URLStreamHandler;
@@ -37,6 +38,7 @@ public class NetCipherURLStreamHandlerFactory implements URLStreamHandlerFactory
      * @see java.net.URL#getURLStreamHandler(String protocol)
      */
     @SuppressLint("PrivateApi")
+    @Nullable
     @Override
     public URLStreamHandler createURLStreamHandler(String protocol) {
         try {
