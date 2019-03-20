@@ -36,6 +36,12 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.client.methods.HttpGet;
+import info.guardianproject.netcipher.client.StrongHttpsClient;
+import info.guardianproject.netcipher.proxy.OrbotHelper;
+import info.guardianproject.netcipher.proxy.ProxyHelper;
+import info.guardianproject.netcipher.proxy.PsiphonHelper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -48,13 +54,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
-import ch.boye.httpclientandroidlib.HttpResponse;
-import ch.boye.httpclientandroidlib.client.methods.HttpGet;
-import info.guardianproject.netcipher.client.StrongHttpsClient;
-import info.guardianproject.netcipher.proxy.OrbotHelper;
-import info.guardianproject.netcipher.proxy.ProxyHelper;
-import info.guardianproject.netcipher.proxy.PsiphonHelper;
-
 public class NetCipherSampleActivity extends Activity {
 
     private final static String TAG = "NetCipherSampleActivity";
@@ -65,9 +64,8 @@ public class NetCipherSampleActivity extends Activity {
     private TextView torStatusTextView;
 
     // test the local device proxy provided by Orbot/Tor
-    private final static String PROXY_HOST = "127.0.0.1";
-    private int mProxyHttp = 8118; // default for Orbot/Tor
-    private int mProxySocks = 9050; // default for Orbot/Tor
+    private int mProxyHttp = OrbotHelper.DEFAULT_PROXY_HTTP_PORT;
+    private int mProxySocks = OrbotHelper.DEFAULT_PROXY_SOCKS_PORT;
 
     private final static String DEFAULT_ONION_URL = "http://3g2upl4pq6kufc4m.onion";
 
@@ -292,7 +290,7 @@ public class NetCipherSampleActivity extends Activity {
                     else if (mProxyType == Proxy.Type.SOCKS)
                         proxyPort = mProxySocks;
                 }
-                String resp = checkHTTP(url, mProxyType, PROXY_HOST, proxyPort);
+                String resp = checkHTTP(url, mProxyType, OrbotHelper.DEFAULT_PROXY_HOST, proxyPort);
                 msg = new Message();
                 msg.getData().putString("status", resp);
                 handler.sendMessage(msg);

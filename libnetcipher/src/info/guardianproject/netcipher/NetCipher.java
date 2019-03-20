@@ -17,26 +17,32 @@
 
 package info.guardianproject.netcipher;
 
+import android.annotation.TargetApi;
+import android.app.Application;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.JsonReader;
 import android.util.Log;
+import info.guardianproject.netcipher.client.StrongBuilderBase;
+import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
+import info.guardianproject.netcipher.proxy.NetCipherURLStreamHandlerFactory;
+import info.guardianproject.netcipher.proxy.OrbotHelper;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandlerFactory;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-
-import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
-import info.guardianproject.netcipher.proxy.OrbotHelper;
 
 public class NetCipher {
     private static final String TAG = "NetCipher";
@@ -46,7 +52,9 @@ public class NetCipher {
     }
 
     public final static Proxy ORBOT_HTTP_PROXY = new Proxy(Proxy.Type.HTTP,
-            new InetSocketAddress("127.0.0.1", 8118));
+            new InetSocketAddress("127.0.0.1", OrbotHelper.DEFAULT_PROXY_HTTP_PORT));
+    public final static Proxy ORBOT_SOCKS_PROXY = new Proxy(Proxy.Type.SOCKS,
+            new InetSocketAddress("127.0.0.1", OrbotHelper.DEFAULT_PROXY_SOCKS_PORT));
 
     private static Proxy proxy;
 
@@ -62,6 +70,8 @@ public class NetCipher {
      *
      * @param host the IP address for the HTTP proxy to use globally
      * @param port the port number for the HTTP proxy to use globally
+     * @see #setProxy(Proxy)
+     * @see #clearProxy()
      */
     public static void setProxy(String host, int port) {
         if (!TextUtils.isEmpty(host) && port > 0) {
@@ -83,6 +93,8 @@ public class NetCipher {
      * proxy settings are allowed to override the current Tor proxy.
      *
      * @param proxy the HTTP proxy to use globally
+     * @see #setProxy(String, int)
+     * @see #clearProxy()
      */
     public static void setProxy(Proxy proxy) {
         if (proxy != null && NetCipher.proxy == ORBOT_HTTP_PROXY) {
@@ -120,9 +132,93 @@ public class NetCipher {
      * own proxy settings for connections that need proxies to work.  So if "use
      * Tor" is enabled, as tested by looking for the static instance of Proxy,
      * then no other proxy settings are allowed to override the current Tor proxy.
+     *
+     * @see #clearProxy()
+     * @see #useGlobalProxy()
      */
     public static void useTor() {
-        setProxy(ORBOT_HTTP_PROXY);
+        if (Build.VERSION.SDK_INT < 24) {
+            setProxy(ORBOT_HTTP_PROXY);
+        } else {
+            setProxy(ORBOT_SOCKS_PROXY);
+        }
+    }
+
+    /**
+     * Makes a connection to {@code check.torproject.org} to read its results
+     * of whether the connection came via Tor or not.
+     *
+     * @return true if {@code check.torproject.org} says connection is via Tor, false if not or on error
+     * @see <a href="https://check.torproject.org">check.torproject.org</a>
+     */
+    @TargetApi(11)
+    public static boolean isURLConnectionUsingTor() {
+        if (Build.VERSION.SDK_INT < 11) {
+            throw new UnsupportedOperationException("only works on android-11 or higher");
+        }
+
+        try {
+            URL url = new URL(StrongBuilderBase.TOR_CHECK_URL);
+            return checkIsTor(url.openConnection());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @TargetApi(11)
+    public static boolean isNetCipherGetHttpURLConnectionUsingTor() {
+        if (Build.VERSION.SDK_INT < 11) {
+            throw new UnsupportedOperationException("only works on android-11 or higher");
+        }
+
+        try {
+            URL url = new URL(StrongBuilderBase.TOR_CHECK_URL);
+            return checkIsTor(NetCipher.getHttpURLConnection(url));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @TargetApi(11)
+    private static boolean checkIsTor(URLConnection connection) throws IOException {
+        boolean isTor = false;
+        Log.i(TAG, "content length: " + connection.getContentLength());
+        JsonReader jsonReader = new JsonReader(new InputStreamReader(connection.getInputStream()));
+        jsonReader.beginObject();
+        while (jsonReader.hasNext()) {
+            String name = jsonReader.nextName();
+            if ("IsTor".equals(name)) {
+                isTor = jsonReader.nextBoolean();
+                break;
+            } else {
+                jsonReader.skipValue();
+            }
+        }
+        return isTor;
+    }
+
+    /**
+     * Call this method in {@link Application#onCreate()} to enable NetCipher
+     * to control the proxying.  This only works on
+     * {@link Build.VERSION_CODES#N Android 7.1.2 N} or newer. There needs to
+     * be a separate call to {@link #setProxy(Proxy)} or {@link #useTor()} for
+     * proxying to actually be enabled.  {@link #clearProxy()} will then remove
+     * the proxying when the global proxy control is in place.
+     *
+     * @see #useTor()
+     * @see #setProxy(Proxy)
+     * @see #setProxy(String, int)
+     * @see #clearProxy()
+     * @see URL#setURLStreamHandlerFactory(URLStreamHandlerFactory)
+     */
+    @TargetApi(24)
+    public static void useGlobalProxy() {
+        if (Build.VERSION.SDK_INT < 24) {
+            throw new UnsupportedOperationException("only works on android-24 or higher");
+        }
+        URL.setURLStreamHandlerFactory(new NetCipherURLStreamHandlerFactory());
     }
 
     /**
@@ -156,6 +252,10 @@ public class NetCipher {
     /**
      * Get a {@link HttpURLConnection} from a {@link URL}, and specify whether
      * it should use a more compatible, but less strong, suite of ciphers.
+     * <p>
+     * If {@link #useGlobalProxy()} is called, this method will use the global
+     * proxy settings.  For {@code .onion} addresses, this will still directly
+     * configure the proxy, but that should be the same exact settings.
      *
      * @param url
      * @param compatible
@@ -167,8 +267,13 @@ public class NetCipher {
             throws IOException {
         // .onion addresses only work via Tor, so force Tor for all of them
         Proxy proxy = NetCipher.proxy;
-        if (OrbotHelper.isOnionAddress(url))
-            proxy = ORBOT_HTTP_PROXY;
+        if (OrbotHelper.isOnionAddress(url)) {
+            if (Build.VERSION.SDK_INT < 24) {
+                proxy = ORBOT_HTTP_PROXY;
+            } else {
+                proxy = ORBOT_SOCKS_PROXY;
+            }
+        }
 
         HttpURLConnection connection;
         if (proxy != null) {

@@ -32,7 +32,7 @@ import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.webkit.WebView;
-
+import info.guardianproject.netcipher.proxy.OrbotHelper;
 import org.apache.http.HttpHost;
 
 import java.io.IOException;
@@ -46,10 +46,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class WebkitProxy {
-
-    private final static String DEFAULT_HOST = "localhost";
-    private final static int DEFAULT_PORT = 8118;
-    private final static int DEFAULT_SOCKS_PORT = 9050;
 
     private final static int REQUEST_CODE = 0;
 
@@ -95,12 +91,11 @@ public class WebkitProxy {
         System.setProperty("https.proxyHost", host);
         System.setProperty("https.proxyPort", Integer.toString(port));
 
-
         System.setProperty("socks.proxyHost", host);
-        System.setProperty("socks.proxyPort", Integer.toString(DEFAULT_SOCKS_PORT));
+        System.setProperty("socks.proxyPort", Integer.toString(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT));
 
         System.setProperty("socksProxyHost", host);
-        System.setProperty("socksProxyPort", Integer.toString(DEFAULT_SOCKS_PORT));
+        System.setProperty("socksProxyPort", Integer.toString(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT));
     }
 
     private static void resetSystemProperties() {
@@ -114,12 +109,11 @@ public class WebkitProxy {
         System.setProperty("https.proxyHost", "");
         System.setProperty("https.proxyPort", "");
 
-
         System.setProperty("socks.proxyHost", "");
-        System.setProperty("socks.proxyPort", Integer.toString(DEFAULT_SOCKS_PORT));
+        System.setProperty("socks.proxyPort", Integer.toString(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT));
 
         System.setProperty("socksProxyHost", "");
-        System.setProperty("socksProxyPort", Integer.toString(DEFAULT_SOCKS_PORT));
+        System.setProperty("socksProxyPort", Integer.toString(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT));
     }
 
     /**
@@ -506,7 +500,7 @@ public class WebkitProxy {
     }
 
     private static Object getDeclaredField(Object obj, String name)
-            throws  NoSuchFieldException,IllegalAccessException {
+            throws NoSuchFieldException, IllegalAccessException {
         Field f = obj.getClass().getDeclaredField(name);
         f.setAccessible(true);
         Object out = f.get(obj);
@@ -514,7 +508,7 @@ public class WebkitProxy {
     }
 
     private static void setDeclaredField(Object obj, String name, Object value)
-            throws  NoSuchFieldException,IllegalAccessException {
+            throws NoSuchFieldException, IllegalAccessException {
         Field f = obj.getClass().getDeclaredField(name);
         f.setAccessible(true);
         f.set(obj, value);
@@ -544,7 +538,7 @@ public class WebkitProxy {
     }
 
     public static Socket getSocket(Context context) throws IOException {
-        return getSocket(context, DEFAULT_HOST, DEFAULT_SOCKS_PORT);
+        return getSocket(context, OrbotHelper.DEFAULT_PROXY_HOST, OrbotHelper.DEFAULT_PROXY_SOCKS_PORT);
 
     }
 
