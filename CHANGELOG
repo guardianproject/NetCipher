@@ -1,3 +1,14 @@
+v2.1
+* use SOCKS directly when running on SDK 24+
+* use Tor globally with URLConnection via URL.setURLStreamHandlerFactory()
+* overhaul WebViewProxy to work on all SDK versions and add tests
+* disable TLS Session Tickets by default with HttpURLConnection
+* expanded badssl.com tests
+* nailed down automated emulator tests
+* add errorprone static code analyzer to CI job
+
+v2.0
+
 v1.1
 715ea8d updated code for new http changes
 b99f9e4 updated sample for latest onionkit changes
