@@ -135,6 +135,22 @@ connected 28 default x86_64:
   <<: *kvm-template
 
 
+jarRelease:
+  stage: deploy
+  artifacts:
+    name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
+    paths:
+      - "logcat.txt"
+      - "*/build/libs"
+      - "*/build/reports"
+      - "*/build/outputs/*ml"
+      - "*/build/outputs/apk"
+    expire_in: 1 week
+    when: always
+  script:
+    - ./make-release-build
+
+
 after_script:
     # this file changes every time but should not be cached
     - rm -f $GRADLE_USER_HOME/caches/modules-2/modules-2.lock

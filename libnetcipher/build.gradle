@@ -58,3 +58,72 @@ android {
         }
     }
 }
+
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
+        return; // Skip debug builds.
+    }
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile, sourcesJar, javadocJar, createPom
+    task.from variant.javaCompile.destinationDir
+    task.exclude('info/guardianproject/**/BuildConfig.**')
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.compile
+    options.addStringOption('notimestamp')
+    failOnError false
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+apply plugin: 'maven'
+
+task createPom << {
+    pom {
+        project {
+            name 'NetCipher'
+            artifactId 'netcipher'
+            inceptionYear '2012'
+            url 'https://guardianproject.info/code/netcipher'
+            description 'NetCipher is a library for Android that provides multiple means to improve network security in mobile applications. It provides best practices TLS settings using the standard Android HTTP methods, HttpURLConnection and Apache HTTP Client, provides simple Tor integration, makes it easy to configure proxies for HTTP connections and `WebView` instances.'
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+            developers {
+                developer {
+                   id = 'guardianproject'
+                   name = 'Guardian Project'
+                   email = 'support@guardianproject.info'
+                }
+            }
+            issueManagement {
+                url = "https://gitlab.com/guardianproject/netcipher/issues"
+            }
+            scm {
+                connection = 'scm:git:https://gitlab.com/guardianproject/netcipher.git'
+                url = 'https://gitlab.com/guardianproject/netcipher'
+            }
+        }
+    }.writeTo(project.getBuildDir().toString() + "/libs/" + project.name + "-" + project.version + ".pom")
+}

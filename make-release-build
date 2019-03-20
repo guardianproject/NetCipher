@@ -6,20 +6,20 @@ set -x
 # standardize timezone to reduce build differences
 export TZ=UTC
 
-git reset --hard
-git clean -fdx
+#git reset --hard
+#git clean -fdx
 
-./setup-ant
-cd libnetcipher
-ant release-all
+./gradlew jarRelease
 
 if which gpg > /dev/null; then
     if [ -z "`gpg --list-secret-keys`" ]; then
         echo "No GPG secret keys found, not signing APK"
     else
-        jarname=netcipher-$(git describe)
-        rm -f ${jarname}*.asc
-        for f in ${jarname}*.*; do
+        jardir=*/build/libs
+        jarname=netcipher*-$(git describe)
+        jars=${jardir}/${jarname}
+        rm -f ${jars}*.asc
+        for f in ${jars}*.*; do
             gpg --armor --detach-sign $f
         done
     fi
