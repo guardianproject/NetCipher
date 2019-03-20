@@ -128,11 +128,6 @@ connected 26 google_apis x86:
 
 connected 27 google_apis_playstore x86:
   <<: *kvm-template
-  only:
-    - master@guardianproject/netcipher
-
-connected 28 default x86_64:
-  <<: *kvm-template
 
 
 jarRelease:
