@@ -6,8 +6,8 @@ set -x
 # standardize timezone to reduce build differences
 export TZ=UTC
 
-#git reset --hard
-#git clean -fdx
+git reset --hard
+git clean -fdx
 
 ./gradlew jarRelease
 
