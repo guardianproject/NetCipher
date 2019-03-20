@@ -66,11 +66,14 @@ android.libraryVariants.all { variant ->
     task.dependsOn variant.javaCompile, sourcesJar, javadocJar, createPom
     task.from variant.javaCompile.destinationDir
     task.exclude('info/guardianproject/**/BuildConfig.**')
+    artifacts.add('archives', task);
+    task.baseName = 'netcipher'
 }
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
+    baseName = 'netcipher'
 }
 
 task javadoc(type: Javadoc) {
@@ -84,6 +87,7 @@ task javadoc(type: Javadoc) {
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
+    baseName = 'netcipher'
 }
 
 artifacts {
@@ -123,5 +127,5 @@ task createPom << {
                 url = 'https://gitlab.com/guardianproject/netcipher'
             }
         }
-    }.writeTo(project.getBuildDir().toString() + "/libs/" + project.name + "-" + project.version + ".pom")
+    }.writeTo(project.getBuildDir().toString() + "/libs/" + "netcipher" + "-" + project.version + ".pom")
 }
