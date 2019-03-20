@@ -17,11 +17,14 @@
 
 package info.guardianproject.netcipher;
 
+import android.annotation.TargetApi;
+import android.app.Application;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
+import info.guardianproject.netcipher.proxy.NetCipherURLStreamHandlerFactory;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -33,6 +36,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLStreamHandlerFactory;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
@@ -62,6 +66,8 @@ public class NetCipher {
      *
      * @param host the IP address for the HTTP proxy to use globally
      * @param port the port number for the HTTP proxy to use globally
+     * @see #setProxy(Proxy)
+     * @see #clearProxy()
      */
     public static void setProxy(String host, int port) {
         if (!TextUtils.isEmpty(host) && port > 0) {
@@ -83,6 +89,8 @@ public class NetCipher {
      * proxy settings are allowed to override the current Tor proxy.
      *
      * @param proxy the HTTP proxy to use globally
+     * @see #setProxy(String, int)
+     * @see #clearProxy()
      */
     public static void setProxy(Proxy proxy) {
         if (proxy != null && NetCipher.proxy == ORBOT_HTTP_PROXY) {
@@ -120,6 +128,9 @@ public class NetCipher {
      * own proxy settings for connections that need proxies to work.  So if "use
      * Tor" is enabled, as tested by looking for the static instance of Proxy,
      * then no other proxy settings are allowed to override the current Tor proxy.
+     *
+     * @see #clearProxy()
+     * @see #useGlobalProxy()
      */
     public static void useTor() {
         if (Build.VERSION.SDK_INT < 24) {
@@ -127,6 +138,28 @@ public class NetCipher {
         } else {
             setProxy(ORBOT_SOCKS_PROXY);
         }
+    }
+
+    /**
+     * Call this method in {@link Application#onCreate()} to enable NetCipher
+     * to control the proxying.  This only works on
+     * {@link Build.VERSION_CODES#N Android 7.1.2 N} or newer. There needs to
+     * be a separate call to {@link #setProxy(Proxy)} or {@link #useTor()} for
+     * proxying to actually be enabled.  {@link #clearProxy()} will then remove
+     * the proxying when the global proxy control is in place.
+     *
+     * @see #useTor()
+     * @see #setProxy(Proxy)
+     * @see #setProxy(String, int)
+     * @see #clearProxy()
+     * @see URL#setURLStreamHandlerFactory(URLStreamHandlerFactory)
+     */
+    @TargetApi(24)
+    public static void useGlobalProxy() {
+        if (Build.VERSION.SDK_INT < 24) {
+            throw new UnsupportedOperationException("only works on android-24 or higher");
+        }
+        URL.setURLStreamHandlerFactory(new NetCipherURLStreamHandlerFactory());
     }
 
     /**
@@ -160,6 +193,10 @@ public class NetCipher {
     /**
      * Get a {@link HttpURLConnection} from a {@link URL}, and specify whether
      * it should use a more compatible, but less strong, suite of ciphers.
+     * <p>
+     * If {@link #useGlobalProxy()} is called, this method will use the global
+     * proxy settings.  For {@code .onion} addresses, this will still directly
+     * configure the proxy, but that should be the same exact settings.
      *
      * @param url
      * @param compatible
