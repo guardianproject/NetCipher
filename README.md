@@ -65,7 +65,7 @@ The binary jar, source jar, and javadoc jar are all available on `jcenter()`,
 and they all include GPG signatures.  To include this library using gradle,
 add this line to your *build.gradle*:
 
-    implementation 'info.guardianproject.netcipher:netcipher:2.0.0'
+    implementation 'info.guardianproject.netcipher:netcipher:2.1.0'
 
 Otherwise, the files can also be [downloaded directly] from bintray.com.
 
@@ -91,10 +91,10 @@ You will need up to three dependencies to pull in the right bits for your
 project.
 
 At minimum, you will need the `netcipher` base artifact. The `StrongBuilder`
-classes are in 2.0.0 and higher:
+classes are in 2.1.0 and higher:
 
 ```groovy
-implementation 'info.guardianproject.netcipher:netcipher:2.0.0'
+implementation 'info.guardianproject.netcipher:netcipher:2.1.0'
 ```
 
 If you are planning on using `HttpURLConnection` and `StrongConnectionBuilder`,
@@ -123,8 +123,8 @@ would have these dependencies, in addition to any others that the
 project needs:
 
 ```groovy
-implementation 'info.guardianproject.netcipher:netcipher:2.0.0'
-implementation 'info.guardianproject.netcipher:netcipher-okhttp3:2.0.0'
+implementation 'info.guardianproject.netcipher:netcipher:2.1.0'
+implementation 'info.guardianproject.netcipher:netcipher-okhttp3:2.1.0'
 implementation 'com.squareup.okhttp3:okhttp:3.4.2'
 ```
 
