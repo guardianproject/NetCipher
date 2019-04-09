@@ -289,6 +289,39 @@ public void onTimeout() {
 }
 ```
 
+## WebView
+
+NetCipher also comes with a helper library which makes it trivial to
+proxy settings for WebViews. It is also packaged with maven:
+
+```
+dependencies {
+
+    implementation 'info.guardianproject.netcipher:netcipher-webkit:2.0.0-alpha1'
+
+}
+```
+
+On Android 5.0 (API level 21) or newer the simplets way to use `WebkitProxy`
+is by initializing it on App start. WebView proxying works globally.
+
+```
+class App extends Application {
+
+    public void onCreate() {
+        try {
+            WebkitProxy.setProxy(SampleApplication.class.getName(), this.getApplicationContext(), null, "localhost", 8118);
+        } catch (Exception e) {
+            Log.e(TAG, "Could not start WebkitProxy", e);
+        }
+    }
+}
+```
+
+If you want to support older Android versions you'll also need to pass
+a reference of your WebView when calling `WebkitProxy.setProxy()`.
+
+
 ## Sample Apps
 
 This project contains a sample app for each of the four HTTP client APIs:
@@ -299,6 +332,7 @@ This project contains a sample app for each of the four HTTP client APIs:
 |OkHttp3            |`sample-okhttp3`   |
 |Volley             |`sample-volley`    |
 |Apache HttpClient  |`sample-httpclient`|
+|WebView            |`sample-webkit`    |
 
 Each of the four apps does the same thing: request the latest Stack Overflow
 `android` questions and show them in a list. What differs between the
