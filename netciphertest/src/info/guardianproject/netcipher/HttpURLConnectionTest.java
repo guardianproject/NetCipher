@@ -386,7 +386,7 @@ public class HttpURLConnectionTest {
 
     @Test
     public void testSocksProxyWithOnion() throws IOException {
-        Assume.assumeTrue("Only works on Android 3.0 or higher", Build.VERSION.SDK_INT >= 11);
+        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
         if (!canUseHostTorSocks()) try {
             new ServerSocket(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT).close();
             Assume.assumeTrue("Requires either Orbot running in emulator or tor on host", false);
