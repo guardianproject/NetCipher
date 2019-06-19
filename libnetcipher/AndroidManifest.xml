@@ -3,6 +3,6 @@
 
     <uses-sdk
         android:minSdkVersion="9"
-        android:targetSdkVersion="24" />
+        android:targetSdkVersion="29" />
 
 </manifest>
