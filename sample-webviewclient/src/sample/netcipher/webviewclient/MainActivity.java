@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package sample.netcipher.webkit;
+package sample.netcipher.webviewclient;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import info.guardianproject.netcipher.webkit.WebkitProxy;
 
 public class MainActivity extends Activity {
 
@@ -34,27 +32,19 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
-        boolean proxySuccess = false;
         webView = (WebView) findViewById(R.id.webview);
-        try {
-            proxySuccess = WebkitProxy.setProxy(SampleApplication.class.getName(), this.getApplicationContext(), webView, "localhost", 8118);
-            webView.loadUrl("https://guardianproject.info/code/netcipher/");
-        } catch (Exception e) {
-            Log.e("###", "Could not start WebkitProxy", e);
-        }
+        final TextView status = (TextView) findViewById(R.id.status);
+        GenericWebViewClient webViewClient = new GenericWebViewClient(this);
 
-        TextView status = (TextView) findViewById(R.id.status);
-        if (proxySuccess) {
-            status.setText(String.format("(localhost:8118) WebView proxy setup successful"));
-        } else {
-            status.setText(String.format("(localhost:8118) WebView proxy setup NOT successful"));
-        }
+        webViewClient.setRequestCounterListener(new GenericWebViewClient.RequestCounterListener() {
+            @Override
+            public void countChanged(int requestCount) {
+                status.setText("request count: " + requestCount);
+            }
+        });
+
+        webView.setWebViewClient(webViewClient);
+        webView.loadUrl("https://guardianproject.info/code/netcipher/");
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-
-    }
 }

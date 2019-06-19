@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package sample.netcipher.webkit;
+package sample.netcipher.webviewclient;
 
 import android.app.Application;
 
