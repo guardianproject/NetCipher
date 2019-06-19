@@ -182,7 +182,6 @@ public class HttpURLConnectionTest {
                 "web.wechat.com",
                 "mirrors.kernel.org",
                 "www.google.com",
-                "glympse.com",
                 // uses SNI
                 "check-tls.akamaized.net",
                 "guardianproject.info",
