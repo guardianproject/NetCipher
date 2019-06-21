@@ -4,13 +4,13 @@ dependencies {
     api project(':libnetcipher')
     implementation 'com.android.support:support-annotations:27.1.1'
 
-    androidTestImplementation "com.android.support:multidex:1.0.3"
-    androidTestImplementation "junit:junit:4.12"
-    androidTestImplementation "com.android.support.test:runner:1.0.2"
-    androidTestImplementation "com.android.support.test:rules:1.0.2"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.2"
-    androidTestImplementation "org.nanohttpd:nanohttpd:2.2.0"
-    androidTestImplementation "net.lightbody.bmp:browsermob-core:2.1.5"
+    androidTestImplementation 'com.android.support:multidex:1.0.3'
+    androidTestImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'org.nanohttpd:nanohttpd:2.2.0'
+    androidTestImplementation 'net.lightbody.bmp:browsermob-core:2.1.5'
 }
 
 android {
