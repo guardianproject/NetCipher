@@ -5,9 +5,10 @@ dependencies {
     implementation 'com.android.support:support-annotations:27.1.1'
 
     androidTestImplementation 'com.android.support:multidex:1.0.3'
-    androidTestImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestUtil 'com.android.support.test:orchestrator:1.0.2'
+    androidTestImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     androidTestImplementation 'org.nanohttpd:nanohttpd:2.2.0'
     androidTestImplementation 'net.lightbody.bmp:browsermob-core:2.1.5'
@@ -35,15 +36,24 @@ android {
         }
     }
 
+    defaultConfig {
+        multiDexEnabled true
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        // The following argument makes the Android Test Orchestrator run its
+        // "pm clear" command after each test invocation. This command ensures
+        // that the app's state is completely cleared between tests. This is required
+        // since there is no way to unset URL.setURLStreamHandlerFactory().
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+    }
+
     lintOptions {
         htmlReport true
         xmlReport false
         textReport false
     }
 
-    defaultConfig {
-        multiDexEnabled true
-        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+    testOptions {
+        execution 'ANDROID_TEST_ORCHESTRATOR'
     }
 
     packagingOptions {

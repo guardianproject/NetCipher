@@ -60,6 +60,12 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+/**
+ * This test suite can break others because it calls{@link NetCipher#useGlobalProxy()},
+ * which uses {@link URL#setURLStreamHandlerFactory(java.net.URLStreamHandlerFactory)}.
+ * There is no way to reset the {@link java.net.URLStreamHandlerFactory} after that has
+ * been called, except for restarting the JVM.
+ */
 @RunWith(AndroidJUnit4.class)
 public class HttpURLConnectionTest {
     public static final String TAG = "HttpURLConnectionTest";

@@ -18,7 +18,6 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -120,7 +119,6 @@ public class WebviewProxyTestActivityTest {
         Assert.assertEquals(CONTENT_DIRECT, html);
     }
 
-    @Ignore // remove me once this test is stable
     @Test
     public void testWebkitProxy() throws Exception {
 
