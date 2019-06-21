@@ -32,17 +32,18 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class StrongVolleyQueueBuilderTest extends
-        AndroidTestCase {
+public class StrongVolleyQueueBuilderTest extends AndroidTestCase {
+
     private static final String TEST_URL =
             "https://gitlab.com/guardianproject/NetCipher/raw/master/netciphertest/res/test.json";
     private static final String EXPECTED = "{\"Hello\": \"world\"}";
     private static AtomicBoolean initialized = new AtomicBoolean(false);
     private static AtomicBoolean isOrbotInstalled = null;
+    private static CountDownLatch initLatch = new CountDownLatch(1);
+
     private CountDownLatch responseLatch;
     private Exception innerException = null;
     private String testResult = null;
-    private static CountDownLatch initLatch = new CountDownLatch(1);
 
     public void setUp() throws InterruptedException {
         if (!initialized.get()) {
@@ -92,24 +93,19 @@ public class StrongVolleyQueueBuilderTest extends
         responseLatch = new CountDownLatch(1);
     }
 
-    public void testOrbotInstalled() throws InterruptedException {
+    public void testOrbotInstalled() {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
         try {
-            getContext()
-                    .getPackageManager()
-                    .getApplicationInfo("org.torproject.android", 0);
-            assertTrue("Orbot is installed, but NetCipher thinks it is not",
-                    isOrbotInstalled.get());
+            getContext().getPackageManager().getApplicationInfo("org.torproject.android", 0);
+            assertTrue("Orbot is installed, but NetCipher thinks it is not", isOrbotInstalled.get());
         } catch (PackageManager.NameNotFoundException e) {
-            assertFalse("Orbot not installed, but NetCipher thinks it is",
-                    isOrbotInstalled.get());
+            assertFalse("Orbot not installed, but NetCipher thinks it is", isOrbotInstalled.get());
         }
     }
 
-    public void testBuilder()
-            throws Exception {
+    public void testBuilder() throws Exception {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 

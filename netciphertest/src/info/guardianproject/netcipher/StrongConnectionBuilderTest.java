@@ -31,15 +31,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StrongConnectionBuilderTest extends
         AndroidTestCase {
+
     private static final String TEST_URL =
             "https://gitlab.com/guardianproject/NetCipher/raw/master/netciphertest/res/test.json";
+
     private static final String EXPECTED = "{\"Hello\": \"world\"}";
     private static AtomicBoolean initialized = new AtomicBoolean(false);
     private static AtomicBoolean isOrbotInstalled = null;
+    private static CountDownLatch initLatch = new CountDownLatch(1);
+
     private CountDownLatch responseLatch;
     private Exception innerException = null;
     private String testResult = null;
-    private static CountDownLatch initLatch = new CountDownLatch(1);
 
     public void setUp() throws InterruptedException {
         if (!initialized.get()) {
@@ -89,78 +92,61 @@ public class StrongConnectionBuilderTest extends
         responseLatch = new CountDownLatch(1);
     }
 
-    public void testOrbotInstalled() throws InterruptedException {
+    public void testOrbotInstalled() {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
         try {
-            getContext()
-                    .getPackageManager()
-                    .getApplicationInfo("org.torproject.android", 0);
-            assertTrue("Orbot is installed, but NetCipher thinks it is not",
-                    isOrbotInstalled.get());
+            getContext().getPackageManager().getApplicationInfo("org.torproject.android", 0);
+            assertTrue("Orbot is installed, but NetCipher thinks it is not", isOrbotInstalled.get());
         } catch (PackageManager.NameNotFoundException e) {
-            assertFalse("Orbot not installed, but NetCipher thinks it is",
-                    isOrbotInstalled.get());
+            assertFalse("Orbot not installed, but NetCipher thinks it is", isOrbotInstalled.get());
         }
     }
 
-    public void testStrongConnectionBuilder()
-            throws Exception {
+    public void testStrongConnectionBuilder() throws Exception {
+        assertTrue("we were not initialized", initialized.get());
+        assertNotNull("we did not get an Orbot status", isOrbotInstalled);
+
+        if (isOrbotInstalled.get()) {
+            StrongConnectionBuilder builder = StrongConnectionBuilder.forMaxSecurity(getContext());
+
+            testStrongBuilder(builder.connectTo(TEST_URL), new TestBuilderCallback<HttpURLConnection>() {
+                @Override
+                protected void loadResult(HttpURLConnection c) throws Exception {
+                    try {
+                        testResult = StrongConnectionBuilder.slurp(c.getInputStream());
+                    } finally {
+                        c.disconnect();
+                    }
+                }
+            });
+        }
+    }
+
+    public void testValidatedStrongConnectionBuilder() throws Exception {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
         if (isOrbotInstalled.get()) {
             StrongConnectionBuilder builder =
-                    StrongConnectionBuilder
-                            .forMaxSecurity(getContext());
+                    StrongConnectionBuilder.forMaxSecurity(getContext()).withTorValidation();
 
-            testStrongBuilder(builder.connectTo(TEST_URL),
-                    new TestBuilderCallback<HttpURLConnection>() {
-                        @Override
-                        protected void loadResult(HttpURLConnection c)
-                                throws Exception {
-                            try {
-                                testResult =
-                                        StrongConnectionBuilder.slurp(c.getInputStream());
-                            } finally {
-                                c.disconnect();
-                            }
-                        }
-                    });
+            testStrongBuilder(builder.connectTo(TEST_URL), new TestBuilderCallback<HttpURLConnection>() {
+                @Override
+                protected void loadResult(HttpURLConnection c)
+                        throws Exception {
+                    try {
+                        testResult = StrongConnectionBuilder.slurp(c.getInputStream());
+                    } finally {
+                        c.disconnect();
+                    }
+                }
+            });
         }
     }
 
-    public void testValidatedStrongConnectionBuilder()
-            throws Exception {
-        assertTrue("we were not initialized", initialized.get());
-        assertNotNull("we did not get an Orbot status", isOrbotInstalled);
-
-        if (isOrbotInstalled.get()) {
-            StrongConnectionBuilder builder =
-                    StrongConnectionBuilder
-                            .forMaxSecurity(getContext())
-                            .withTorValidation();
-
-            testStrongBuilder(builder.connectTo(TEST_URL),
-                    new TestBuilderCallback<HttpURLConnection>() {
-                        @Override
-                        protected void loadResult(HttpURLConnection c)
-                                throws Exception {
-                            try {
-                                testResult =
-                                        StrongConnectionBuilder.slurp(c.getInputStream());
-                            } finally {
-                                c.disconnect();
-                            }
-                        }
-                    });
-        }
-    }
-
-    private void testStrongBuilder(StrongBuilder builder,
-                                   TestBuilderCallback callback)
-            throws Exception {
+    private void testStrongBuilder(StrongBuilder builder, TestBuilderCallback callback) throws Exception {
         testResult = null;
         builder.build(callback);
 
@@ -173,11 +159,9 @@ public class StrongConnectionBuilderTest extends
         assertEquals(EXPECTED, testResult);
     }
 
-    private abstract class TestBuilderCallback<C>
-            implements StrongBuilder.Callback<C> {
+    private abstract class TestBuilderCallback<C> implements StrongBuilder.Callback<C> {
 
-        abstract protected void loadResult(C connection)
-                throws Exception;
+        abstract protected void loadResult(C connection) throws Exception;
 
         @Override
         public void onConnected(C connection) {

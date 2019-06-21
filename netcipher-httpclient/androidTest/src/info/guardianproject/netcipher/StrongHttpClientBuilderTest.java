@@ -37,15 +37,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StrongHttpClientBuilderTest extends
         AndroidTestCase {
+
     private static final String TEST_URL =
             "https://gitlab.com/guardianproject/NetCipher/raw/master/netciphertest/res/test.json";
+
     private static final String EXPECTED = "{\"Hello\": \"world\"}";
     private static AtomicBoolean initialized = new AtomicBoolean(false);
     private static AtomicBoolean isOrbotInstalled = null;
+    private static CountDownLatch initLatch = new CountDownLatch(1);
+
     private CountDownLatch responseLatch;
     private Exception innerException = null;
     private String testResult = null;
-    private static CountDownLatch initLatch = new CountDownLatch(1);
 
     public void setUp() throws InterruptedException {
         if (!initialized.get()) {
@@ -100,61 +103,43 @@ public class StrongHttpClientBuilderTest extends
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
         try {
-            getContext()
-                    .getPackageManager()
-                    .getApplicationInfo("org.torproject.android", 0);
-            assertTrue("Orbot is installed, but NetCipher thinks it is not",
-                    isOrbotInstalled.get());
+            getContext().getPackageManager().getApplicationInfo("org.torproject.android", 0);
+            assertTrue("Orbot is installed, but NetCipher thinks it is not", isOrbotInstalled.get());
         } catch (PackageManager.NameNotFoundException e) {
-            assertFalse("Orbot not installed, but NetCipher thinks it is",
-                    isOrbotInstalled.get());
+            assertFalse("Orbot not installed, but NetCipher thinks it is", isOrbotInstalled.get());
         }
     }
 
-    public void testBuilder()
-            throws Exception {
+    public void testBuilder() throws Exception {
+        assertTrue("we were not initialized", initialized.get());
+        assertNotNull("we did not get an Orbot status", isOrbotInstalled);
+
+        if (isOrbotInstalled.get()) {
+            StrongHttpClientBuilder builder = StrongHttpClientBuilder.forMaxSecurity(getContext());
+            testStrongBuilder(builder, new TestBuilderCallback<HttpClient>() {
+                @Override
+                protected void loadResult(HttpClient client) throws Exception {
+                    HttpGet get = new HttpGet(TEST_URL);
+                    testResult = client.execute(get, new BasicResponseHandler());
+                }
+            });
+        }
+    }
+
+    public void testValidatedBuilder() throws Exception {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
         if (isOrbotInstalled.get()) {
             StrongHttpClientBuilder builder =
-                    StrongHttpClientBuilder
-                            .forMaxSecurity(getContext());
-
-            testStrongBuilder(builder,
-                    new TestBuilderCallback<HttpClient>() {
-                        @Override
-                        protected void loadResult(HttpClient client)
-                                throws Exception {
-                            HttpGet get = new HttpGet(TEST_URL);
-
-                            testResult = client.execute(get, new BasicResponseHandler());
-                        }
-                    });
-        }
-    }
-
-    public void testValidatedBuilder()
-            throws Exception {
-        assertTrue("we were not initialized", initialized.get());
-        assertNotNull("we did not get an Orbot status", isOrbotInstalled);
-
-        if (isOrbotInstalled.get()) {
-            StrongHttpClientBuilder builder =
-                    StrongHttpClientBuilder
-                            .forMaxSecurity(getContext())
-                            .withTorValidation();
-
-            testStrongBuilder(builder,
-                    new TestBuilderCallback<HttpClient>() {
-                        @Override
-                        protected void loadResult(HttpClient client)
-                                throws Exception {
-                            HttpGet get = new HttpGet(TEST_URL);
-
-                            testResult = client.execute(get, new BasicResponseHandler());
-                        }
-                    });
+                    StrongHttpClientBuilder.forMaxSecurity(getContext()).withTorValidation();
+            testStrongBuilder(builder, new TestBuilderCallback<HttpClient>() {
+                @Override
+                protected void loadResult(HttpClient client) throws Exception {
+                    HttpGet get = new HttpGet(TEST_URL);
+                    testResult = client.execute(get, new BasicResponseHandler());
+                }
+            });
         }
     }
 
@@ -176,9 +161,7 @@ public class StrongHttpClientBuilderTest extends
         return out.toString();
     }
 
-    private void testStrongBuilder(StrongBuilder builder,
-                                   TestBuilderCallback callback)
-            throws Exception {
+    private void testStrongBuilder(StrongBuilder builder, TestBuilderCallback callback) throws Exception {
         testResult = null;
         builder.build(callback);
 
@@ -191,11 +174,9 @@ public class StrongHttpClientBuilderTest extends
         assertEquals(EXPECTED, testResult);
     }
 
-    private abstract class TestBuilderCallback<C>
-            implements StrongBuilder.Callback<C> {
+    private abstract class TestBuilderCallback<C> implements StrongBuilder.Callback<C> {
 
-        abstract protected void loadResult(C connection)
-                throws Exception;
+        abstract protected void loadResult(C connection) throws Exception;
 
         @Override
         public void onConnected(C connection) {
