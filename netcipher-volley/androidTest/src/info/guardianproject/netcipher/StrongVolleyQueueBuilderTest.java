@@ -19,25 +19,23 @@ package info.guardianproject.netcipher;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
-
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongVolleyQueueBuilder;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import info.guardianproject.netcipher.proxy.StatusCallback;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class StrongVolleyQueueBuilderTest extends
         AndroidTestCase {
     private static final String TEST_URL =
-        "https://gitlab.com/guardianproject/NetCipher/raw/master/netciphertest/res/test.json";
+            "https://gitlab.com/guardianproject/NetCipher/raw/master/netciphertest/res/test.json";
     private static final String EXPECTED = "{\"Hello\": \"world\"}";
     private static AtomicBoolean initialized = new AtomicBoolean(false);
     private static AtomicBoolean isOrbotInstalled = null;

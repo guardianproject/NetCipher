@@ -19,17 +19,16 @@ package info.guardianproject.netcipher;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongOkHttpClientBuilder;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import info.guardianproject.netcipher.proxy.StatusCallback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StrongOkHttpClientBuilderTest extends
         AndroidTestCase {
