@@ -43,9 +43,9 @@ import static org.junit.Assert.assertTrue;
 public class StrongOkHttpClientBuilderTest {
 
     private static final String TEST_URL =
-            "https://wares.commonsware.com/test.json";
+            "https://gitlab.com/guardianproject/NetCipher/raw/6006c45988/netciphertest/res/test.json";
 
-    private static final String EXPECTED = "{\"Hello\": \"world\"}";
+    private static final String EXPECTED = "{\"Hello\": \"world\"}\n";
     private static AtomicBoolean initialized = new AtomicBoolean(false);
     private static AtomicBoolean isOrbotInstalled = null;
     private static CountDownLatch initLatch = new CountDownLatch(1);
