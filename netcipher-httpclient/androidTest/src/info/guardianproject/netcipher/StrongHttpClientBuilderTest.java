@@ -18,7 +18,7 @@ package info.guardianproject.netcipher;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 import cz.msebera.android.httpclient.client.HttpClient;
 import cz.msebera.android.httpclient.client.methods.HttpGet;
 import cz.msebera.android.httpclient.impl.client.BasicResponseHandler;
@@ -26,6 +26,9 @@ import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongHttpClientBuilder;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import info.guardianproject.netcipher.proxy.StatusCallback;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,8 +38,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class StrongHttpClientBuilderTest extends
-        AndroidTestCase {
+import static android.support.test.InstrumentationRegistry.getContext;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+@RunWith(AndroidJUnit4.class)
+public class StrongHttpClientBuilderTest {
 
     private static final String TEST_URL =
             "https://gitlab.com/guardianproject/NetCipher/raw/master/netciphertest/res/test.json";
@@ -50,6 +59,7 @@ public class StrongHttpClientBuilderTest extends
     private Exception innerException = null;
     private String testResult = null;
 
+    @Before
     public void setUp() throws InterruptedException {
         if (!initialized.get()) {
             OrbotHelper
@@ -98,6 +108,7 @@ public class StrongHttpClientBuilderTest extends
         responseLatch = new CountDownLatch(1);
     }
 
+    @Test
     public void testOrbotInstalled() throws InterruptedException {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
@@ -110,6 +121,7 @@ public class StrongHttpClientBuilderTest extends
         }
     }
 
+    @Test
     public void testBuilder() throws Exception {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
@@ -126,6 +138,7 @@ public class StrongHttpClientBuilderTest extends
         }
     }
 
+    @Test
     public void testValidatedBuilder() throws Exception {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);

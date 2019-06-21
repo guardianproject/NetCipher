@@ -18,19 +18,28 @@ package info.guardianproject.netcipher;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongConnectionBuilder;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import info.guardianproject.netcipher.proxy.StatusCallback;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.net.HttpURLConnection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class StrongConnectionBuilderTest extends
-        AndroidTestCase {
+import static android.support.test.InstrumentationRegistry.getContext;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+@RunWith(AndroidJUnit4.class)
+public class StrongConnectionBuilderTest {
 
     private static final String TEST_URL =
             "https://gitlab.com/guardianproject/NetCipher/raw/master/netciphertest/res/test.json";
@@ -44,6 +53,7 @@ public class StrongConnectionBuilderTest extends
     private Exception innerException = null;
     private String testResult = null;
 
+    @Before
     public void setUp() throws InterruptedException {
         if (!initialized.get()) {
             OrbotHelper
@@ -92,6 +102,7 @@ public class StrongConnectionBuilderTest extends
         responseLatch = new CountDownLatch(1);
     }
 
+    @Test
     public void testOrbotInstalled() {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
@@ -104,6 +115,7 @@ public class StrongConnectionBuilderTest extends
         }
     }
 
+    @Test
     public void testStrongConnectionBuilder() throws Exception {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
@@ -124,6 +136,7 @@ public class StrongConnectionBuilderTest extends
         }
     }
 
+    @Test
     public void testValidatedStrongConnectionBuilder() throws Exception {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);

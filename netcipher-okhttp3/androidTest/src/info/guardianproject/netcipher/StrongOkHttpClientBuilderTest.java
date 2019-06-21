@@ -18,20 +18,29 @@ package info.guardianproject.netcipher;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 import info.guardianproject.netcipher.client.StrongBuilder;
 import info.guardianproject.netcipher.client.StrongOkHttpClientBuilder;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import info.guardianproject.netcipher.proxy.StatusCallback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class StrongOkHttpClientBuilderTest extends
-        AndroidTestCase {
+import static android.support.test.InstrumentationRegistry.getContext;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+@RunWith(AndroidJUnit4.class)
+public class StrongOkHttpClientBuilderTest {
 
     private static final String TEST_URL =
             "https://wares.commonsware.com/test.json";
@@ -45,6 +54,7 @@ public class StrongOkHttpClientBuilderTest extends
     private Exception innerException = null;
     private String testResult = null;
 
+    @Before
     public void setUp() throws InterruptedException {
         if (!initialized.get()) {
             OrbotHelper
@@ -93,6 +103,7 @@ public class StrongOkHttpClientBuilderTest extends
         responseLatch = new CountDownLatch(1);
     }
 
+    @Test
     public void testOrbotInstalled() {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
@@ -105,13 +116,13 @@ public class StrongOkHttpClientBuilderTest extends
         }
     }
 
+    @Test
     public void testBuilder() throws Exception {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
         if (isOrbotInstalled.get()) {
             StrongOkHttpClientBuilder builder = StrongOkHttpClientBuilder.forMaxSecurity(getContext());
-
             testStrongBuilder(builder, new TestBuilderCallback<OkHttpClient>() {
                 @Override
                 protected void loadResult(OkHttpClient client) throws Exception {
@@ -122,23 +133,18 @@ public class StrongOkHttpClientBuilderTest extends
         }
     }
 
-    public void testValidatedBuilder()
-            throws Exception {
+    @Test
+    public void testValidatedBuilder() throws Exception {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
         if (isOrbotInstalled.get()) {
             StrongOkHttpClientBuilder builder =
-                    StrongOkHttpClientBuilder
-                            .forMaxSecurity(getContext())
-                            .withTorValidation();
-
+                    StrongOkHttpClientBuilder.forMaxSecurity(getContext()).withTorValidation();
             testStrongBuilder(builder, new TestBuilderCallback<OkHttpClient>() {
                 @Override
-                protected void loadResult(OkHttpClient client)
-                        throws Exception {
+                protected void loadResult(OkHttpClient client) throws Exception {
                     Request request = new Request.Builder().url(TEST_URL).build();
-
                     testResult = client.newCall(request).execute().body().string();
                 }
             });
