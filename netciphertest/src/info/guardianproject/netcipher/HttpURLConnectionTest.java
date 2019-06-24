@@ -376,9 +376,32 @@ public class HttpURLConnectionTest {
         connection.disconnect();
     }
 
+    /**
+     * Using {@link NetCipher#useGlobalProxy()} leaks DNS on Android 7.x, but
+     * the proxying still works.  Without proxied DNS, it is not possible to
+     * connect to {@code .onion} addresses.
+     */
+    @Test
+    public void testUseGlobalProxyWithDNSLeaksOnAndroid7x() throws Exception {
+        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
+        if (!canUseHostTorSocks()) try {
+            new ServerSocket(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT).close();
+            Assume.assumeTrue("Requires either Orbot running in emulator or tor on host", false);
+        } catch (IOException e) {
+            // ignored
+        }
+
+        NetCipher.useGlobalProxyWithDNSLeaksOnAndroid7x();
+        assertFalse("should not be running over Tor yet", NetCipher.isURLConnectionUsingTor());
+        NetCipher.useTor();
+        assertTrue("should be running over Tor", NetCipher.isURLConnectionUsingTor());
+        NetCipher.clearProxy();
+        assertFalse("should no longer be running over Tor", NetCipher.isURLConnectionUsingTor());
+    }
+
     @Test
     public void testUseGlobalProxy() throws Exception {
-        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
+        Assume.assumeTrue("Only works on Android 8.0 or higher", Build.VERSION.SDK_INT >= 26);
         if (!canUseHostTorSocks()) try {
             new ServerSocket(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT).close();
             Assume.assumeTrue("Requires either Orbot running in emulator or tor on host", false);
@@ -407,7 +430,7 @@ public class HttpURLConnectionTest {
 
     @Test(expected = UnknownHostException.class)
     public void testUseGlobalProxyWithoutProxy() throws Exception {
-        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
+        Assume.assumeTrue("Only works on Android 8.0 or higher", Build.VERSION.SDK_INT >= 26);
         if (!canUseHostTorSocks()) try {
             new ServerSocket(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT).close();
             Assume.assumeTrue("Requires either Orbot running in emulator or tor on host", false);
