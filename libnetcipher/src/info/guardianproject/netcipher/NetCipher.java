@@ -17,10 +17,10 @@
 
 package info.guardianproject.netcipher;
 
-import android.annotation.TargetApi;
 import android.app.Application;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.JsonReader;
 import android.util.Log;
@@ -151,7 +151,7 @@ public class NetCipher {
      * @return true if {@code check.torproject.org} says connection is via Tor, false if not or on error
      * @see <a href="https://check.torproject.org">check.torproject.org</a>
      */
-    @TargetApi(11)
+    @RequiresApi(api = 11)
     public static boolean isURLConnectionUsingTor() {
         if (Build.VERSION.SDK_INT < 11) {
             throw new UnsupportedOperationException("only works on android-11 or higher");
@@ -166,7 +166,7 @@ public class NetCipher {
         return false;
     }
 
-    @TargetApi(11)
+    @RequiresApi(api = 11)
     public static boolean isNetCipherGetHttpURLConnectionUsingTor() {
         if (Build.VERSION.SDK_INT < 11) {
             throw new UnsupportedOperationException("only works on android-11 or higher");
@@ -181,7 +181,7 @@ public class NetCipher {
         return false;
     }
 
-    @TargetApi(11)
+    @RequiresApi(api = 11)
     private static boolean checkIsTor(URLConnection connection) throws IOException {
         boolean isTor = false;
         JsonReader jsonReader = new JsonReader(new InputStreamReader(connection.getInputStream()));
@@ -213,7 +213,7 @@ public class NetCipher {
      * @see #clearProxy()
      * @see URL#setURLStreamHandlerFactory(URLStreamHandlerFactory)
      */
-    @TargetApi(26)
+    @RequiresApi(api = 26)
     public static void useGlobalProxy() {
         if (Build.VERSION.SDK_INT < 26) {
             throw new UnsupportedOperationException("only works on Android 8.0 (26) or higher");
@@ -236,7 +236,7 @@ public class NetCipher {
      * @see URL#setURLStreamHandlerFactory(URLStreamHandlerFactory)
      */
     @Deprecated
-    @TargetApi(24)
+    @RequiresApi(api = 24)
     public static void useGlobalProxyWithDNSLeaksOnAndroid7x() {
         if (Build.VERSION.SDK_INT >= 26) {
             useGlobalProxy();
