@@ -34,3 +34,6 @@ libnetcipher/netcipher-*.jar*
 
 # Android Studio
 .idea/
+
+# Javadoc on GitHub Pages
+/public/
