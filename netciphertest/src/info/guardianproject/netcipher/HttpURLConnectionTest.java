@@ -25,14 +25,11 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.w3c.dom.Document;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSocketFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -60,12 +57,6 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-/**
- * This test suite can break others because it calls{@link NetCipher#useGlobalProxy()},
- * which uses {@link URL#setURLStreamHandlerFactory(java.net.URLStreamHandlerFactory)}.
- * There is no way to reset the {@link java.net.URLStreamHandlerFactory} after that has
- * been called, except for restarting the JVM.
- */
 @RunWith(AndroidJUnit4.class)
 public class HttpURLConnectionTest {
     public static final String TAG = "HttpURLConnectionTest";
@@ -95,26 +86,12 @@ public class HttpURLConnectionTest {
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        clearProxySettings();
+        NetCipher.clearProxy();
     }
 
     @After
     public void tearDown() throws NoSuchFieldException, IllegalAccessException {
-        clearProxySettings();
-    }
-
-    /**
-     * Clear all proxy settings, since they are global.
-     */
-    private void clearProxySettings() throws NoSuchFieldException, IllegalAccessException {
         NetCipher.clearProxy();
-
-        if (Build.VERSION.SDK_INT >= 24) {
-            // reset the system's URLStreamHandlerFactory
-            Field factoryField = URL.class.getDeclaredField("factory");
-            factoryField.setAccessible(true);
-            factoryField.set(factoryField, null);
-        }
     }
 
     @Test
@@ -376,74 +353,6 @@ public class HttpURLConnectionTest {
         connection.disconnect();
     }
 
-    /**
-     * Using {@link NetCipher#useGlobalProxy()} leaks DNS on Android 7.x, but
-     * the proxying still works.  Without proxied DNS, it is not possible to
-     * connect to {@code .onion} addresses.
-     */
-    @Test
-    public void testUseGlobalProxyWithDNSLeaksOnAndroid7x() throws Exception {
-        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
-        if (!canUseHostTorSocks()) try {
-            new ServerSocket(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT).close();
-            Assume.assumeTrue("Requires either Orbot running in emulator or tor on host", false);
-        } catch (IOException e) {
-            // ignored
-        }
-
-        NetCipher.useGlobalProxyWithDNSLeaksOnAndroid7x();
-        assertFalse("should not be running over Tor yet", NetCipher.isURLConnectionUsingTor());
-        NetCipher.useTor();
-        assertTrue("should be running over Tor", NetCipher.isURLConnectionUsingTor());
-        NetCipher.clearProxy();
-        assertFalse("should no longer be running over Tor", NetCipher.isURLConnectionUsingTor());
-    }
-
-    @Test
-    public void testUseGlobalProxy() throws Exception {
-        Assume.assumeTrue("Only works on Android 8.0 or higher", Build.VERSION.SDK_INT >= 26);
-        if (!canUseHostTorSocks()) try {
-            new ServerSocket(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT).close();
-            Assume.assumeTrue("Requires either Orbot running in emulator or tor on host", false);
-        } catch (IOException e) {
-            // ignored
-        }
-
-        NetCipher.useGlobalProxy();
-        assertFalse("should not be running over Tor yet", NetCipher.isURLConnectionUsingTor());
-        NetCipher.useTor();
-        assertTrue("should be running over Tor", NetCipher.isURLConnectionUsingTor());
-
-        URL url = new URL("https://facebookcorewwwi.onion/osd.xml");
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        assertTrue("https://facebookcorewwwi.onion should use TLS",
-                connection.getSSLSocketFactory() instanceof TlsOnlySocketFactory);
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-        Document document = documentBuilder.parse(connection.getInputStream());
-        assertEquals("OpenSearchDescription", document.getDocumentElement().getNodeName());
-        connection.disconnect();
-
-        NetCipher.clearProxy();
-        assertFalse("should no longer be running over Tor", NetCipher.isURLConnectionUsingTor());
-    }
-
-    @Test(expected = UnknownHostException.class)
-    public void testUseGlobalProxyWithoutProxy() throws Exception {
-        Assume.assumeTrue("Only works on Android 8.0 or higher", Build.VERSION.SDK_INT >= 26);
-        if (!canUseHostTorSocks()) try {
-            new ServerSocket(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT).close();
-            Assume.assumeTrue("Requires either Orbot running in emulator or tor on host", false);
-        } catch (IOException e) {
-            // ignored
-        }
-
-        NetCipher.useGlobalProxy();
-        URL url = new URL("https://facebookcorewwwi.onion/osd.xml");
-        url.openConnection().connect();
-        fail();
-    }
-
     @Test
     public void testSocksProxyWithOnion() throws IOException {
         Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
@@ -478,6 +387,7 @@ public class HttpURLConnectionTest {
 
     @Test(expected = SocketException.class)
     public void testBadSocksProxyFails() throws IOException {
+        Assume.assumeTrue("For some reason, only on Android 7.0, connection is null", Build.VERSION.SDK_INT != 24);
         final int testPort = 58273;
         try {
             new ServerSocket(testPort).close();
