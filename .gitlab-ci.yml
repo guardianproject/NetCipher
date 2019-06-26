@@ -181,6 +181,21 @@ jarRelease:
   script:
     - ./make-release-build
 
+pages:
+  stage: deploy
+  artifacts:
+    paths:
+    - public
+  script:
+    - ./gradlew javadoc
+    - test -d public || mkdir public
+    - printf '<!DOCTYPE html>\n\n<html><body><h1>NetCipher Javadoc</h1><ul>' > public/index.html
+    - for f in */build/docs/javadoc; do
+        libname=`echo $f | cut -d / -f 1`;
+        printf "<li><a href=\"$libname\/\">$libname</a></li>" >> public/index.html;
+        cp -a $f public/$libname;
+      done
+    - printf '</ul></body></html>' >> public/index.html
 
 after_script:
     # this file changes every time but should not be cached
