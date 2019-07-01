@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 
 /**
  * While making a secure connection, Android's {@link HttpsURLConnection} falls
- * back to SSLv3 from TLSv1. This is a bug in android versions < 4.4. It can be
+ * back to SSLv3 from TLSv1. This is a bug in android versions &lt; 4.4. It can be
  * fixed by removing the SSLv3 protocol from Enabled Protocols list. Use this as
  * the {@link SSLSocketFactory} for
  * {@link HttpsURLConnection#setDefaultSSLSocketFactory(SSLSocketFactory)}
