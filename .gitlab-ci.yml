@@ -168,6 +168,10 @@ connected 27 google_apis_playstore x86:
 connected 29 default x86_64:
   <<: *kvm-template
   allow_failure: true
+  retry:
+    when:
+      - api_failure
+      - runner_system_failure
 
 jarRelease:
   stage: deploy
