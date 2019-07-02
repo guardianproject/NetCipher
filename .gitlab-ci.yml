@@ -23,6 +23,8 @@ before_script:
     name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
     paths:
       - "logcat.txt"
+      - "tor.log"
+      - "syslog"
       - "*/build/reports"
       - "*/build/outputs/*ml"
       - "*/build/outputs/apk"
@@ -60,21 +62,50 @@ errorprone:
     - export AVD_PACKAGE="system-images;android-${AVD_SDK};${AVD_TAG};${AVD_ARCH}"
     - echo $AVD_PACKAGE
     - emulator -accel-check || true
+
+    # Use bleeding edge for Q, or download proven emulator version, based on
+    # https://aur.archlinux.org/android-emulator.git
+    - if [[ "$AVD_SDK" == Q ]]; then
+          set -x; echo y | sdkmanager --channel=3 "emulator" > /dev/null; set +x;
+      else
+          set -x;
+          rm -rf $ANDROID_HOME/emulator;
+          wget -q http://dl.google.com/android/repository/emulator-linux-5264690.zip;
+          echo "48c1cda2bdf3095d9d9d5c010fbfb3d6d673e3ea  emulator-linux-5264690.zip" | sha1sum -c;
+          unzip -qq -d $ANDROID_HOME emulator-linux-5264690.zip;
+          set +x;
+      fi
+    - grep -v '^License' $ANDROID_HOME/tools/source.properties
+                         $ANDROID_HOME/emulator/source.properties
+
     - alias sdkmanager
-    - echo y | sdkmanager "emulator" "platforms;android-$AVD_SDK" > /dev/null
+    - echo y | sdkmanager "platforms;android-$AVD_SDK" > /dev/null
     - if ! avdmanager list avd | grep "Name. avd$AVD_SDK$"; then
           set -x;
           rm -rf ~/.android/avd  $ANDROID_HOME/system-images;
           echo y | sdkmanager "$AVD_PACKAGE" > /dev/null;
-          echo no | avdmanager create avd --name avd$AVD_SDK --tag "$AVD_TAG" --package "$AVD_PACKAGE" --device "Nexus 5";
-          export RAMSIZE="$((`sed -n 's,^MemAvailable:[^0-9]*\([0-9][0-9]*\)[^0-9]*$,\1,p' /proc/meminfo` * 3 / 4 / 1024))";
-          sed -i '/^hw\.ramSize\s*=.*/d' ~/.android/avd/*.avd/config.ini;
-          echo "hw.ramSize=$RAMSIZE" >> ~/.android/avd/*.avd/config.ini;
+          echo no | avdmanager create avd --name avd$AVD_SDK --tag "$AVD_TAG" --package "$AVD_PACKAGE" --sdcard 64M --device "Nexus 5";
+          export RAMSIZE="`sed -n 's,^MemAvailable:[^0-9]*\([0-9][0-9]*\)[^0-9]*$,\1,p' /proc/meminfo`";
+          if [ $RAMSIZE -le 2048 ]; then
+              sed -i '/^hw\.ramSize\s*=.*/d' ~/.android/avd/*.avd/config.ini;
+              echo "hw.ramSize=1024" >> ~/.android/avd/*.avd/config.ini;
+          fi;
           avdmanager list avd;
           set +x;
       fi
+    - grep -v '^License' $ANDROID_HOME/system-images/android-$AVD_SDK/$AVD_TAG/$AVD_ARCH/source.properties
     - adb start-server
     - ls -l ~/.android
+    - if [ $AVD_SDK -ge 24 ]; then
+          set -x;
+          apt-get update;
+          apt-get -qy install jq netcat-openbsd tor --no-install-recommends;
+          service tor start;
+          while ! nc -w 1 localhost 9050; do echo "waiting for proxy port..."; sleep 1; done;
+          while ! curl --proxy socks5://localhost:9050 --location https://check.torproject.org/api/ip | jq --exit-status '.IsTor'; do echo 'waiting for tor...'; sleep 1; done;
+          set +x;
+      fi
+    - emulator -version
     - emulator -avd avd$AVD_SDK
         -no-audio
         -no-jni
@@ -87,7 +118,10 @@ errorprone:
     - wait-for-emulator
     - adb devices
     - adb shell input keyevent 82 &
-    - ./gradlew connectedCheck || (adb -e logcat -d > logcat.txt; exit 1)
+    - ./gradlew connectedCheck
+      || ./gradlew connectedCheck
+      || ./gradlew connectedCheck
+      || (adb -e logcat -d > logcat.txt; exit 1)
 
 connected 22 default armeabi-v7a:
   <<: *test-template
@@ -102,9 +136,11 @@ connected 22 default armeabi-v7a:
 
 connected 17 default x86:
   <<: *kvm-template
+  allow_failure: true
 
 connected 18 default x86:
   <<: *kvm-template
+  allow_failure: true
   only:
     - master@guardianproject/netcipher
 
@@ -129,6 +165,13 @@ connected 26 google_apis x86:
 connected 27 google_apis_playstore x86:
   <<: *kvm-template
 
+connected 29 default x86_64:
+  <<: *kvm-template
+  allow_failure: true
+  retry:
+    when:
+      - api_failure
+      - runner_system_failure
 
 jarRelease:
   stage: deploy
@@ -145,8 +188,25 @@ jarRelease:
   script:
     - ./make-release-build
 
+pages:
+  stage: deploy
+  artifacts:
+    paths:
+    - public
+  script:
+    - ./gradlew javadoc
+    - test -d public || mkdir public
+    - printf '<!DOCTYPE html>\n\n<html><body><h1>NetCipher Javadoc</h1><ul>' > public/index.html
+    - for f in */build/docs/javadoc; do
+        libname=`echo $f | cut -d / -f 1`;
+        printf "<li><a href=\"$libname\/\">$libname</a></li>" >> public/index.html;
+        cp -a $f public/$libname;
+      done
+    - printf '</ul></body></html>' >> public/index.html
 
 after_script:
     # this file changes every time but should not be cached
     - rm -f $GRADLE_USER_HOME/caches/modules-2/modules-2.lock
     - rm -fr $GRADLE_USER_HOME/caches/*/plugin-resolution/
+    - (cp /var/log/tor/log tor.log; chmod a+r tor.log) || true
+    - (cp /var/log/syslog syslog; chmod a+r syslog) || true

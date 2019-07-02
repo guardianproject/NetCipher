@@ -1,6 +1,7 @@
 package info.guardianproject.netcipher.webkit;
 
 import android.os.Build;
+import android.support.test.espresso.IdlingPolicies;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -18,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -68,6 +69,9 @@ public class WebviewProxyTestActivityTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
+
+        IdlingPolicies.setIdlingResourceTimeout(10, TimeUnit.MINUTES);
+        IdlingPolicies.setMasterPolicyTimeout(10, TimeUnit.MINUTES);
 
         if (Build.VERSION.SDK_INT >= 19) {
             // start embedded http proxy server
@@ -120,7 +124,6 @@ public class WebviewProxyTestActivityTest {
         Assert.assertEquals(CONTENT_DIRECT, html);
     }
 
-    @Ignore // remove me once this test is stable
     @Test
     public void testWebkitProxy() throws Exception {
 

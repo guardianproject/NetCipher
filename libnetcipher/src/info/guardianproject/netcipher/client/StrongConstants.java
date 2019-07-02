@@ -38,8 +38,11 @@ public class StrongConstants {
      * Ordered to prefer the stronger/newer TLS versions as noted
      * http://op-co.de/blog/posts/android_ssl_downgrade/
      */
-    public static final String ENABLED_PROTOCOLS[] = {"TLSv1.2", "TLSv1.1",
-            "TLSv1"};
+    public static final String ENABLED_PROTOCOLS[] = {
+            TlsOnlySocketFactory.TLSV1_2,
+            TlsOnlySocketFactory.TLSV1_1,
+            TlsOnlySocketFactory.TLSV1,
+    };
 
     private StrongConstants() {
         // this is a utility class with only static methods

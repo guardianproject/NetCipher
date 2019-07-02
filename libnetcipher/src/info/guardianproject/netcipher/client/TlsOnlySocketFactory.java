@@ -23,6 +23,11 @@ import android.net.SSLCertificateSocketFactory;
 import android.os.Build;
 import android.util.Log;
 
+import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -36,24 +41,23 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.HandshakeCompletedListener;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-
 /**
  * While making a secure connection, Android's {@link HttpsURLConnection} falls
- * back to SSLv3 from TLSv1. This is a bug in android versions < 4.4. It can be
+ * back to SSLv3 from TLSv1. This is a bug in android versions &lt; 4.4. It can be
  * fixed by removing the SSLv3 protocol from Enabled Protocols list. Use this as
  * the {@link SSLSocketFactory} for
  * {@link HttpsURLConnection#setDefaultSSLSocketFactory(SSLSocketFactory)}
  *
  * @author Bhavit S. Sengar
  * @author Hans-Christoph Steiner
+ * @see SSLSocket table of protocols and ciphers Android supports
+ * @see <a href="https://android.googlesource.com/platform/external/boringssl/+/refs/tags/android-7.1.2_r36/src/include/openssl/ssl.h#3267">source of protocol name constants</a>
  */
 public class TlsOnlySocketFactory extends SSLSocketFactory {
 
+    public static final String TLSV1_2 = "TLSv1.2";
+    public static final String TLSV1_1 = "TLSv1.1";
+    public static final String TLSV1 = "TLSv1";
     public static final String SSLV3 = "SSLv3";
     public static final String SSLV2 = "SSLv2";
 
@@ -181,6 +185,10 @@ public class TlsOnlySocketFactory extends SSLSocketFactory {
                     .getSupportedProtocols()));
             protocols.remove(SSLV2);
             protocols.remove(SSLV3);
+            if (Build.VERSION.SDK_INT >= 24) {
+                protocols.remove(TLSV1);
+                protocols.remove(TLSV1_1);
+            }
             super.setEnabledProtocols(protocols.toArray(new String[protocols.size()]));
 
             /*

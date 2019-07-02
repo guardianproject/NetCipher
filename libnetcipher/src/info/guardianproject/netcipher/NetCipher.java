@@ -17,10 +17,10 @@
 
 package info.guardianproject.netcipher;
 
-import android.annotation.TargetApi;
 import android.app.Application;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.JsonReader;
 import android.util.Log;
@@ -151,7 +151,7 @@ public class NetCipher {
      * @return true if {@code check.torproject.org} says connection is via Tor, false if not or on error
      * @see <a href="https://check.torproject.org">check.torproject.org</a>
      */
-    @TargetApi(11)
+    @RequiresApi(api = 11)
     public static boolean isURLConnectionUsingTor() {
         if (Build.VERSION.SDK_INT < 11) {
             throw new UnsupportedOperationException("only works on android-11 or higher");
@@ -166,7 +166,7 @@ public class NetCipher {
         return false;
     }
 
-    @TargetApi(11)
+    @RequiresApi(api = 11)
     public static boolean isNetCipherGetHttpURLConnectionUsingTor() {
         if (Build.VERSION.SDK_INT < 11) {
             throw new UnsupportedOperationException("only works on android-11 or higher");
@@ -181,10 +181,9 @@ public class NetCipher {
         return false;
     }
 
-    @TargetApi(11)
+    @RequiresApi(api = 11)
     private static boolean checkIsTor(URLConnection connection) throws IOException {
         boolean isTor = false;
-        Log.i(TAG, "content length: " + connection.getContentLength());
         JsonReader jsonReader = new JsonReader(new InputStreamReader(connection.getInputStream()));
         jsonReader.beginObject();
         while (jsonReader.hasNext()) {
@@ -202,10 +201,11 @@ public class NetCipher {
     /**
      * Call this method in {@link Application#onCreate()} to enable NetCipher
      * to control the proxying.  This only works on
-     * {@link Build.VERSION_CODES#N Android 7.1.2 N} or newer. There needs to
+     * {@link Build.VERSION_CODES#O Android 8.0 Oreo} or newer. There needs to
      * be a separate call to {@link #setProxy(Proxy)} or {@link #useTor()} for
      * proxying to actually be enabled.  {@link #clearProxy()} will then remove
-     * the proxying when the global proxy control is in place.
+     * the proxying when the global proxy control is in place, but the
+     * {@link URLStreamHandlerFactory} will stay in place until app restart.
      *
      * @see #useTor()
      * @see #setProxy(Proxy)
@@ -213,11 +213,39 @@ public class NetCipher {
      * @see #clearProxy()
      * @see URL#setURLStreamHandlerFactory(URLStreamHandlerFactory)
      */
-    @TargetApi(24)
+    @RequiresApi(api = 26)
     public static void useGlobalProxy() {
-        if (Build.VERSION.SDK_INT < 24) {
-            throw new UnsupportedOperationException("only works on android-24 or higher");
+        if (Build.VERSION.SDK_INT < 26) {
+            throw new UnsupportedOperationException("only works on Android 8.0 (26) or higher");
         }
+        URL.setURLStreamHandlerFactory(new NetCipherURLStreamHandlerFactory());
+    }
+
+    /**
+     * This is the same as {@link #useGlobalProxy()} except that it can run on
+     * Android 7.x (SDK 24 and 25).  The global proxying leaks DNS on Android 7.x,
+     * so this is not suitable for a privacy proxy.  It will make access proxying
+     * work.  It can also be used as a failsafe to help prevent leaks when the
+     * proxying is configured per-connection.
+     *
+     * @see #useGlobalProxy()
+     * @see #useTor()
+     * @see #setProxy(Proxy)
+     * @see #setProxy(String, int)
+     * @see #clearProxy()
+     * @see URL#setURLStreamHandlerFactory(URLStreamHandlerFactory)
+     */
+    @Deprecated
+    @RequiresApi(api = 24)
+    public static void useGlobalProxyWithDNSLeaksOnAndroid7x() {
+        if (Build.VERSION.SDK_INT >= 26) {
+            useGlobalProxy();
+            return;
+        }
+        if (Build.VERSION.SDK_INT < 24) {
+            throw new UnsupportedOperationException("only works on Android 7.0 (24) or higher");
+        }
+        Log.w(TAG, "Android 7.x fails to globally proxy DNS! DNS will leak and .onion addresses will always fail!");
         URL.setURLStreamHandlerFactory(new NetCipherURLStreamHandlerFactory());
     }
 
@@ -239,7 +267,7 @@ public class NetCipher {
     public static TlsOnlySocketFactory getTlsOnlySocketFactory(boolean compatible) {
         SSLContext sslcontext;
         try {
-            sslcontext = SSLContext.getInstance("TLSv1");
+            sslcontext = SSLContext.getInstance(TlsOnlySocketFactory.TLSV1);
             sslcontext.init(null, null, null);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e);

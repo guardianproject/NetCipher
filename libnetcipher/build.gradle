@@ -4,11 +4,12 @@ dependencies {
     implementation 'com.android.support:support-annotations:27.1.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestUtil 'com.android.support.test:orchestrator:1.0.2'
     androidTestImplementation 'junit:junit:4.12'
 }
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 29
     buildToolsVersion '27.0.3'
 
     sourceSets {
@@ -34,7 +35,12 @@ android {
     }
 
     defaultConfig {
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        // The following argument makes the Android Test Orchestrator run its
+        // "pm clear" command after each test invocation. This command ensures
+        // that the app's state is completely cleared between tests. This is required
+        // since there is no way to unset URL.setURLStreamHandlerFactory().
+        testInstrumentationRunnerArguments clearPackageData: 'true'
     }
 
     lintOptions {
@@ -44,6 +50,7 @@ android {
     }
 
     testOptions {
+        execution 'ANDROID_TEST_ORCHESTRATOR'
         unitTests {
             // prevent tests on JVM from dying on android.util.Log calls
             returnDefaultValues = true
@@ -81,6 +88,12 @@ task javadoc(type: Javadoc) {
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     classpath += configurations.compile
     options.addStringOption('notimestamp')
+    android.libraryVariants.all { variant ->
+        if (variant.name == 'release') {
+            owner.classpath += variant.javaCompile.classpath
+        }
+    }
+    exclude '**/R.html', '**/R.*.html', '**/index.html'
     failOnError false
 }
 
@@ -114,9 +127,9 @@ task createPom << {
             }
             developers {
                 developer {
-                   id = 'guardianproject'
-                   name = 'Guardian Project'
-                   email = 'support@guardianproject.info'
+                    id = 'guardianproject'
+                    name = 'Guardian Project'
+                    email = 'support@guardianproject.info'
                 }
             }
             issueManagement {

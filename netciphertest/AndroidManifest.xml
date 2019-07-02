@@ -2,15 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="info.guardianproject.netcipher.test" android:versionCode="1" android:versionName="1.0">
 
-    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="22" />
+    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="29" />
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"
         android:targetPackage="info.guardianproject.netcipher.test" />
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application android:allowBackup="false" android:label="NetCipherTest">
-        <uses-library android:name="android.test.runner" />
+    <application
+            android:label="NetCipherTest"
+            android:allowBackup="false"
+            android:networkSecurityConfig="@xml/network_security_config">
+        <uses-library android:name="android.test.runner"/>
     </application>
 
 </manifest>

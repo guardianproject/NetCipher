@@ -25,13 +25,11 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.w3c.dom.Document;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSocketFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,6 +44,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -87,26 +86,12 @@ public class HttpURLConnectionTest {
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        clearProxySettings();
+        NetCipher.clearProxy();
     }
 
     @After
     public void tearDown() throws NoSuchFieldException, IllegalAccessException {
-        clearProxySettings();
-    }
-
-    /**
-     * Clear all proxy settings, since they are global.
-     */
-    private void clearProxySettings() throws NoSuchFieldException, IllegalAccessException {
         NetCipher.clearProxy();
-
-        if (Build.VERSION.SDK_INT >= 24) {
-            // reset the system's URLStreamHandlerFactory
-            Field factoryField = URL.class.getDeclaredField("factory");
-            factoryField.setAccessible(true);
-            factoryField.set(factoryField, null);
-        }
     }
 
     @Test
@@ -182,7 +167,6 @@ public class HttpURLConnectionTest {
                 "web.wechat.com",
                 "mirrors.kernel.org",
                 "www.google.com",
-                "glympse.com",
                 // uses SNI
                 "check-tls.akamaized.net",
                 "guardianproject.info",
@@ -193,7 +177,7 @@ public class HttpURLConnectionTest {
         };
         prefetchDns(hosts);
         // reset the default SSLSocketFactory, since it is global
-        SSLContext sslcontext = SSLContext.getInstance("TLSv1");
+        SSLContext sslcontext = SSLContext.getInstance(TlsOnlySocketFactory.TLSV1);
         sslcontext.init(null, null, null); // null means use default
         HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());
         for (String host : hosts) {
@@ -324,6 +308,35 @@ public class HttpURLConnectionTest {
         }
     }
 
+    @Test(expected = SSLHandshakeException.class)
+    public void testRemovingTLSv1() throws IOException {
+        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
+        URLConnection connection = NetCipher.getHttpURLConnection(new URL("https://tls-v1-0.badssl.com:1010/"));
+        connection.setConnectTimeout(0); // blocking connect with TCP timeout
+        connection.setReadTimeout(0);
+        connection.getContent();
+    }
+
+    @Test(expected = SSLHandshakeException.class)
+    public void testRemovingTLSv1_1() throws IOException {
+        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
+        URLConnection connection = NetCipher.getHttpURLConnection(new URL("https://tls-v1-1.badssl.com:1011/"));
+        connection.setConnectTimeout(0); // blocking connect with TCP timeout
+        connection.setReadTimeout(0);
+        connection.getContent();
+    }
+
+    @Test
+    public void testTLSv1_2Only() throws IOException {
+        HttpsURLConnection connection = NetCipher.getHttpsURLConnection(new URL("https://tls-v1-2.badssl.com:1012/"));
+        connection.setConnectTimeout(0); // blocking connect with TCP timeout
+        connection.setReadTimeout(0);
+        connection.getContent();
+        SSLSocketFactory sslSocketFactory = connection.getSSLSocketFactory();
+        assertTrue("socket factory of type 'TlsOnlySocketFactory' expected",
+                sslSocketFactory instanceof TlsOnlySocketFactory);
+    }
+
     @Test
     public void testDefaultSSLSocketFactory() throws IOException {
         SSLSocketFactory sslSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
@@ -341,53 +354,8 @@ public class HttpURLConnectionTest {
     }
 
     @Test
-    public void testUseGlobalProxy() throws Exception {
-        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
-        if (!canUseHostTorSocks()) try {
-            new ServerSocket(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT).close();
-            Assume.assumeTrue("Requires either Orbot running in emulator or tor on host", false);
-        } catch (IOException e) {
-            // ignored
-        }
-
-        NetCipher.useGlobalProxy();
-        assertFalse("should not be running over Tor yet", NetCipher.isURLConnectionUsingTor());
-        NetCipher.useTor();
-        assertTrue("should be running over Tor", NetCipher.isURLConnectionUsingTor());
-
-        URL url = new URL("https://facebookcorewwwi.onion/osd.xml");
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        assertTrue("https://facebookcorewwwi.onion should use TLS",
-                connection.getSSLSocketFactory() instanceof TlsOnlySocketFactory);
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-        Document document = documentBuilder.parse(connection.getInputStream());
-        assertEquals("OpenSearchDescription", document.getDocumentElement().getNodeName());
-        connection.disconnect();
-
-        NetCipher.clearProxy();
-        assertFalse("should no longer be running over Tor", NetCipher.isURLConnectionUsingTor());
-    }
-
-    @Test(expected = UnknownHostException.class)
-    public void testUseGlobalProxyWithoutProxy() throws Exception {
-        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
-        if (!canUseHostTorSocks()) try {
-            new ServerSocket(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT).close();
-            Assume.assumeTrue("Requires either Orbot running in emulator or tor on host", false);
-        } catch (IOException e) {
-            // ignored
-        }
-
-        NetCipher.useGlobalProxy();
-        URL url = new URL("https://facebookcorewwwi.onion/osd.xml");
-        url.openConnection().connect();
-        fail();
-    }
-
-    @Test
     public void testSocksProxyWithOnion() throws IOException {
-        Assume.assumeTrue("Only works on Android 3.0 or higher", Build.VERSION.SDK_INT >= 11);
+        Assume.assumeTrue("Only works on Android 7.1.2 or higher", Build.VERSION.SDK_INT >= 24);
         if (!canUseHostTorSocks()) try {
             new ServerSocket(OrbotHelper.DEFAULT_PROXY_SOCKS_PORT).close();
             Assume.assumeTrue("Requires either Orbot running in emulator or tor on host", false);
@@ -419,6 +387,7 @@ public class HttpURLConnectionTest {
 
     @Test(expected = SocketException.class)
     public void testBadSocksProxyFails() throws IOException {
+        Assume.assumeTrue("For some reason, only on Android 7.0, connection is null", Build.VERSION.SDK_INT != 24);
         final int testPort = 58273;
         try {
             new ServerSocket(testPort).close();

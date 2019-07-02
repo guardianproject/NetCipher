@@ -18,34 +18,45 @@ package info.guardianproject.netcipher;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.test.AndroidTestCase;
-
+import android.support.test.runner.AndroidJUnit4;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import info.guardianproject.netcipher.client.StrongBuilder;
+import info.guardianproject.netcipher.client.StrongVolleyQueueBuilder;
+import info.guardianproject.netcipher.proxy.OrbotHelper;
+import info.guardianproject.netcipher.proxy.StatusCallback;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import info.guardianproject.netcipher.client.StrongBuilder;
-import info.guardianproject.netcipher.client.StrongVolleyQueueBuilder;
-import info.guardianproject.netcipher.proxy.OrbotHelper;
-import info.guardianproject.netcipher.proxy.StatusCallback;
+import static android.support.test.InstrumentationRegistry.getContext;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-public class StrongVolleyQueueBuilderTest extends
-        AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class StrongVolleyQueueBuilderTest {
+
     private static final String TEST_URL =
-        "https://gitlab.com/guardianproject/NetCipher/raw/master/netciphertest/res/test.json";
-    private static final String EXPECTED = "{\"Hello\": \"world\"}";
+            "https://gitlab.com/guardianproject/NetCipher/raw/6006c45988/netciphertest/res/test.json";
+
+    private static final String EXPECTED = "{\"Hello\": \"world\"}\n";
     private static AtomicBoolean initialized = new AtomicBoolean(false);
     private static AtomicBoolean isOrbotInstalled = null;
+    private static CountDownLatch initLatch = new CountDownLatch(1);
+
     private CountDownLatch responseLatch;
     private Exception innerException = null;
     private String testResult = null;
-    private static CountDownLatch initLatch = new CountDownLatch(1);
 
+    @Before
     public void setUp() throws InterruptedException {
         if (!initialized.get()) {
             OrbotHelper
@@ -94,24 +105,21 @@ public class StrongVolleyQueueBuilderTest extends
         responseLatch = new CountDownLatch(1);
     }
 
-    public void testOrbotInstalled() throws InterruptedException {
+    @Test
+    public void testOrbotInstalled() {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
         try {
-            getContext()
-                    .getPackageManager()
-                    .getApplicationInfo("org.torproject.android", 0);
-            assertTrue("Orbot is installed, but NetCipher thinks it is not",
-                    isOrbotInstalled.get());
+            getContext().getPackageManager().getApplicationInfo("org.torproject.android", 0);
+            assertTrue("Orbot is installed, but NetCipher thinks it is not", isOrbotInstalled.get());
         } catch (PackageManager.NameNotFoundException e) {
-            assertFalse("Orbot not installed, but NetCipher thinks it is",
-                    isOrbotInstalled.get());
+            assertFalse("Orbot not installed, but NetCipher thinks it is", isOrbotInstalled.get());
         }
     }
 
-    public void testBuilder()
-            throws Exception {
+    @Test
+    public void testBuilder() throws Exception {
         assertTrue("we were not initialized", initialized.get());
         assertNotNull("we did not get an Orbot status", isOrbotInstalled);
 
