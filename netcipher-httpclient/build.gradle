@@ -32,6 +32,13 @@ android {
 
     defaultConfig {
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        /*
+          The Android Testing Support Library collects analytics to continuously improve the testing
+          experience. More specifically, it uploads a hash of the package name of the application
+          under test for each invocation. If you do not wish to upload this data, you can opt-out by
+          passing the following argument to the test runner: disableAnalytics "true".
+         */
+        testInstrumentationRunnerArguments disableAnalytics: 'true'
     }
 
     lintOptions {
