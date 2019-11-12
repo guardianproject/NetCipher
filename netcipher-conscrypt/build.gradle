@@ -1,0 +1,118 @@
+apply plugin: 'com.android.library'
+
+dependencies {
+    api 'org.conscrypt:conscrypt-android:2.2.1'
+    api project(':libnetcipher')
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestImplementation 'junit:junit:4.12'
+}
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion '27.0.3'
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+
+        androidTest {
+            manifest.srcFile 'androidTest/AndroidManifest.xml'
+            java.srcDirs = ['androidTest/src']
+        }
+    }
+
+    defaultConfig {
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+    }
+
+    lintOptions {
+        htmlReport true
+        xmlReport false
+        textReport false
+
+        // okio refers to java.nio.file, don't stop on error
+        warning 'InvalidPackage'
+    }
+}
+
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
+        return; // Skip debug builds.
+    }
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile, sourcesJar, javadocJar, createPom
+    task.from variant.javaCompile.destinationDir
+    task.exclude('info/guardianproject/**/BuildConfig.**')
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.compile
+    options.addStringOption('notimestamp')
+    android.libraryVariants.all { variant ->
+        if (variant.name == 'release') {
+            owner.classpath += variant.javaCompile.classpath
+        }
+    }
+    exclude '**/R.html', '**/R.*.html', '**/index.html'
+    failOnError false
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+apply plugin: 'maven'
+
+task createPom << {
+    pom {
+        project {
+            name 'NetCipher Conscrypt'
+            inceptionYear '2016'
+            url 'https://guardianproject.info/code/netcipher'
+            description 'NetCipher is a library for Android that provides multiple means to improve network security in mobile applications. It provides best practices TLS settings using the standard Android HTTP methods, HttpURLConnection and Apache HTTP Client, provides simple Tor integration, makes it easy to configure proxies for HTTP connections and `WebView` instances.'
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+            developers {
+                developer {
+                   id = 'guardianproject'
+                   name = 'Guardian Project'
+                   email = 'support@guardianproject.info'
+                }
+            }
+            issueManagement {
+                url = "https://gitlab.com/guardianproject/netcipher/issues"
+            }
+            scm {
+                connection = 'scm:git:https://gitlab.com/guardianproject/netcipher.git'
+                url = 'https://gitlab.com/guardianproject/netcipher'
+            }
+        }
+    }.writeTo(project.getBuildDir().toString() + "/libs/" + project.name + "-" + project.version + ".pom")
+}
