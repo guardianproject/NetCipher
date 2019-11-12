@@ -69,14 +69,14 @@ public class MainActivity extends Activity {
                         }
                         HttpsURLConnection hc = (HttpsURLConnection) c;
                         hc.connect();
-                        Log.d("###", "SocketFactory: " + hc.getSSLSocketFactory().getClass().getName());
+                        String socketFactoryName = hc.getSSLSocketFactory().getClass().getSimpleName();
                         int httpStatus = hc.getResponseCode();
 
                         if (httpStatus != 200) {
-                            throw new RuntimeException("expected http-status 200 but encountered: " + httpStatus);
+                            throw new RuntimeException("expected http-status 200 but encountered: " + httpStatus + "\nSocketFactory: " + socketFactoryName);
                         }
 
-                        displayStateReuquestOkay();
+                        displayStateReuquestOkay(socketFactoryName);
 
                     } catch (MalformedURLException e) {
                         displayStateRequestFailed(e);
@@ -130,14 +130,14 @@ public class MainActivity extends Activity {
         });
     }
 
-    void displayStateReuquestOkay() {
+    void displayStateReuquestOkay(final String socketFactoryName) {
         new Handler(getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
                 progress.setVisibility(View.GONE);
                 button.setVisibility(View.VISIBLE);
                 msg.setVisibility(View.VISIBLE);
-                msg.setText("request okay");
+                msg.setText("request okay\n(used: " + socketFactoryName + ")");
                 button.setText("re-request");
             }
         });

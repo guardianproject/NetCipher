@@ -33,6 +33,8 @@ import javax.net.ssl.SSLSessionContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
+
 /**
  * OpenSSL-backed SSLContext service provider interface.
  *
@@ -114,7 +116,7 @@ public abstract class NetCipherOpenSSLContextImpl extends SSLContextSpi {
         if (sslParameters == null) {
             throw new IllegalStateException("SSLContext is not initialized.");
         }
-        return Platform.wrapSocketFactoryIfNeeded(new OpenSSLSocketFactoryImpl(sslParameters));
+        return new TlsOnlySocketFactory(Platform.wrapSocketFactoryIfNeeded(new OpenSSLSocketFactoryImpl(sslParameters)));
     }
 
     @Override
