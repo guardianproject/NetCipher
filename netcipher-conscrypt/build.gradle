@@ -6,6 +6,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.squareup.okhttp3:okhttp:3.10.0'
 }
 
 android {
@@ -31,6 +32,11 @@ android {
 
     defaultConfig {
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        // The following argument makes the Android Test Orchestrator run its
+        // "pm clear" command after each test invocation. This command ensures
+        // that the app's state is completely cleared between tests. This is required
+        // since there is no way to unset URL.setURLStreamHandlerFactory().
+        testInstrumentationRunnerArguments clearPackageData: 'true'
     }
 
     lintOptions {

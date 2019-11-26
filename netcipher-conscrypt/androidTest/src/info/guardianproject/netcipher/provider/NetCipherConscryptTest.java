@@ -16,33 +16,39 @@
 
 package info.guardianproject.netcipher.provider;
 
+import android.os.Build;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.conscrypt.Conscrypt;
 import org.conscrypt.NetCipherDefaultSSLContextImpl;
 import org.conscrypt.NetCipherOpenSSLContextImpl;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
+import java.net.URL;
 import java.security.Provider;
 import java.security.Security;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
+import okhttp3.OkHttpClient;
 
 @RunWith(AndroidJUnit4.class)
 public class NetCipherConscryptTest {
 
-    @Test
-    public void testInsertConscryptSecurityProvider(){
-        Provider p = Security.getProvider("Conscrypt");
-        Assert.assertNull(p);
+    @Before
+    public void before() {
+        Security.removeProvider("NetCipherConscrypt");
+    }
 
-        Security.insertProviderAt(Conscrypt.newProvider(), 1);
-        p = Security.getProvider("Conscrypt");
-        Assert.assertNotNull(p);
-
-        Security.removeProvider("Conscrypt");
-        p = Security.getProvider("Conscrypt");
-        Assert.assertNull(p);
+    @After
+    public void after() {
+        Security.removeProvider("NetCipherConscrypt");
     }
 
     @Test
@@ -60,7 +66,7 @@ public class NetCipherConscryptTest {
     }
 
     @Test
-    public void testNetChiperProviderTlsImplPresent() {
+    public void testNetCipherProviderTlsImplPresent() {
 
         String ctxImplName = NetCipherOpenSSLContextImpl.class.getName();
         Assert.assertEquals("org.conscrypt.NetCipherOpenSSLContextImpl", ctxImplName);
@@ -74,4 +80,42 @@ public class NetCipherConscryptTest {
         Assert.assertEquals(ctxImplName + "$TLSv13", p.getProperty("SSLContext.TLSv1.3"));
         Assert.assertEquals(NetCipherDefaultSSLContextImpl.class.getName(), p.getProperty("SSLContext.Default"));
     }
+
+    @Test
+    public void testHttpUrlConnectionSocketFactory() throws IOException {
+        Assume.assumeTrue("Only works on Android 8.1 (sdk 27) or newer", Build.VERSION.SDK_INT >= 27);
+
+        Provider p = Security.getProvider("NetCipherConscrypt");
+        Assert.assertNull(p);
+
+        Security.insertProviderAt(NetCipherConscrypt.newProvider(), 1);
+        p = Security.getProvider("NetCipherConscrypt");
+        Assert.assertNotNull(p);
+
+        URL url = new URL("https://example.com");
+        HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
+        Assert.assertEquals(TlsOnlySocketFactory.class, c.getSSLSocketFactory().getClass());
+
+        Security.removeProvider("NetCipherConscrypt");
+        p = Security.getProvider("NetCipherConscrypt");
+        Assert.assertNull(p);
+    }
+
+    @Test
+    public void testOkHttp() throws IOException {
+        Provider p = Security.getProvider("NetCipherConscrypt");
+        Assert.assertNull(p);
+
+        Security.insertProviderAt(NetCipherConscrypt.newProvider(), 1);
+        p = Security.getProvider("NetCipherConscrypt");
+        Assert.assertNotNull(p);
+
+        OkHttpClient c = new OkHttpClient.Builder().build();
+        Assert.assertEquals(TlsOnlySocketFactory.class, c.sslSocketFactory().getClass());
+
+        Security.removeProvider("NetCipherConscrypt");
+        p = Security.getProvider("NetCipherConscrypt");
+        Assert.assertNull(p);
+    }
+
 }

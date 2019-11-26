@@ -35,8 +35,9 @@ public class SampleApplication extends Application {
 
         Security.insertProviderAt(NetCipherConscrypt.newProvider(), 1);
 
-        // make sure the default system ssl implementation does not get used
+        // make sure the default system ssl implementation does not get in the way
         Security.removeProvider("AndroidOpenSSL");
+        Security.removeProvider("Conscrypt");
 
         // for (Provider p : Security.getProviders()) {
         //     Log.d("###", "active provider: " + p.getName());
