@@ -80,9 +80,11 @@ errorprone:
     - wait-for-emulator
     - adb devices
     - adb shell input keyevent 82 &
-    - ./gradlew connectedCheck
-      || ./gradlew connectedCheck
-      || ./gradlew connectedCheck
+    # these tests only work in Android Studio, not from command line :-|
+    - export EXCLUDES="--exclude-task :netcipher-conscrypt:connectedDebugAndroidTest --exclude-task :netcipher-webkit:connectedDebugAndroidTest"
+    - ./gradlew connectedCheck $EXCLUDES
+      || ./gradlew connectedCheck $EXCLUDES
+      || ./gradlew connectedCheck $EXCLUDES
       || (adb -e logcat -d > logcat.txt; exit 1)
 
 connected 22 default armeabi-v7a:
