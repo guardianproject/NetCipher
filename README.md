@@ -65,8 +65,9 @@ The binary jar, source jar, and javadoc jar are all available on `jcenter()`,
 and they all include GPG signatures.  To include this library using gradle,
 add this line to your *build.gradle*:
 
-    implementation 'info.guardianproject.netcipher:netcipher:2.1.0'
-
+```groovy
+implementation 'info.guardianproject.netcipher:netcipher:2.1.0'
+```
 Otherwise, the files can also be [downloaded directly] from bintray.com.
 
 # The Strong Builders
@@ -294,7 +295,7 @@ public void onTimeout() {
 NetCipher also comes with a helper library which makes it trivial to
 proxy settings for WebViews. It is also packaged with maven:
 
-```
+```groovy
 dependencies {
 
     implementation 'info.guardianproject.netcipher:netcipher-webkit:2.0.0-alpha1'
@@ -302,10 +303,10 @@ dependencies {
 }
 ```
 
-On Android 5.0 (API level 21) or newer the simplets way to use `WebkitProxy`
+On Android 5.0 (API level 21) or newer the simplest way to use `WebkitProxy`
 is by initializing it on App start. WebView proxying works globally.
 
-```
+```java
 class App extends Application {
 
     public void onCreate() {
