@@ -113,9 +113,20 @@ public class OrbotHelper implements ProxyHelper {
     public final static String STATUS_STARTS_DISABLED = "STARTS_DISABLED";
 
     public final static String ACTION_START_TOR = "org.torproject.android.START_TOR";
+    /**
+     * Intent Action to request V2 Onion Services
+     * See {{@link #requestHiddenServiceOnPort(Activity, int)}}
+     */
+    @Deprecated
     public final static String ACTION_REQUEST_HS = "org.torproject.android.REQUEST_HS_PORT";
+    /**
+     * Intent Action to request V3 Onion Services
+     * See {{@link #requestV3OnionServiceOnPort(Activity, int, int, String)}}
+     */
+    public final static String ACTION_REQUEST_V3_ONION_SERVICE = "org.torproject.android.REQUEST_V3_ONION_SERVICE";
     public final static int START_TOR_RESULT = 0x9234;
     public final static int HS_REQUEST_CODE = 9999;
+    public final static int V3_ONION_SERVICE_REQUEST_CODE = 3333;
 
 
 /*
@@ -125,7 +136,7 @@ public class OrbotHelper implements ProxyHelper {
 */
 
     /**
-     * Test whether a {@link URL} is a Tor Hidden Service host name, also known
+     * Test whether a {@link URL} is a Tor Onion Service host name, also known
      * as an ".onion address".
      *
      * @return whether the host name is a Tor .onion address
@@ -135,7 +146,7 @@ public class OrbotHelper implements ProxyHelper {
     }
 
     /**
-     * Test whether a URL {@link String} is a Tor Hidden Service host name, also known
+     * Test whether a URL {@link String} is a Tor Onion Service host name, also known
      * as an ".onion address".
      *
      * @return whether the host name is a Tor .onion address
@@ -185,12 +196,34 @@ public class OrbotHelper implements ProxyHelper {
         }
     }
 
+    /**
+     * This method creates a V2 Onion Service which is being phased out by tor soon.
+     * Instead, you should use {{@link #requestV3OnionServiceOnPort(Activity, int, int, String)}}
+     * to create a V3 Onion Service. See https://blog.torproject.org/v2-deprecation-timeline
+     */
+    @Deprecated
     public static void requestHiddenServiceOnPort(Activity activity, int port) {
         Intent intent = new Intent(ACTION_REQUEST_HS);
         intent.setPackage(ORBOT_PACKAGE_NAME);
         intent.putExtra("hs_port", port);
 
         activity.startActivityForResult(intent, HS_REQUEST_CODE);
+    }
+
+    /**
+     * Tells Orbot to spin up a v3 Onion Service for your application
+     * @param activity
+     * @param port the local port that your service is running on
+     * @param onionPort the virtual port for the onion service to use
+     * @param orbotServiceName a labeling string that will be displayed in Orbot
+     */
+    public static void requestV3OnionServiceOnPort(Activity activity, int port, int onionPort, String orbotServiceName) {
+        Intent intent = new Intent(ACTION_REQUEST_V3_ONION_SERVICE);
+        intent.setPackage(ORBOT_PACKAGE_NAME);
+        intent.putExtra("localPort", port);
+        intent.putExtra("onionPort", onionPort);
+        intent.putExtra("name", orbotServiceName);
+        activity.startActivityForResult(intent, V3_ONION_SERVICE_REQUEST_CODE);
     }
 
     /**
