@@ -113,12 +113,7 @@ public class OrbotHelper implements ProxyHelper {
     public final static String STATUS_STARTS_DISABLED = "STARTS_DISABLED";
 
     public final static String ACTION_START_TOR = "org.torproject.android.START_TOR";
-    /**
-     * Intent Action to request V2 Onion Services
-     * See {{@link #requestHiddenServiceOnPort(Activity, int)}}
-     */
-    @Deprecated
-    public final static String ACTION_REQUEST_HS = "org.torproject.android.REQUEST_HS_PORT";
+
     /**
      * Intent Action to request V3 Onion Services
      * See {{@link #requestV3OnionServiceOnPort(Activity, int, int, String)}}
@@ -194,20 +189,6 @@ public class OrbotHelper implements ProxyHelper {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
-    }
-
-    /**
-     * This method creates a V2 Onion Service which is being phased out by tor soon.
-     * Instead, you should use {{@link #requestV3OnionServiceOnPort(Activity, int, int, String)}}
-     * to create a V3 Onion Service. See https://blog.torproject.org/v2-deprecation-timeline
-     */
-    @Deprecated
-    public static void requestHiddenServiceOnPort(Activity activity, int port) {
-        Intent intent = new Intent(ACTION_REQUEST_HS);
-        intent.setPackage(ORBOT_PACKAGE_NAME);
-        intent.putExtra("hs_port", port);
-
-        activity.startActivityForResult(intent, HS_REQUEST_CODE);
     }
 
     /**
